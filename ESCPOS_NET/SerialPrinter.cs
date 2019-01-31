@@ -1,11 +1,11 @@
 ﻿namespace ESCPOS_NET
 {
-    public class Printer : BasePrinter
+    public class SerialPrinter : BasePrinter
     {
         private CommandEmitter _emitter = new CommandEmitter();
 
         // TODO: default values to their default values in ctor.
-        public Printer()
+        public SerialPrinter()
         {
 
         }
