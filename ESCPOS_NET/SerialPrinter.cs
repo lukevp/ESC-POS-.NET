@@ -18,9 +18,14 @@ namespace ESCPOS_NET
             _serialPort.Close();
         }
 
-        public void Write(byte[] bytes)
+
+        public void Write(params object[] bytearrays)
         {
-            _serialPort.Write(bytes, 0, bytes.Length);
+            foreach (var obj in bytearrays)
+            {
+                byte[] bytes = (byte[])obj;
+                _serialPort.Write(bytes, 0, bytes.Length);
+            }
         }
     }
 }
