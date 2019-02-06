@@ -38,7 +38,7 @@ namespace ESCPOS_NET.Emitters
         byte[] SetBarcodeHeightInDots(int height);
         byte[] SetBarWidth(BarWidth width);
         byte[] SetBarLabelPosition(BarLabelPrintPosition position);
-        byte[] SetBarLabelFont(bool fontB);
+        byte[] SetBarLabelFontB(bool fontB);
         /* 2D-Code Commands */
     }
 }
