@@ -1,5 +1,6 @@
 ﻿using ESCPOS_NET.Emitters;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace ESCPOS_NET.ConsoleTest
@@ -13,17 +14,62 @@ namespace ESCPOS_NET.ConsoleTest
         {
             sp = new SerialPrinter("COM20", 115200);
             e = new EPSON_TM_T20II();
+            List<string> testCases = new List<string>()
+            {
+                "Line Spacing"
+            };
             while (true)
-            { 
+            {
+                int i = 0;
+                foreach (var item in testCases)
+                {
+                    i += 1;
+                    Console.WriteLine($"{i} : {item}");
+                }
+                Console.WriteLine("99 : Exit");
+                Console.Write("Execute Test: ");
+                int choice;
+
+                try
+                {
+                    choice = Convert.ToInt32(Console.ReadLine());
+                    if (choice != 99 && (choice < 1 || choice > testCases.Count ))
+                    {
+                        throw new InvalidOperationException();
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("Invalid entry. Please try again.");
+                    continue;
+                }
+
+                if (choice == 99) return;
+
+                Console.Clear();
+
                 Setup();
-                TestLineSpacing();
+
+                sp.Write(e.PrintLine($"== [ Start {testCases[choice - 1]} ] =="));
+
+                switch (choice)
+                {
+                    case 1:
+                        sp.Write(Tests.LineSpacing(e));
+                        break;
+                    default:
+                        Console.WriteLine("Invalid entry.");
+                        break;
+                }
+
+                sp.Write(e.PrintLine($"== [ End {testCases[choice - 1]} ] =="));
+                sp.Write(e.PartialCutAfterFeed(5));
                 //TestStyles();
                 //TestLineFeeds();
                 //TestCutter();
                 //TestMultiLineWrite();
                 //TestBHReceipt();
                 //TestBarcodeStyles();
-                var x = Console.ReadKey();
                 //TestHEBReceipt();
                 // TODO: write a sanitation check.
                 // TODO: make DPI to inch convesion function
@@ -40,17 +86,11 @@ namespace ESCPOS_NET.ConsoleTest
             sp.Write(e.Enable());
         }
 
+        /*
         static void TestLineSpacing()
         {
             sp.Write(
-                e.PrintLine("Testing Line Spacing"),
-                e.SetLineSpacingInDots(200),
-                e.PrintLine("This was spaced 200 dots"),
-                e.SetLineSpacingInDots(20),
-                e.PrintLine("This was spaced 20 dots"),
-                e.ResetLineSpacing(),
-                e.PrintLine("This was spaced the default # of dots"),
-                e.PrintLine("Done Testing Line Spacing")
+                
             );
         }
 
@@ -178,7 +218,7 @@ namespace ESCPOS_NET.ConsoleTest
 
 
             */
-
+            /*
         }
 
 
@@ -224,11 +264,11 @@ namespace ESCPOS_NET.ConsoleTest
                 e.PrintLine("  123 FAKE ST.                    123 FAKE ST."),
                 e.PrintLine("  DECATUR, IL 12345               DECATUR, IL 12345"),
                 e.PrintLine("  (123)456-7890                   (123)456-7890"),
-                e.PrintLine("  CUST: 87654321"),*/
+                e.PrintLine("  CUST: 87654321"),*//*
             e.FullCutAfterFeed(1000)
             );
         }
-
+    
 
         static void TestBHReceipt()
         {
@@ -273,6 +313,6 @@ namespace ESCPOS_NET.ConsoleTest
                 e.PrintLine("  CUST: 87654321"),
                 e.FullCutAfterFeed(1000)
             );
-        }
+        }*/
     }
 }
