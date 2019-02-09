@@ -9,14 +9,12 @@ namespace ESCPOS_NET.Emitters
         /* Printing Commands */
         public byte[] Print(string data)
         {
-
             List<byte> outputBytes = new List<byte>();
             // Fix OSX or Windows-style newlines
             data = data.Replace("\r\n", "\n");
             data = data.Replace("\r", "\n");
 
             // TODO: Sanitize...
-
             return data.ToCharArray().Select(x => (byte)x).ToArray();
         }
 

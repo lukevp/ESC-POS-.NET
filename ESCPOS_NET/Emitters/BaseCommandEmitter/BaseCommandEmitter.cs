@@ -26,6 +26,8 @@ namespace ESCPOS_NET.Emitters
         public static readonly byte FeedLines = 0x64;
         public static readonly byte FeedLinesReverse = 0x65;
         public static readonly byte FeedDots = 0x4A;
+        public static readonly byte ResetLineSpacing = 0x32;
+        public static readonly byte LineSpacingInDots = 0x33;
     }
 
     public static class Functions

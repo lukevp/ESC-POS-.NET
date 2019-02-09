@@ -9,7 +9,6 @@ namespace ESCPOS_NET.ConsoleTest
         private static SerialPrinter sp;
         private static ICommandEmitter e;
 
-
         static void Main(string[] args)
         {
             sp = new SerialPrinter("COM20", 115200);
@@ -17,12 +16,13 @@ namespace ESCPOS_NET.ConsoleTest
             while (true)
             { 
                 Setup();
+                TestLineSpacing();
                 //TestStyles();
                 //TestLineFeeds();
                 //TestCutter();
                 //TestMultiLineWrite();
                 //TestBHReceipt();
-                TestBarcodeStyles();
+                //TestBarcodeStyles();
                 var x = Console.ReadKey();
                 //TestHEBReceipt();
                 // TODO: write a sanitation check.
@@ -36,9 +36,24 @@ namespace ESCPOS_NET.ConsoleTest
 
         static void Setup()
         {
-            sp.Write(e.Initialize);
-            sp.Write(e.Enable);
+            sp.Write(e.Initialize());
+            sp.Write(e.Enable());
         }
+
+        static void TestLineSpacing()
+        {
+            sp.Write(
+                e.PrintLine("Testing Line Spacing"),
+                e.SetLineSpacingInDots(200),
+                e.PrintLine("This was spaced 200 dots"),
+                e.SetLineSpacingInDots(20),
+                e.PrintLine("This was spaced 20 dots"),
+                e.ResetLineSpacing(),
+                e.PrintLine("This was spaced the default # of dots"),
+                e.PrintLine("Done Testing Line Spacing")
+            );
+        }
+
 
         static void TestMultiLineWrite()
         {
@@ -78,9 +93,9 @@ namespace ESCPOS_NET.ConsoleTest
         static void TestCutter()
         {
             sp.Write(e.PrintLine("Performing Full Cut (no feed)."));
-            sp.Write(e.FullCut);
+            sp.Write(e.FullCut());
             sp.Write(e.PrintLine("Performing Partial Cut (no feed)."));
-            sp.Write(e.PartialCut);
+            sp.Write(e.PartialCut());
             sp.Write(e.PrintLine("Performing Full Cut (1000 dot feed)."));
             sp.Write(e.FullCutAfterFeed(1000));
             sp.Write(e.PrintLine("Performing Partial Cut (1000 dot feed)."));
@@ -172,7 +187,7 @@ namespace ESCPOS_NET.ConsoleTest
             sp.Write(
                 //e.FeedDots(2000),
                 // TODO: logo
-                e.CenterAlign,
+                e.CenterAlign(),
                 //e.PrintLine("BHONEYWELLv"),
                 //e.SetBarcodeHeightInDots(360),
                 //e.SetBarWidth(BarWidth.Regular),
@@ -219,7 +234,7 @@ namespace ESCPOS_NET.ConsoleTest
         {
             sp.Write(
                 e.FeedDots(2000),
-                e.CenterAlign,
+                e.CenterAlign(),
                 e.PrintLine("3"),
                 e.SetBarcodeHeightInDots(360),
                 e.SetBarWidth(BarWidth.Regular),
@@ -234,7 +249,7 @@ namespace ESCPOS_NET.ConsoleTest
                 e.PrintLine("www.bhphotovideo.com"),
                 e.SetStyles(PrintStyle.None),
                 e.PrintLine(""),
-                e.LeftAlign,
+                e.LeftAlign(),
                 e.PrintLine("Order: 123456789        Date: 02/01/19"),
                 e.PrintLine(""),
                 e.PrintLine(""),
@@ -242,12 +257,12 @@ namespace ESCPOS_NET.ConsoleTest
                 e.PrintLine("1   TRITON LOW-NOISE IN-LINE MICROPHONE PREAMP"),
                 e.PrintLine("    TRFETHEAD/FETHEAD                        89.95         89.95"),
                 e.PrintLine("----------------------------------------------------------------"),
-                e.RightAlign,
+                e.RightAlign(),
                 e.PrintLine("SUBTOTAL         89.95"),
                 e.PrintLine("Total Order:         89.95"),
                 e.PrintLine("Total Payment:              "),
                 e.PrintLine(""),
-                e.LeftAlign,
+                e.LeftAlign(),
                 e.SetStyles(PrintStyle.Bold | PrintStyle.FontB),
                 e.PrintLine("SOLD TO:                        SHIP TO:"),
                 e.SetStyles(PrintStyle.FontB),
