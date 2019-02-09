@@ -24,7 +24,7 @@ namespace ESCPOS_NET.Emitters
         byte[] PartialCutAfterFeed(int lineCount);
 
         /* Printing Commands */
-        byte[] PrintLines(string lines);
+        byte[] Print(string lines);
         byte[] PrintLine(string line);
         byte[] Print(string line);
         byte[] FeedLines(int lineCount);

@@ -7,29 +7,22 @@ namespace ESCPOS_NET.Emitters
     public abstract partial class BaseCommandEmitter : ICommandEmitter
     {
         /* Printing Commands */
-        public byte[] PrintLines(string lines)
+        public byte[] Print(string data)
         {
 
             List<byte> outputBytes = new List<byte>();
             // Fix OSX or Windows-style newlines
-            lines = lines.Replace("\r\n", "\n");
-            lines = lines.Replace("\r", "\n");
+            data = data.Replace("\r\n", "\n");
+            data = data.Replace("\r", "\n");
 
             // TODO: Sanitize...
 
-            return lines.ToCharArray().Select(x => (byte)x).ToArray();
+            return data.ToCharArray().Select(x => (byte)x).ToArray();
         }
 
         public byte[] PrintLine(string line)
         {
-            // TODO: Sanitize...
-            return(line.Replace("\r", "").Replace("\n", "") + "\n").ToCharArray().Select(x => (byte)x).ToArray();
-        }
-
-        public byte[] Print(string line)
-        {
-            // TODO: Sanitize...
-            return (line.Replace("\r", "").Replace("\n", "")).ToCharArray().Select(x => (byte)x).ToArray();
+            return Print(line.Replace("\r", "").Replace("\n", "") + "\n");
         }
 
         public byte[] FeedLines(int lineCount) => new byte[] { Cmd.ESC, Whitespace.FeedLines, (byte)lineCount };

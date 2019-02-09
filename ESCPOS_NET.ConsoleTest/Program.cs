@@ -42,25 +42,25 @@ namespace ESCPOS_NET.ConsoleTest
 
         static void TestMultiLineWrite()
         {
-            sp.Write(e.PrintLines("This is a test\r\nOf multiline\rprinting with different\n line separators.\n\n"));
+            sp.Write(e.Print("This is a test\r\nOf multiline\rprinting with different\n line separators.\n\n"));
         }
 
         static void TestStyles()
         {
             sp.Write(e.SetStyles(PrintStyle.None));
-            sp.Write(e.PrintLines("Default: The quick brown fox jumped over the lazy dogs.\n"));
+            sp.Write(e.Print("Default: The quick brown fox jumped over the lazy dogs.\n"));
             sp.Write(e.SetStyles(PrintStyle.FontB));
-            sp.Write(e.PrintLines("Font B: The quick brown fox jumped over the lazy dogs.\n"));
+            sp.Write(e.Print("Font B: The quick brown fox jumped over the lazy dogs.\n"));
             sp.Write(e.SetStyles(PrintStyle.Bold));
-            sp.Write(e.PrintLines("Bold: The quick brown fox jumped over the lazy dogs.\n"));
+            sp.Write(e.Print("Bold: The quick brown fox jumped over the lazy dogs.\n"));
             sp.Write(e.SetStyles(PrintStyle.Underline));
-            sp.Write(e.PrintLines("Underline: The quick brown fox jumped over the lazy dogs.\n"));
+            sp.Write(e.Print("Underline: The quick brown fox jumped over the lazy dogs.\n"));
             sp.Write(e.SetStyles(PrintStyle.DoubleWidth));
-            sp.Write(e.PrintLines("DoubleWidth: The quick brown fox jumped over the lazy dogs.\n"));
+            sp.Write(e.Print("DoubleWidth: The quick brown fox jumped over the lazy dogs.\n"));
             sp.Write(e.SetStyles(PrintStyle.DoubleHeight));
-            sp.Write(e.PrintLines("DoubleHeight: The quick brown fox jumped over the lazy dogs.\n"));
+            sp.Write(e.Print("DoubleHeight: The quick brown fox jumped over the lazy dogs.\n"));
             sp.Write(e.SetStyles(PrintStyle.FontB | PrintStyle.DoubleHeight | PrintStyle.DoubleWidth | PrintStyle.Underline | PrintStyle.Bold));
-            sp.Write(e.PrintLines("All Styles: The quick brown fox jumped over the lazy dogs.\n"));
+            sp.Write(e.Print("All Styles: The quick brown fox jumped over the lazy dogs.\n"));
             sp.Write(e.SetStyles(PrintStyle.None));
         }
         static void TestLineFeeds()
