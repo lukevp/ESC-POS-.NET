@@ -1,2 +1,5 @@
 .vs/
 ESCPOS_NET/obj/
+ESCPOS_NET.ConsoleTest/bin/
+ESCPOS_NET.ConsoleTest/obj/
+ESCPOS_NET/bin/

@@ -1,18 +1,31 @@
-﻿namespace ESCPOS_NET
+﻿using ESCPOS_NET.Emitters;
+using RJCP.IO.Ports;
+
+namespace ESCPOS_NET
 {
-    public class SerialPrinter : BasePrinter
+    public class SerialPrinter
     {
-        private CommandEmitter _emitter = new CommandEmitter();
-
+        private SerialPortStream _serialPort;
         // TODO: default values to their default values in ctor.
-        public SerialPrinter()
+        public SerialPrinter(string portName, int baudRate)
         {
-
+            _serialPort = new SerialPortStream(portName, baudRate);
+            _serialPort.Open();
         }
 
-        public override void Print()
+         ~SerialPrinter()
         {
+            _serialPort.Close();
+        }
 
+
+        public void Write(params object[] bytearrays)
+        {
+            foreach (var obj in bytearrays)
+            {
+                byte[] bytes = (byte[])obj;
+                _serialPort.Write(bytes, 0, bytes.Length);
+            }
         }
     }
 }
