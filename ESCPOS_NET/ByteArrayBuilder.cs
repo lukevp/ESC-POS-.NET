@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 /* FROM: https://www.codeproject.com/Tips/674256/ByteArrayBuilder-a-StringBuilder-for-Bytes 2/9/2019 */
-namespace UtilityClasses
+namespace ESCPOS_NET.Utilities
     {
     /// <summary>
     /// Provides similar functionality to a StringBuilder, but for bytes

@@ -8,7 +8,7 @@ namespace ESCPOS_NET.ConsoleTest
 {
     class Program
     {
-        private static IPrinter printer;
+        private static BasePrinter printer;
         private static ICommandEmitter e;
 
         static void Main(string[] args)
