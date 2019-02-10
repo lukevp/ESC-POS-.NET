@@ -20,6 +20,10 @@ namespace ESCPOS_NET.Emitters
 
         public byte[] PrintLine(string line)
         {
+            if (line == null)
+            { 
+                return Print("\n");
+            }
             return Print(line.Replace("\r", "").Replace("\n", "") + "\n");
         }
 

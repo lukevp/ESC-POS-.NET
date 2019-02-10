@@ -7,7 +7,7 @@ namespace ESCPOS_NET.Emitters
     public interface ICommandEmitter
     {
         /* Print Commands */
-        byte[] PrintLine(string line);
+        byte[] PrintLine(string line = null);
         byte[] Print(string line);
         byte[] FeedLines(int lineCount);
         byte[] FeedLinesReverse(int lineCount);
