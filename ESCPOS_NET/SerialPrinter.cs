@@ -3,9 +3,10 @@ using RJCP.IO.Ports;
 
 namespace ESCPOS_NET
 {
-    public class SerialPrinter
+    public class SerialPrinter : IPrinter
     {
         private SerialPortStream _serialPort;
+
         // TODO: default values to their default values in ctor.
         public SerialPrinter(string portName, int baudRate)
         {

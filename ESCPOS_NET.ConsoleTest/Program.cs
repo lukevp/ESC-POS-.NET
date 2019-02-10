@@ -1,22 +1,32 @@
 ﻿using ESCPOS_NET.Emitters;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace ESCPOS_NET.ConsoleTest
 {
     class Program
     {
-        private static SerialPrinter sp;
+        private static IPrinter printer;
         private static ICommandEmitter e;
 
         static void Main(string[] args)
         {
-            sp = new SerialPrinter("COM20", 115200);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                printer = new SerialPrinter("COM20", 115200);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Console.WriteLine("Linux!");
+                printer = new FilePrinter("/dev/usb/lp0");
+            }
             e = new EPSON_TM_T20II();
             List<string> testCases = new List<string>()
             {
-                "Line Spacing"
+                "Line Spacing",
+
             };
             while (true)
             {
@@ -50,20 +60,20 @@ namespace ESCPOS_NET.ConsoleTest
 
                 Setup();
 
-                sp.Write(e.PrintLine($"== [ Start {testCases[choice - 1]} ] =="));
+                printer.Write(e.PrintLine($"== [ Start {testCases[choice - 1]} ] =="));
 
                 switch (choice)
                 {
                     case 1:
-                        sp.Write(Tests.LineSpacing(e));
+                        printer.Write(Tests.LineSpacing(e));
                         break;
                     default:
                         Console.WriteLine("Invalid entry.");
                         break;
                 }
 
-                sp.Write(e.PrintLine($"== [ End {testCases[choice - 1]} ] =="));
-                sp.Write(e.PartialCutAfterFeed(5));
+                printer.Write(e.PrintLine($"== [ End {testCases[choice - 1]} ] =="));
+                printer.Write(e.PartialCutAfterFeed(5));
                 //TestStyles();
                 //TestLineFeeds();
                 //TestCutter();
@@ -82,8 +92,8 @@ namespace ESCPOS_NET.ConsoleTest
 
         static void Setup()
         {
-            sp.Write(e.Initialize());
-            sp.Write(e.Enable());
+            printer.Write(e.Initialize());
+            printer.Write(e.Enable());
         }
 
         /*
