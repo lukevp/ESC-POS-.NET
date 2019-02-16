@@ -32,6 +32,9 @@ Feeds the paper n lines in reverse. Doesn't work on TM-T20II.
 FeedDots(int n)
 Feeds the paper n dots, where n < 255.
 
+
+
+
 # Implemented Commands (pending)
 
 ## Print Commands
@@ -119,10 +122,9 @@ GS V Select cut mode and cut paper
 DLE ENQ Send real-time request to printer
 DLE DC4 (fn = 1) Generate pulse in real-time
 DLE DC4 (fn = 2) Execute power-off sequence
-ESC ( A Control beeper tones
-        Beep integrated beeper in TM-U230 models
-        Set integrated beeper when offline factors occur in TM-U230 models
-        Set integrated beeper except when offline factors occur in TM-U230 models
+
+TODO: check for DLE DC4 other functions and any other real time commands to make sure they're not part of graphics data because they will be processed immediately.  also can use GS ( D to disable realtime commands before processing graphics data
+
 ESC @ Initialize printer
 ESC p Generate pulse
 GS ( A Execute test print
@@ -139,25 +141,10 @@ GS ( Q Commands for drawing graphics
         Draw line
         Draw rectangle
 
-## Kanji Commands
-FS ! Select print mode(s) for Kanji characters
-FS & Select Kanji character mode
-FS ( A Select Kanji character style(s)
-Select Kanji character font
-FS – Turn underline mode on/off for Kanji characters
-FS . Cancel Kanji character mode
-FS 2 Define user-defined Kanji characters
-FS C Select Kanji character code system
-FS S Set Kanji character spacing
-FS W Turn quadruple-size mode on/off for Kanji characters
-FS ? Cancel user-defined Kanji characters
-
 ## Two Dimension Code Commands (QR Codes)
 GS ( k Set up and print the symbol
 
 ## Customize Commands
-FS g 1 Write to NV user memory
-FS g 2 Read from NV user memory
 GS ( C Edit NV user memory
         Delete the specified record
         Store the data in the specified record
@@ -185,21 +172,8 @@ GS ( E Set user setup commands
         Set the paper layout
 
 ## Counter Printing Commands
-GS C 0 Select counter print mode
-GS C 1 Select count mode (A)
-GS C 2 Set counter
-GS C ; Select counter mode (B)
-GS c Print counter
 
 ## Printing Paper Commands
-FS ( L Select label and black mark control function(s)
-        Paper layout setting
-        Paper layout information transmission
-        Transmit the positioning information
-        Feed paper to the label peeling position
-        Feed paper to the cutting position
-        Feed paper to the print starting position
-        Paper layout error special margin setting
 
 
 
