@@ -1,4 +1,6 @@
-﻿using ESCPOS_NET.Emitters;
+﻿// TODO: Implement this class
+
+using ESCPOS_NET.Emitters;
 using System;
 
 namespace ESCPOS_NET

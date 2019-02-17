@@ -78,7 +78,7 @@ namespace ESCPOS_NET.ConsoleTest
                     case 4:
                         printer.Write(Tests.TextStyles(e));
                         break;
-                    case 5:
+                    case 98:
                         printer.Write(Tests.Receipt(e));
                         break;
                     default:
