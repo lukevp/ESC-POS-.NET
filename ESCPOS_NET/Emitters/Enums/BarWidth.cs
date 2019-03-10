@@ -4,7 +4,7 @@
     {
         Thinnest = 2,
         Thin     = 3,
-        Regular  = 4,
+        Default  = 4,
         Thick    = 5,
         Thickest = 6
     }

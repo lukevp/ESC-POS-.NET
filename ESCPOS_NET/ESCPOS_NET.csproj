@@ -1,7 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Company>animalistic.io</Company>
+    <Product>ESCPOS_NET</Product>
+    <Authors>Luke Paireepinart</Authors>
+    <Description>.NET Standard 2.0 Implementation of ESC/POS command generation and integration with thermal printers.
+Allows creating receipts with all common functionality supported.</Description>
+    <Copyright>Copyright 2019 CandL Development, LLC.</Copyright>
+    <PackageLicenseUrl>https://licenses.nuget.org/MIT</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/lukevp/ESC-POS-.NET</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>epson thermal receipt printing esc pos escpos escp</PackageTags>
+    <Version>0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

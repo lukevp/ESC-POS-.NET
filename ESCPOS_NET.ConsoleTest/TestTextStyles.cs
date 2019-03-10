@@ -1,0 +1,28 @@
+﻿using ESCPOS_NET.Emitters;
+using ESCPOS_NET.Utilities;
+
+namespace ESCPOS_NET.ConsoleTest
+{
+
+    public static partial class Tests
+    {
+        public static byte[] TextStyles(ICommandEmitter e) =>
+            ByteSplicer.Combine(
+                e.SetStyles(PrintStyle.None),
+                e.Print("Default: The quick brown fox jumped over the lazy dogs.\n"),
+                e.SetStyles(PrintStyle.FontB),
+                e.Print("Font B: The quick brown fox jumped over the lazy dogs.\n"),
+                e.SetStyles(PrintStyle.Bold),
+                e.Print("Bold: The quick brown fox jumped over the lazy dogs.\n"),
+                e.SetStyles(PrintStyle.Underline),
+                e.Print("Underline: The quick brown fox jumped over the lazy dogs.\n"),
+                e.SetStyles(PrintStyle.DoubleWidth),
+                e.Print("DoubleWidth: The quick brown fox jumped over the lazy dogs.\n"),
+                e.SetStyles(PrintStyle.DoubleHeight),
+                e.Print("DoubleHeight: The quick brown fox jumped over the lazy dogs.\n"),
+                e.SetStyles(PrintStyle.FontB | PrintStyle.DoubleHeight | PrintStyle.DoubleWidth | PrintStyle.Underline | PrintStyle.Bold),
+                e.Print("All Styles: The quick brown fox jumped over the lazy dogs.\n"),
+                e.SetStyles(PrintStyle.None)
+            );
+    }
+}

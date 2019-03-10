@@ -6,30 +6,34 @@ namespace ESCPOS_NET.Emitters
 {
     public interface ICommandEmitter
     {
-        /* Operational Commands */
-        byte[] Initialize { get; }
-        byte[] Enable { get; }
-        byte[] Disable { get; }
-
-        /* Character Commands */
-        byte[] SetStyles(PrintStyle style);
-        byte[] LeftAlign { get; }
-        byte[] RightAlign { get; }
-        byte[] CenterAlign { get; }
-
-        /* Action Commands */
-        byte[] FullCut { get; }
-        byte[] PartialCut { get; }
-        byte[] FullCutAfterFeed(int lineCount);
-        byte[] PartialCutAfterFeed(int lineCount);
-
-        /* Printing Commands */
-        byte[] Print(string lines);
-        byte[] PrintLine(string line);
+        /* Print Commands */
+        byte[] PrintLine(string line = null);
         byte[] Print(string line);
         byte[] FeedLines(int lineCount);
         byte[] FeedLinesReverse(int lineCount);
         byte[] FeedDots(int dotCount);
+
+        /* Line Spacing Commands */
+        byte[] ResetLineSpacing();
+        byte[] SetLineSpacingInDots(int dots);
+
+        /* Operational Commands */
+        byte[] Initialize();
+        byte[] Enable();
+        byte[] Disable();
+
+        /* Character Commands */
+        byte[] SetStyles(PrintStyle style);
+        byte[] LeftAlign();
+        byte[] RightAlign();
+        byte[] CenterAlign();
+
+        /* Action Commands */
+        byte[] FullCut();
+        byte[] PartialCut();
+        byte[] FullCutAfterFeed(int lineCount);
+        byte[] PartialCutAfterFeed(int lineCount);
+
 
         /* Image Commands */
         /* Status Commands */
