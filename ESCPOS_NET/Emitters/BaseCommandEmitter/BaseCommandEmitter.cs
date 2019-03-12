@@ -29,6 +29,10 @@ namespace ESCPOS_NET.Emitters
         public static readonly byte ResetLineSpacing = 0x32;
         public static readonly byte LineSpacingInDots = 0x33;
     }
+    public static class Status
+    {
+        public static readonly byte AutomaticStatusBack = 0x61;
+    }
 
     public static class Functions
     {

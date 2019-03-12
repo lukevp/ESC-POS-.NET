@@ -13,6 +13,8 @@ namespace ESCPOS_NET.ConsoleTest
 
         static void Main(string[] args)
         {
+            e = new EPSON();
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 printer = new SerialPrinter("COM20", 115200);
@@ -21,7 +23,7 @@ namespace ESCPOS_NET.ConsoleTest
             {
                 printer = new FilePrinter("/dev/usb/lp0");
             }
-            e = new EPSON_TM_T20II();
+
             List<string> testCases = new List<string>()
             {
                 "Printing",
@@ -61,6 +63,7 @@ namespace ESCPOS_NET.ConsoleTest
                 Console.Clear();
 
                 Setup();
+                var x = printer.Read();
 
                 printer.Write(e.PrintLine($"== [ Start {testCases[choice - 1]} ] =="));
 
@@ -106,6 +109,7 @@ namespace ESCPOS_NET.ConsoleTest
         {
             printer.Write(e.Initialize());
             printer.Write(e.Enable());
+            printer.Write(e.EnableAutomaticStatusBack());
         }
 
         /*

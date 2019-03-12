@@ -1,5 +1,11 @@
 # ESC-POS-.NET
-.NET (C#) Implementation of the Epson ESC/POS standard
+.NET (C#) Implementation of the Epson ESC/POS standard.
+
+Supports Mac OSX, Linux, and Windows.  Supports Epson thermal receipt printers and most common functions.
+
+
+## Getting Started
+Check out the ESCPOS_NET.ConsoleTest for a comprehensive test suite that covers all implemented functions.
 
 
 ## Initializing
@@ -104,8 +110,7 @@ GS ( L GS 8 L Set graphics data
         Store the graphics data in the print buffer (column format).
 
 ## Status Commands
-DLE EOT Transmit real-time status
-GS r Transmit status
+GS a Enable/disable Automatic Status Back (ASB)
 
 ## Bar Code Commands
 GS H Select print position of HRI characters

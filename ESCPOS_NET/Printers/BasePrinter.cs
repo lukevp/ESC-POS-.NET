@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Timers;
 
 namespace ESCPOS_NET
@@ -6,6 +7,7 @@ namespace ESCPOS_NET
     public abstract class BasePrinter
     {
         protected BinaryWriter _writer;
+        protected BinaryReader _reader;
         protected Timer _timer;
         protected int _bytesWritten = 0;
 
@@ -29,8 +31,15 @@ namespace ESCPOS_NET
             {
                 _timer.Start();
             }
-
         }
+
+        public virtual byte[] Read()
+        {
+            // TODO: make this read until the stream is empty (non-blocking?) or with a timeout perhaps?
+            // TODO: make a method that can watch the stream and read / throw events.
+            return _reader.ReadBytes(8);
+        }
+
         protected virtual void Flush(object sender, ElapsedEventArgs e)
         {
             _bytesWritten = 0;
