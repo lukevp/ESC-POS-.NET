@@ -7,6 +7,9 @@ Supports Mac OSX, Linux, and Windows.  Supports Epson thermal receipt printers a
 ## Getting Started
 Check out the ESCPOS_NET.ConsoleTest for a comprehensive test suite that covers all implemented functions.
 
+# NOTE: This document is a WIP so most of the below is just placeholder text as the project is being implemented.
+
+
 
 ## Initializing
 
