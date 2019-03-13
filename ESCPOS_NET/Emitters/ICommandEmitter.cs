@@ -39,6 +39,7 @@ namespace ESCPOS_NET.Emitters
 
         /* Status Commands */
         byte[] EnableAutomaticStatusBack();
+        byte[] EnableAutomaticInkStatusBack();
 
         /* Barcode Commands */
         byte[] PrintBarcode(BarcodeType type, string barcode);

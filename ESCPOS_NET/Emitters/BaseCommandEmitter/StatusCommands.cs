@@ -7,8 +7,8 @@ namespace ESCPOS_NET.Emitters
     {
         /* Status Commands */
 
-        // Default this to ASB all statuses (Drawer Kick-Out Connector, Online, Error, Roll Paper Sensor, and Panel Switch).
-        // All 0s are unused bytes.
-        public byte[] EnableAutomaticStatusBack() => new byte[] { Cmd.GS, Status.AutomaticStatusBack, 0b11110010 };
+        public byte[] EnableAutomaticStatusBack() => new byte[] { Cmd.GS, Status.AutomaticStatusBack, 0xFF };
+
+        public byte[] EnableAutomaticInkStatusBack() => new byte[] { Cmd.GS, Status.AutomaticInkStatusBack, 0xFF };
     }
 }
