@@ -36,7 +36,11 @@ namespace ESCPOS_NET.Emitters
 
 
         /* Image Commands */
+
         /* Status Commands */
+        byte[] EnableAutomaticStatusBack();
+        byte[] EnableAutomaticInkStatusBack();
+
         /* Barcode Commands */
         byte[] PrintBarcode(BarcodeType type, string barcode);
         byte[] SetBarcodeHeightInDots(int height);

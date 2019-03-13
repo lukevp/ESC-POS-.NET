@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ESCPOS_NET.Emitters
 {
-    public class EPSON_TM_T20II : BaseCommandEmitter
+    public class EPSON : BaseCommandEmitter
     {
     }
 }

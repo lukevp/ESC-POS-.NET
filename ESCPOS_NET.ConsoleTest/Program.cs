@@ -1,4 +1,5 @@
 ﻿using ESCPOS_NET.Emitters;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -15,13 +16,17 @@ namespace ESCPOS_NET.ConsoleTest
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+
+                using (var x = new SerialPrinter("COM20", 115200))
+                {
+                }
                 printer = new SerialPrinter("COM20", 115200);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 printer = new FilePrinter("/dev/usb/lp0");
             }
-            e = new EPSON_TM_T20II();
+            e = new EPSON();
             List<string> testCases = new List<string>()
             {
                 "Printing",
@@ -60,8 +65,8 @@ namespace ESCPOS_NET.ConsoleTest
 
                 Console.Clear();
 
+                printer.StartMonitoring();
                 Setup();
-
                 printer.Write(e.PrintLine($"== [ Start {testCases[choice - 1]} ] =="));
 
                 switch (choice)
@@ -102,10 +107,19 @@ namespace ESCPOS_NET.ConsoleTest
             }
         }
 
+        static void StatusChanged(object sender, EventArgs ps)
+        {
+            var status = (PrinterStatus)ps;
+            Console.WriteLine($"Printer Online Status: {status.IsPrinterOnline}");
+            Console.WriteLine(JsonConvert.SerializeObject(status));
+        }
+
         static void Setup()
         {
             printer.Write(e.Initialize());
             printer.Write(e.Enable());
+            printer.Write(e.EnableAutomaticStatusBack());
+            printer.StatusChanged += StatusChanged;
         }
 
         /*
