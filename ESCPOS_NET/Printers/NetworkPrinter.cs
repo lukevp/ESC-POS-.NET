@@ -1,12 +1,55 @@
-﻿// TODO: Implement this class
-using ESCPOS_NET.Emitters;
-using System;
+﻿using System;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
 
 namespace ESCPOS_NET
 {
-    public class NetworkPrinter
+    public class NetworkPrinter : BasePrinter, IDisposable
     {
-        public byte[] Output { get; private set; }
-        
+        private readonly IPEndPoint _endPoint;
+        private Socket _socket;
+        private NetworkStream _sockStream;
+
+        public NetworkPrinter(IPEndPoint endPoint) : base()
+        {
+            _endPoint = endPoint;
+            Connect();
+        }
+
+        public NetworkPrinter(IPAddress ipAddress, int port) : base()
+        {
+            _endPoint = new IPEndPoint(ipAddress, port);
+            Connect();
+        }
+
+        public NetworkPrinter(string ipAddress, int port) : base()
+        {
+
+            _endPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
+            Connect();
+        }
+
+        private void Connect()
+        {
+            _socket = new Socket(_endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _socket.Connect(_endPoint);
+            _sockStream = new NetworkStream(_socket);
+            _writer = new BinaryWriter(_sockStream);
+            _reader = new BinaryReader(_sockStream);
+        }
+
+        ~NetworkPrinter()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            _writer.Close();
+            _reader.Close();
+            _socket.Close();
+            _socket.Dispose();
+        }
     }
 }
