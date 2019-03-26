@@ -14,18 +14,77 @@ namespace ESCPOS_NET.ConsoleTest
 
         static void Main(string[] args)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
 
-                using (var x = new SerialPrinter("COM20", 115200))
-                {
-                }
-                printer = new SerialPrinter("COM20", 115200);
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            Console.WriteLine("ESCPOS_NET Test Application...");
+            Console.WriteLine("1 ) Test Serial Port");
+            Console.WriteLine("2 ) Test Network Printer");
+            Console.Write("Choice: ");
+            string comPort = "";
+            string baudRate;
+            string ip;
+            string networkPort;
+            var response = Console.ReadLine();
+            var valid = new List<string> { "1", "2" };
+            if (!valid.Contains(response)) response = "1";
+            int choice = int.Parse(response);
+
+            if (choice == 1)
             {
-                printer = new FilePrinter("/dev/usb/lp0");
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    while (!comPort.StartsWith("COM"))
+                    { 
+                        Console.Write("COM Port (eg. COM20): ");
+                        comPort = Console.ReadLine();
+                        if (string.IsNullOrWhiteSpace(comPort))
+                        {
+                            comPort = "COM20";
+                        }
+                    }
+                    Console.Write("Baud Rate (eg. 115200): ");
+                    baudRate = Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(baudRate))
+                    {
+                        baudRate = "115200";
+                    }
+                    printer = new SerialPrinter(comPort, int.Parse(baudRate));
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Console.Write("File / virtual com path (eg. /dev/usb/lp0): ");
+                    comPort = Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(comPort))
+                    {
+                        comPort = "/dev/usb/lp0";
+                    }
+                    printer = new FilePrinter(comPort);
+                }
             }
+            else if (choice == 2)
+            {
+                Console.Write("IP Address (eg. 192.168.1.240): ");
+                ip = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(ip))
+                {
+                    ip = "192.168.1.240";
+                }
+                Console.Write("TCP Port (eg. 9000): ");
+                networkPort = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(networkPort))
+                {
+                    networkPort = "9000";
+                }
+                printer = new NetworkPrinter(ip, int.Parse(networkPort));
+            }
+
+            bool monitor = false;
+            Console.Write("Turn on Live Status Back Monitoring? (y/n): ");
+            response = Console.ReadLine().Trim().ToLowerInvariant();
+            if (response.Length >= 1 && response[0] == 'y')
+            {
+                monitor = true;
+            }
+            
             e = new EPSON();
             List<string> testCases = new List<string>()
             {
@@ -45,7 +104,6 @@ namespace ESCPOS_NET.ConsoleTest
                 }
                 Console.WriteLine("99 : Exit");
                 Console.Write("Execute Test: ");
-                int choice;
 
                 try
                 {
@@ -65,7 +123,10 @@ namespace ESCPOS_NET.ConsoleTest
 
                 Console.Clear();
 
-                printer.StartMonitoring();
+                if (monitor)
+                { 
+                    printer.StartMonitoring();
+                }
                 Setup();
                 printer.Write(e.PrintLine($"== [ Start {testCases[choice - 1]} ] =="));
 
@@ -83,7 +144,7 @@ namespace ESCPOS_NET.ConsoleTest
                     case 4:
                         printer.Write(Tests.TextStyles(e));
                         break;
-                    case 98:
+                    case 5:
                         printer.Write(Tests.Receipt(e));
                         break;
                     default:
@@ -99,7 +160,7 @@ namespace ESCPOS_NET.ConsoleTest
                 //TestMultiLineWrite();
                 //TestHEBReceipt();
                 // TODO: write a sanitation check.
-                // TODO: make DPI to inch convesion function
+                // TODO: make DPI to inch conversion function
                 // TODO: full cuts and reverse feeding not implemented on epson...  should throw exception?
                 // TODO: make an input loop that lets you execute each test separately.
                 // TODO: also make an automatic runner that runs all tests (command line).
