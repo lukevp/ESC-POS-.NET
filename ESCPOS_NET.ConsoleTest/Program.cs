@@ -92,7 +92,8 @@ namespace ESCPOS_NET.ConsoleTest
                 "Line Spacing",
                 "Barcode Styles",
                 "Text Styles",
-                "Full Receipt"
+                "Full Receipt",
+                "Images"
             };
             while (true)
             {
@@ -146,6 +147,9 @@ namespace ESCPOS_NET.ConsoleTest
                         break;
                     case 5:
                         printer.Write(Tests.Receipt(e));
+                        break;
+                    case 6:
+                        printer.Write(Tests.Images(e));
                         break;
                     default:
                         Console.WriteLine("Invalid entry.");

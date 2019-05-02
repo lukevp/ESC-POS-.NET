@@ -2,6 +2,7 @@
 using ESCPOS_NET.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace ESCPOS_NET.ConsoleTest
@@ -11,6 +12,7 @@ namespace ESCPOS_NET.ConsoleTest
         public static byte[] Receipt(ICommandEmitter e) =>
             ByteSplicer.Combine(
             e.CenterAlign(),
+            e.PrintImage(File.ReadAllBytes("images/pd-logo-300.png"), true),
             e.PrintLine(),
             e.SetBarcodeHeightInDots(360),
             e.SetBarWidth(BarWidth.Default),
