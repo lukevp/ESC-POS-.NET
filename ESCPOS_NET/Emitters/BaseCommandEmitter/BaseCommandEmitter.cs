@@ -50,4 +50,10 @@ namespace ESCPOS_NET.Emitters
         public static readonly byte SetBarLabelPosition = 0x48;
         public static readonly byte SetBarLabelFont = 0x66;
     }
+    public static class Images
+    {
+        public static readonly byte ImageCmdParen = 0x28;
+        public static readonly byte ImageCmd8 = 0x38;
+        public static readonly byte ImageCmdL = 0x4C;
+    }
 }

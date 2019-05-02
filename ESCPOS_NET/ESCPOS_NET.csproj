@@ -13,11 +13,12 @@ Allows creating receipts with all common functionality supported.</Description>
     <RepositoryUrl>https://github.com/lukevp/ESC-POS-.NET</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>epson thermal receipt printing esc pos escpos escp</PackageTags>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="SerialPortStream" Version="2.2.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0006" />
   </ItemGroup>
 
 </Project>
