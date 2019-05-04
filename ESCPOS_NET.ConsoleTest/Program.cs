@@ -109,7 +109,7 @@ namespace ESCPOS_NET.ConsoleTest
                 try
                 {
                     choice = Convert.ToInt32(Console.ReadLine());
-                    if (choice != 99 && (choice < 1 || choice > testCases.Count ))
+                    if (choice != 99 && (choice < 1 || choice > testCases.Count))
                     {
                         throw new InvalidOperationException();
                     }
