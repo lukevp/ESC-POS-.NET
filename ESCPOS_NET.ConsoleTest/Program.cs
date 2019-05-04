@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -93,7 +94,8 @@ namespace ESCPOS_NET.ConsoleTest
                 "Barcode Styles",
                 "Text Styles",
                 "Full Receipt",
-                "Images"
+                "Images",
+                "Juliogamasso-Test"
             };
             while (true)
             {
@@ -150,6 +152,9 @@ namespace ESCPOS_NET.ConsoleTest
                         break;
                     case 6:
                         printer.Write(Tests.Images(e));
+                        break;
+                    case 7:
+                        printer.Write(File.ReadAllBytes("test-files/output-juliogamasso.bin"));
                         break;
                     default:
                         Console.WriteLine("Invalid entry.");
