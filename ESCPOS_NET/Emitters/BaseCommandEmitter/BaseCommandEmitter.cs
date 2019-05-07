@@ -18,6 +18,7 @@ namespace ESCPOS_NET.Emitters
     {
         public static readonly byte StyleMode = 0x21;
         public static readonly byte Alignment = 0x61;
+        public static readonly byte ReversePrintMode = 0x42;
     }
     public static class Whitespace
     {

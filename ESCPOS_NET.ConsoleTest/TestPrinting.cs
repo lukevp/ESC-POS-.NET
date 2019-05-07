@@ -8,7 +8,7 @@ namespace ESCPOS_NET.ConsoleTest
         public static byte[] Printing(ICommandEmitter e) =>
             ByteSplicer.Combine(
                 e.Print("Multiline Test: Windows...\r\nOSX...\rUnix...\n"),
-                // TODO: sanitize test.
+                //TODO: sanitize test.
                 e.PrintLine("Feeding 250 dots."),
                 e.FeedDots(250),
                 e.PrintLine("Feeding 3 lines."),
@@ -16,7 +16,13 @@ namespace ESCPOS_NET.ConsoleTest
                 e.PrintLine("Done Feeding."),
                 e.PrintLine("Reverse Feeding 6 lines."),
                 e.FeedLinesReverse(6),
-                e.PrintLine("Done Reverse Feeding.")
+                e.PrintLine("Done Reverse Feeding."),
+                e.PrintLine("Reverse print mode."),
+                e.ReverseMode(1),
+                e.PrintLine("REVERSE MODE TEST ACTIVE"),
+                e.ReverseMode(0),
+                e.PrintLine("REVERSE MODE TEST DISABLED"),
+                e.PrintLine("Done print mode.")
              );
     }
 }
