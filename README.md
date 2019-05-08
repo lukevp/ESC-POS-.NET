@@ -18,33 +18,33 @@ Please comment / DM / open issues and let me know how the library is working for
 # Implemented Commands
 
 ## Bit Image Commands
-ESC ✻ Select bit-image mode
-GS ( L [OR] GS 8 L Set graphics data
+* `ESC ✻` Select bit-image mode
+* `GS ( L` OR `GS 8 L` Set graphics data
         * Set the reference dot density for graphics.
         * Print the graphics data in the print buffer.
         * Store the graphics data in the print buffer (raster format).
 
 ## Print Commands
-* LF Print and line feed
-* CR Print and carriage return
-* ESC J Print and feed paper
-* ESC K Print and reverse feed
-* ESC d Print and feed n lines
-* ESC e Print and reverse feed n lines
+* `LF` Print and line feed
+* `CR` Print and carriage return
+* `ESC J` Print and feed paper
+* `ESC K` Print and reverse feed
+* `ESC d` Print and feed n lines
+* `ESC e` Print and reverse feed n lines
 
 ## Bar Code Commands
-GS H Select print position of HRI characters
-GS f Select font for HRI characters
-GS h Set bar code height
-GS k Print bar code
-GS w Set bar code width
+* `GS H` Select print position of HRI characters
+* `GS f` Select font for HRI characters
+* `GS h` Set bar code height
+* `GS k` Print bar code
+* `GS w` Set bar code width
 
 ## Status Commands
-GS a Enable/disable Automatic Status Back (ASB)
+* `GS a` Enable/disable Automatic Status Back (ASB)
 
 
 ## Miscellaneous Commands
-ESC @ Initialize printer
+* `ESC @` Initialize printer
 
 
 
