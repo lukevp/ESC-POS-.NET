@@ -16,13 +16,7 @@ namespace ESCPOS_NET.ConsoleTest
                 e.PrintLine("Done Feeding."),
                 e.PrintLine("Reverse Feeding 6 lines."),
                 e.FeedLinesReverse(6),
-                e.PrintLine("Done Reverse Feeding."),
-                e.PrintLine("Reverse print mode."),
-                e.ReverseMode(1),
-                e.PrintLine("REVERSE MODE TEST ACTIVE"),
-                e.ReverseMode(0),
-                e.PrintLine("REVERSE MODE TEST DISABLED"),
-                e.PrintLine("Done print mode.")
+                e.PrintLine("Done Reverse Feeding.")                              
              );
     }
 }
