@@ -20,9 +20,9 @@ Please comment / DM / open issues and let me know how the library is working for
 ## Bit Image Commands
 * `ESC ✻` Select bit-image mode
 * `GS ( L` OR `GS 8 L` Set graphics data
-        * Set the reference dot density for graphics.
-        * Print the graphics data in the print buffer.
-        * Store the graphics data in the print buffer (raster format).
+    * Set the reference dot density for graphics.
+    * Print the graphics data in the print buffer.
+    * Store the graphics data in the print buffer (raster format).
 
 ## Print Commands
 * `LF` Print and line feed
