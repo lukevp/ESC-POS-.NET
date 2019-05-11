@@ -27,6 +27,7 @@ namespace ESCPOS_NET.Emitters
         byte[] LeftAlign();
         byte[] RightAlign();
         byte[] CenterAlign();
+        byte[] ReverseMode(bool activate);
 
         /* Action Commands */
         byte[] FullCut();
