@@ -31,7 +31,6 @@ namespace ESCPOS_NET.Emitters
             }
         }
 
-
         /* Image Commands */
         public byte[] SetImageDensity(bool isHiDPI)
         {
@@ -43,7 +42,7 @@ namespace ESCPOS_NET.Emitters
             return builder.ToArray();
         }
 
-        public byte[] BufferImage(byte[] image, int maxWidth = -1, int color = 1)
+        public byte[] BufferImage(byte[] image, int maxWidth = -1, bool isLegacy = false, int color = 1)
         {
             ByteArrayBuilder imageCommand = new ByteArrayBuilder();
 
@@ -73,12 +72,27 @@ namespace ESCPOS_NET.Emitters
                     height = (int)(maxWidth * (Convert.ToDouble(img.Height) / img.Width));
                     img.Mutate(x => x.Resize(width, height));
                 }
-                byte widthL = (byte)(width);
-                byte widthH = (byte)(width >> 8);
                 byte heightL = (byte)(height);
                 byte heightH = (byte)(height >> 8);
 
-                imageCommand.Append(new byte[] { 0x30, 0x70, 0x30, 0x01, 0x01, colorByte, widthL, widthH, heightL, heightH });
+                if (isLegacy)
+                {
+                    // TODO: if there's a remainder, need to add 1?
+                    var byteWidth = width / 8;
+                    if (width % 8 != 0)
+                    {
+                        byteWidth += 1;
+                    }
+                    byte widthL = (byte)byteWidth;
+                    byte widthH = (byte)(byteWidth >> 8);
+                    imageCommand.Append(new byte[] { Cmd.GS, Images.ImageCmdLegacy, 0x30, 0x00, widthL, widthH, heightL, heightH });
+                }
+                else
+                {
+                    byte widthL = (byte)(width);
+                    byte widthH = (byte)(width >> 8);
+                    imageCommand.Append(new byte[] { 0x30, 0x70, 0x30, 0x01, 0x01, colorByte, widthL, widthH, heightL, heightH });
+                }
                 // TODO: test making a List<byte> if it's faster than using ByteArrayBuilder.
 
                 // Bit pack every 8 horizontal bits into a single byte.
@@ -110,9 +124,12 @@ namespace ESCPOS_NET.Emitters
                 }
             }
             // Load image to print buffer
-            byte[] imageCommandBytes = imageCommand.ToArray();
             ByteArrayBuilder response = new ByteArrayBuilder();
-            response.Append(GetImageHeader(imageCommandBytes.Length));
+            byte[] imageCommandBytes = imageCommand.ToArray();
+            if (!isLegacy)
+            { 
+                response.Append(GetImageHeader(imageCommandBytes.Length));
+            }
             response.Append(imageCommandBytes);
             return response.ToArray();
         }
@@ -126,10 +143,16 @@ namespace ESCPOS_NET.Emitters
             response.Append(printCommandBytes);
             return response.ToArray();
         }
-        public byte[] PrintImage(byte[] image, bool isHiDPI, int maxWidth = -1, int color = 1)
+        public byte[] PrintImage(byte[] image, bool isHiDPI, bool isLegacy = false, int maxWidth = -1, int color = 1)
         {
-            return ByteSplicer.Combine(SetImageDensity(isHiDPI), BufferImage(image, maxWidth, color), WriteImageFromBuffer());
-            
+            if (isLegacy)
+            {
+                return ByteSplicer.Combine(BufferImage(image, maxWidth, isLegacy));
+            }
+            else
+            { 
+                return ByteSplicer.Combine(SetImageDensity(isHiDPI), BufferImage(image, maxWidth, isLegacy, color), WriteImageFromBuffer());
+            }
         }
     }
 }

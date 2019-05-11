@@ -37,10 +37,9 @@ namespace ESCPOS_NET.Emitters
 
         /* Image Commands */
         byte[] SetImageDensity(bool isHiDPI);
-        byte[] BufferImage(byte[] image, int maxWidth, int color = 1);
+        byte[] BufferImage(byte[] image, int maxWidth, bool isLegacy = false, int color = 1);
         byte[] WriteImageFromBuffer();
-        byte[] PrintImage(byte[] image, bool isHiDPI, int maxWidth = -1, int color = 1);
-
+        byte[] PrintImage(byte[] image, bool isHiDPI, bool isLegacy = false, int maxWidth = -1, int color = 1);
         /* Status Commands */
         byte[] EnableAutomaticStatusBack();
         byte[] EnableAutomaticInkStatusBack();

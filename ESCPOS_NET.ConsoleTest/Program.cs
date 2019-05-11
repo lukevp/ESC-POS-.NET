@@ -95,6 +95,7 @@ namespace ESCPOS_NET.ConsoleTest
                 "Text Styles",
                 "Full Receipt",
                 "Images",
+                "Legacy Images",
                 "Juliogamasso-Test"
             };
             while (true)
@@ -151,9 +152,12 @@ namespace ESCPOS_NET.ConsoleTest
                         printer.Write(Tests.Receipt(e));
                         break;
                     case 6:
-                        printer.Write(Tests.Images(e));
+                        printer.Write(Tests.Images(e, false));
                         break;
                     case 7:
+                        printer.Write(Tests.Images(e, true));
+                        break;
+                    case 8:
                         printer.Write(File.ReadAllBytes("test-files/output-juliogamasso.bin"));
                         break;
                     default:
