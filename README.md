@@ -24,6 +24,11 @@ Please comment / DM / open issues and let me know how the library is working for
     * Print the graphics data in the print buffer.
     * Store the graphics data in the print buffer (raster format).
 
+## Character Commands
+ESC ! Select print mode(s)
+GS B Turn white/black reverse print mode on/off - Thanks @juliogamasso!
+
+
 ## Print Commands
 * `LF` Print and line feed
 * `CR` Print and carriage return
@@ -79,7 +84,6 @@ Feeds the paper n dots, where n < 255.
 
 ## Character Commands
 ESC SP Set right-side character spacing
-ESC ! Select print mode(s)
 ESC – Turn underline mode on/off
 ESC E Turn emphasized mode on/off
 ESC G Turn double-strike mode on/off
@@ -89,7 +93,6 @@ ESC r Select print color
 ESC t Select character code table
 ESC { Turn upside-down print mode on/off
 GS ! Select character size
-GS B Turn white/black reverse print mode on/off
 GS b Turn smoothing mode on/off
 
 ## Panel Button Commands
