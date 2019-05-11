@@ -25,8 +25,8 @@ Please comment / DM / open issues and let me know how the library is working for
     * Store the graphics data in the print buffer (raster format).
 
 ## Character Commands
-ESC ! Select print mode(s)
-GS B Turn white/black reverse print mode on/off - Thanks @juliogamasso!
+* `ESC !` Select print mode(s)
+* `GS B` Turn white/black reverse print mode on/off - Thanks @juliogamasso!
 
 
 ## Print Commands
