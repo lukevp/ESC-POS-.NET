@@ -57,124 +57,114 @@ Please comment / DM / open issues and let me know how the library is working for
 # NOTE: This document is a WIP so some of the below is just placeholder text as the project is being implemented.
 
 
-## TODO: ByteSplicer
+## TODO: ByteSplicer Tutorial
 
 ## Print Commands
 // TODO: String sanitation
 
-Print(string) - Outputs the ASCII character data to the printer as it is passed in.  Does not add a trailing new line.  Standardizes platform-specific newlines to LF characters (eg.  Windows CRLF and OS-X CR and Linux LFs will all be converted to LFs to maintain compatibility with the ESC-POS standard).
 
-PrintLine(string) - Outputs the ASCII string passed in with newlines stripped out, and a trailing newline added.
-
-FeedLines(int n)
-Feeds the paper n lines.
-
-FeedLinesReverse(int n)
-Feeds the paper n lines in reverse. Doesn't work on TM-T20II.
-
-FeedDots(int n)
-Feeds the paper n dots, where n < 255.
-
-
-# Implemented Commands (pending)
+# Implemented or To-Implement Commands (pending)
 
 ## Line Spacing Commands
 * ESC 2 Select default line spacing
 * ESC 3 Set line spacing
 
 ## Character Commands
-ESC SP Set right-side character spacing
-ESC – Turn underline mode on/off
-ESC E Turn emphasized mode on/off
-ESC G Turn double-strike mode on/off
-ESC M Select character font
-ESC V Turn 90° clockwise rotation mode on/off
-ESC r Select print color
-ESC t Select character code table
-ESC { Turn upside-down print mode on/off
-GS ! Select character size
-GS b Turn smoothing mode on/off
+* `ESC SP` Set right-side character spacing
+* `ESC –` Turn underline mode on/off
+* `ESC E` Turn emphasized mode on/off
+* `ESC G` Turn double-strike mode on/off
+* `ESC M` Select character font
+* `ESC V` Turn 90° clockwise rotation mode on/off
+* `ESC r` Select print color
+* `ESC t` Select character code table
+* `ESC {` Turn upside-down print mode on/off
+* `GS !` Select character size
+* `GS b` Turn smoothing mode on/off
 
 ## Panel Button Commands
-ESC c 5 Enable/disable panel buttons
+* `ESC c 5` Enable/disable panel buttons
 
 ## Paper Sensor Commands
 @@this is for parallel only  ESC c 3 Select paper sensor(s) to output paper-end signals
 @@this should stop by default ESC c 4 Select paper sensor(s) to stop printing
 
 ## Print Position Commands
-HT Horizontal tab
-ESC $ Set absolute print position
-ESC D Set horizontal tab positions
-* ESC a Select justification
-GS L Set left margin
-GS W Set print area width
+* `HT` Horizontal tab
+* `ESC $` Set absolute print position
+* `ESC D` Set horizontal tab positions
+* `ESC a` Select justification
+* `GS L` Set left margin
+* `GS W` Set print area width
 
 ## Bit Image Commands
-ESC ✻ Select bit-image mode
+* `ESC *` Select bit-image mode
 
 
 
 ## Mechanism Control Commands
-ESC U Turn unidirectional print mode on/off
-GS V Select cut mode and cut paper
+* `ESC U` Turn unidirectional print mode on/off
+* `GS V` Select cut mode and cut paper
 
 ## Miscellaneous Commands
-ESC @ Initialize printer
-DLE ENQ Send real-time request to printer
-DLE DC4 (fn = 1) Generate pulse in real-time
-DLE DC4 (fn = 2) Execute power-off sequence
+* `ESC @` Initialize printer
+* `DLE ENQ` Send real-time request to printer
+* `DLE DC4 (fn = 1)` Generate pulse in real-time
+* `DLE DC4 (fn = 2)` Execute power-off sequence
 
 TODO: check for DLE DC4 other functions and any other real time commands to make sure they're not part of graphics data because they will be processed immediately.  also can use GS ( D to disable realtime commands before processing graphics data
 
-ESC p Generate pulse
-GS ( A Execute test print
-GS ( D Enable/disable real-time command
-GS ( H Request transmission of response or status
-GS ( K Select print control method(s)
-        Select the print control mode
-        Select the print density
-        Select the print speed
-        Select the number of parts for the thermal head energizing
-GS ( P Page mode control
-        Printable area setting when page mode is selected
-GS ( Q Commands for drawing graphics
-        Draw line
-        Draw rectangle
+* `ESC p` Generate pulse
+* `GS ( A` Execute test print
+* `GS ( D` Enable/disable real-time command
+* `GS ( H` Request transmission of response or status
+* `GS ( K` Select print control method(s)
+    *    Select the print control mode
+    *    Select the print density
+    *    Select the print speed
+    *    Select the number of parts for the thermal head energizing
+* `GS ( P` Page mode control
+    *    Printable area setting when page mode is selected
+* `GS ( Q` Commands for drawing graphics
+    *    Draw line
+    *    Draw rectangle
 
 ## Two Dimension Code Commands (QR Codes)
-GS ( k Set up and print the symbol
+* `GS ( k` Set up and print the symbol
 
 ## Customize Commands
-GS ( C Edit NV user memory
-        Delete the specified record
-        Store the data in the specified record
-        Transmit the data in the specified record
-        Transmit capacity of the NV user memory currently being used
-        Transmit the remaining capacity of the NV user memory
-        Transmit the key code list
-        Delete all data in the NV user memory
-GS ( E Set user setup commands
-        Change into the user setting mode
-        End the user setting mode session
-        Change the memory switch
-        Transmit the settings of the memory switch
-        Set the customized setting values
-        Transmit the customized setting values
-        Copy the user-defined page
-        Define the data (column format) for the character code page
-        Define the data (raster format) for the character code page
-        Delete the data for the character code page
-        Set the configuration item for the serial interface
-        Transmit the configuration item for the serial interface
-        Set the configuration item for the Bluetooth interface
-        Transmit the configuration item for the Bluetooth interface
-        Delete the paper layout
-        Set the paper layout
+* `GS ( C` Edit NV user memory
+    *    Delete the specified record
+    *    Store the data in the specified record
+    *    Transmit the data in the specified record
+    *    Transmit capacity of the NV user memory currently being used
+    *    Transmit the remaining capacity of the NV user memory
+    *    Transmit the key code list
+    *    Delete all data in the NV user memory
+* `GS ( E` Set user setup commands
+    *    Change into the user setting mode
+    *    End the user setting mode session
+    *    Change the memory switch
+    *    Transmit the settings of the memory switch
+    *    Set the customized setting values
+    *    Transmit the customized setting values
+    *    Copy the user-defined page
+    *    Define the data (column format) for the character code page
+    *    Define the data (raster format) for the character code page
+    *    Delete the data for the character code page
+    *    Set the configuration item for the serial interface
+    *    Transmit the configuration item for the serial interface
+    *    Set the configuration item for the Bluetooth interface
+    *    Transmit the configuration item for the Bluetooth interface
+    *    Delete the paper layout
+    *    Set the paper layout
 
 ## Counter Printing Commands
 
 ## Printing Paper Commands
+
+
+
 
 
 
