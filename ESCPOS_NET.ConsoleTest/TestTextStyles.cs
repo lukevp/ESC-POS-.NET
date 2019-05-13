@@ -31,7 +31,7 @@ namespace ESCPOS_NET.ConsoleTest
                  e.ReverseMode(false),
                 e.SetStyles(PrintStyle.None),
                 e.RightCharacterSpacing(5),
-                e.PrintLine("Rigth space 5: The quick brown fox jumped over the lazy dogs."),
+                e.PrintLine("Right space 5: The quick brown fox jumped over the lazy dogs."),
                 e.RightCharacterSpacing(0),
                 e.SetStyles(PrintStyle.None),
                 e.UpsideDownMode(true),
