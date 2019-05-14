@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace ESCPOS_NET.Emitters
+﻿namespace ESCPOS_NET.Emitters
 {
     public static class Cmd
     {
@@ -56,5 +53,15 @@ namespace ESCPOS_NET.Emitters
         public static readonly byte ImageCmdParen = 0x28;
         public static readonly byte ImageCmd8 = 0x38;
         public static readonly byte ImageCmdL = 0x4C;
+    }
+
+    public static class QrCode
+    {
+        public static readonly byte QrCodeCmd = 0x28; // l
+        public static readonly byte SetQrCodeModel = 0x41; // Function 165
+        public static readonly byte SetQrCodeSize = 0x43; // Function 167
+        public static readonly byte SetQrCodeErrorLevel = 0x45; // Function 169
+        public static readonly byte QrCodeStoreData = 0x50; // Function 180
+        public static readonly byte QrCodeTransmiteSize = 0x52; // Function 182
     }
 }

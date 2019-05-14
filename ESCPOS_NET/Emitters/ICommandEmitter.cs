@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ESCPOS_NET.Emitters
+﻿namespace ESCPOS_NET.Emitters
 {
     public interface ICommandEmitter
     {
@@ -52,6 +48,8 @@ namespace ESCPOS_NET.Emitters
         byte[] SetBarWidth(BarWidth width);
         byte[] SetBarLabelPosition(BarLabelPrintPosition position);
         byte[] SetBarLabelFontB(bool fontB);
+
         /* 2D-Code Commands */
+        byte[] PrintQrcode(string qrData, int size);
     }
 }

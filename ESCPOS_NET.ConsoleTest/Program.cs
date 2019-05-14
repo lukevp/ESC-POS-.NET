@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace ESCPOS_NET.ConsoleTest
 {
@@ -33,7 +32,7 @@ namespace ESCPOS_NET.ConsoleTest
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     while (!comPort.StartsWith("COM"))
-                    { 
+                    {
                         Console.Write("COM Port (eg. COM20): ");
                         comPort = Console.ReadLine();
                         if (string.IsNullOrWhiteSpace(comPort))
@@ -84,7 +83,7 @@ namespace ESCPOS_NET.ConsoleTest
             {
                 monitor = true;
             }
-            
+
             e = new EPSON();
             List<string> testCases = new List<string>()
             {
@@ -93,7 +92,8 @@ namespace ESCPOS_NET.ConsoleTest
                 "Barcode Styles",
                 "Text Styles",
                 "Full Receipt",
-                "Images"
+                "Images",
+                "QrCode"
             };
             while (true)
             {
@@ -125,7 +125,7 @@ namespace ESCPOS_NET.ConsoleTest
                 Console.Clear();
 
                 if (monitor)
-                { 
+                {
                     printer.StartMonitoring();
                 }
                 Setup();
@@ -150,6 +150,9 @@ namespace ESCPOS_NET.ConsoleTest
                         break;
                     case 6:
                         printer.Write(Tests.Images(e));
+                        break;
+                    case 7:
+                        printer.Write(Tests.QrCode(e));
                         break;
                     default:
                         Console.WriteLine("Invalid entry.");
