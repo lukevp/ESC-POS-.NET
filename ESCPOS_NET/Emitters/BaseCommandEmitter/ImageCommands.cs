@@ -93,21 +93,53 @@ namespace ESCPOS_NET.Emitters
                     byte widthH = (byte)(width >> 8);
                     imageCommand.Append(new byte[] { 0x30, 0x70, 0x30, 0x01, 0x01, colorByte, widthL, widthH, heightL, heightH });
                 }
+
+
                 // TODO: test making a List<byte> if it's faster than using ByteArrayBuilder.
 
+                double[] ditherErrorsNext = new double[width + 2];
                 // Bit pack every 8 horizontal bits into a single byte.
                 for (int y = 0; y < img.Height; y++)
                 {
+                    // Create an array for capturing dither errors
+                    double[] ditherErrorsCurrent = ditherErrorsNext;
+                    ditherErrorsNext = new double[width + 2];
+
                     Span<Rgba32> pixelRowSpan = img.GetPixelRowSpan(y);
                     byte buffer = 0x00;
                     int bufferCount = 7;
                     for (int x = 0; x < img.Width; x++)
                     {
                         // Determine if pixel should be colored in.
-                        if ((0.30 * pixelRowSpan[x].R) + (0.59 * pixelRowSpan[x].G) + (0.11 * pixelRowSpan[x].B) <= 127)
+                        var pixelValue = ((0.30 * pixelRowSpan[x].R) + (0.59 * pixelRowSpan[x].G) + (0.11 * pixelRowSpan[x].B) + (ditherErrorsCurrent[x]));
+                        double error = 0;
+                        if (pixelValue <= 127)
                         {
+                            // Pixel value should be black (0), if it is greater than zero then the error is the difference (pixelvalue - 0)
+                            // which is just the pixel value.
+                            error = pixelValue;
                             buffer |= (byte)(0x01 << bufferCount);
                         }
+                        else
+                        {
+                            // Pixel should be white, so error is pixelvalue - 255
+                            error = pixelValue - 255;
+                        }
+
+                        // Propagate dither.
+                        //error <<= 1; // error * 32
+                        double pixelValue8 = error / 4;
+                        double pixelValue4 = error / 8;
+                        double pixelValue2 = error / 16;
+                        ditherErrorsCurrent[x + 1] += pixelValue8;
+                        ditherErrorsCurrent[x + 2] += pixelValue4;
+
+                        if (x - 2 > 0) ditherErrorsNext[x - 2] += pixelValue2;
+                        if (x - 1 > 0) ditherErrorsNext[x - 1] += pixelValue4;
+                        ditherErrorsNext[x] += pixelValue8;
+                        ditherErrorsNext[x + 1] += pixelValue4;
+                        ditherErrorsNext[x + 2] += pixelValue2;
+
                         if (bufferCount == 0)
                         {
                             bufferCount = 8;
