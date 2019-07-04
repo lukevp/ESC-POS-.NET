@@ -1,5 +1,5 @@
 # ESC-POS-.NET
-.NET (C#) Implementation of the Epson ESC/POS standard.
+.NET (C#) Implementation of the Epson ESC/POS standard.   MIT licensed.
 
 # Supported Platforms
 Supports Windows, Linux, and Mac OSX!  
