@@ -94,6 +94,7 @@ namespace ESCPOS_NET.ConsoleTest
                 "Text Styles",
                 "Full Receipt",
                 "Images"
+                "Qrcode"
             };
             while (true)
             {
@@ -150,6 +151,9 @@ namespace ESCPOS_NET.ConsoleTest
                         break;
                     case 6:
                         printer.Write(Tests.Images(e));
+                        break;
+                    case 7:
+                        printer.Write(Tests.QrCodeTest(e));
                         break;
                     default:
                         Console.WriteLine("Invalid entry.");
