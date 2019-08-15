@@ -1,0 +1,16 @@
+using ESCPOS_NET.Emitters;
+using ESCPOS_NET.Utilities;
+
+namespace ESCPOS_NET.ConsoleTest
+{
+    public static partial class Tests
+    {
+        public static byte[] QrCodeTest(ICommandEmitter e) =>
+            ByteSplicer.Combine(
+                e.CenterAlign(),
+                e.PrintLine("This is a test Qrcode"),
+                e.PrintLine(),
+                e.PrintQrCode("https://github.com/lukevp/ESC-POS-.NET", 7, 50,50)
+                );
+    }
+}
