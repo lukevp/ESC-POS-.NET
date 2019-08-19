@@ -14,16 +14,17 @@ namespace ESCPOS_NET
         public event EventHandler StatusChanged;
         protected BinaryWriter _writer;
         protected BinaryReader _reader;
-        protected System.Timers.Timer _writeTimer;
+        protected System.Timers.Timer _flushTimer;
         protected Thread _readThread;
         protected ConcurrentQueue<byte> _readBuffer = new ConcurrentQueue<byte>();
         protected int _bytesWritten = 0;
+        private readonly int _maxBytesPerWrite = 15000; // max byte chunks to write at once.
 
         public BasePrinter()
         {
-            _writeTimer = new System.Timers.Timer(20);
-            _writeTimer.Elapsed += Flush;
-            _writeTimer.AutoReset = false;
+            _flushTimer = new System.Timers.Timer(20);
+            _flushTimer.Elapsed += Flush;
+            _flushTimer.AutoReset = false;
         }
 
         public virtual void Read()
@@ -44,10 +45,30 @@ namespace ESCPOS_NET
 
         public virtual void Write(byte[] bytes)
         {
-            _writeTimer.Stop();
-            _writer.Write(bytes);
-            _bytesWritten += bytes.Length;
-            if (_bytesWritten >= 200)
+            
+            _flushTimer.Stop();
+            int bytePointer = 0;
+            int bytesLeft = bytes.Length;
+            bool hasFlushed = false;
+            while (bytesLeft > 0)
+            {
+                int count = Math.Min(_maxBytesPerWrite, bytesLeft);
+                _writer.Write(bytes, bytePointer, count);
+                _bytesWritten += count;
+                if (_bytesWritten >= 200)
+                {
+                    // Immediately trigger a flush before proceeding so the output buffer will not be delayed.
+                    hasFlushed = true;
+                    Flush(null, null);
+                }
+                bytePointer += count;
+                bytesLeft -= count;
+            }
+            if (!hasFlushed)
+            {
+                _flushTimer.Start();
+            }
+        }
             {
                 // Immediately trigger a flush before proceeding so the output buffer will not be delayed.
                 Flush(null, null);
