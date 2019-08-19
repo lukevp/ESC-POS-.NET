@@ -35,11 +35,11 @@ namespace ESCPOS_NET.ConsoleTest
                 {
                     while (!comPort.StartsWith("COM"))
                     { 
-                        Console.Write("COM Port (eg. COM20): ");
+                        Console.Write("COM Port (eg. COM2): ");
                         comPort = Console.ReadLine();
                         if (string.IsNullOrWhiteSpace(comPort))
                         {
-                            comPort = "COM20";
+                            comPort = "COM2";
                         }
                     }
                     Console.Write("Baud Rate (eg. 115200): ");
