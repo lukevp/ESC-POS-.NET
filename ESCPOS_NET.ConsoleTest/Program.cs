@@ -96,7 +96,7 @@ namespace ESCPOS_NET.ConsoleTest
                 "Full Receipt",
                 "Images",
                 "Legacy Images",
-                "Juliogamasso-Test"
+                "Large Byte Arrays"
             };
             while (true)
             {
@@ -158,7 +158,61 @@ namespace ESCPOS_NET.ConsoleTest
                         printer.Write(Tests.Images(e, true));
                         break;
                     case 8:
-                        printer.Write(File.ReadAllBytes("test-files/output-juliogamasso.bin"));
+                        try
+                        {
+                            Tests.TestLargeByteArrays(e);
+
+                            // If tests above pass, we know we can safely use memory printer.
+
+                            var kitten = e.PrintImage(File.ReadAllBytes("images/kitten.jpg"), true, false, 500);
+                            var cube = e.PrintImage(File.ReadAllBytes("images/Portal_Companion_Cube.jpg"), true, false, 500);
+
+                            var mp = new MemoryPrinter();
+                            mp.Write(e.Initialize());
+                            mp.Write(e.Enable());
+                            mp.Write(e.CenterAlign());
+                            mp.Write(kitten);
+                            //mp.Write(e.PrintImage(File.ReadAllBytes("images/Portal_Companion_Cube.jpg"), true, false, 500));
+                            //mp.Write(e.PrintImage(File.ReadAllBytes("images/Portal_Companion_Cube.jpg"), true, false, 500));
+                            var result = mp.GetAllData();
+
+
+                            var mp2 = new MemoryPrinter();
+                            mp2.Write(e.Initialize());
+                            mp2.Write(e.Enable());
+                            mp2.Write(e.CenterAlign());
+                            for (var c = 0; c < 15; c++)
+                            {
+                                //mp2.Write(e.FeedLines(3));
+                                //mp2.Write(e.PrintLine("Done Feeding."));
+                                mp2.Write(kitten);
+                                //mp2.Write(e.FeedLines(3));
+                                //mp2.Write(e.PrintLine("Done Feeding."));
+                            }
+                            var result2 = mp2.GetAllData();
+                            printer.Write(result2);
+
+                            /*
+                            int iter = 0;
+                            while (iter < result2.Length)
+                            {
+                                if (result2[iter] != result[iter % result.Length])
+                                {
+                                    Console.WriteLine($"Mismatch at : {iter}");
+                                }
+                                iter += 1;
+                            }*/
+
+
+                            //var t = Task.Run(() => printer.Write(result2));
+                            //t.Wait();
+                            //var sleep = Task.Delay(3000);
+                            //sleep.Wait();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine($"Aborting print due to test failure. Exception: {e?.Message}, Stack Trace: {e?.GetBaseException()?.StackTrace}");
+                        }
                         break;
                     default:
                         Console.WriteLine("Invalid entry.");
