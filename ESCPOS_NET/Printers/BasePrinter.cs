@@ -8,7 +8,7 @@ using System.Timers;
 
 namespace ESCPOS_NET
 {
-    public abstract partial class BasePrinter
+    public abstract partial class BasePrinter : IDisposable
     {
         public PrinterStatus Status = null;
         public event EventHandler StatusChanged;
@@ -22,7 +22,7 @@ namespace ESCPOS_NET
 
         public BasePrinter()
         {
-            _flushTimer = new System.Timers.Timer(20);
+            _flushTimer = new System.Timers.Timer(50);
             _flushTimer.Elapsed += Flush;
             _flushTimer.AutoReset = false;
         }
@@ -139,6 +139,34 @@ namespace ESCPOS_NET
             StatusChanged?.Invoke(this, Status);
         }
 
+        // ~~~START~~~ IDisposable
+        // Flag: Has Dispose already been called?
+        bool disposed = false;
+
+        protected virtual void OverridableDispose() // This method should only be called by the Dispose method.  // It allows synchronous disposing of derived class dependencies with base class disposes.
+        {
+        }
+        public virtual void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+            if (disposing)
+            {
+                _readThread?.Abort();
+                _writer?.Close();
+                _writer?.Dispose();
+                _reader?.Close();
+                _reader?.Dispose();
+                OverridableDispose();
+            }
+            disposed = true;
+        }
+        // ~~~END~~~ IDisposable
         private void TryUpdateInkStatus()
         {
             throw new NotImplementedException();
