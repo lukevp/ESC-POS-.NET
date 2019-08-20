@@ -1,6 +1,6 @@
-﻿using RJCP.IO.Ports;
-using System;
+﻿using System;
 using System.IO;
+using System.IO.Ports;
 using System.Threading.Tasks;
 
 namespace ESCPOS_NET
