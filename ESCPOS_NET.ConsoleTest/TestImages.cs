@@ -59,13 +59,11 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintLine("Test 300px image in GIF format"),
             e.PrintLine("-- pd-logo-300.jpg --"),
             e.PrintImage(File.ReadAllBytes("images/pd-logo-300.gif"), true, isLegacy),
-            e.PrintLine("Test full color image converted to black and white"),
             e.PrintLine("Test full color image converted"),
-            e.PrintLine("to black and white"),
+            e.PrintLine("to black and white and interpolated"),
             e.PrintLine("-- kitten.jpg --"),
             e.PrintImage(File.ReadAllBytes("images/kitten.jpg"), true, isLegacy, 500),
             e.PrintLine("-- portal companion cube.jpg --"),
-            e.PrintImage(File.ReadAllBytes("images/Portal_Companion_Cube.jpg"), true, isLegacy, 500),
-        );
+            e.PrintImage(File.ReadAllBytes("images/Portal_Companion_Cube.jpg"), true, isLegacy, 500));
     }
 }
