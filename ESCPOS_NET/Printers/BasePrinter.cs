@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace ESCPOS_NET
@@ -17,7 +18,7 @@ namespace ESCPOS_NET
         protected System.Timers.Timer _flushTimer;
         protected Thread _readThread;
         protected ConcurrentQueue<byte> _readBuffer = new ConcurrentQueue<byte>();
-        protected int _bytesWritten = 0;
+        protected int _bytesWrittenSinceLastFlush = 0;
         private readonly int _maxBytesPerWrite = 15000; // max byte chunks to write at once.
 
         public BasePrinter()
@@ -26,7 +27,9 @@ namespace ESCPOS_NET
             _flushTimer.Elapsed += Flush;
             _flushTimer.AutoReset = false;
         }
+        private byte[] _readAsyncBuffer = new byte[1024];
 
+        public virtual void HasDataToRead
         public virtual void Read()
         {
             while (true)
@@ -35,8 +38,13 @@ namespace ESCPOS_NET
                 {
                     // Sometimes the serial port lib will throw an exception and read past the end of the queue if a
                     // status changes while data is being written.  We just ignore these bytes.
-                    var b = _reader.ReadByte();
-                    _readBuffer.Enqueue(b);
+                    _readAsyncBuffer = new byte[1024];
+                    var bytesRead = _reader.BaseStream(_readAsyncBuffer, 0, 1024).Result;
+                    for (int i = 0; i < bytesRead; i++)
+                    {
+                        var b = _readAsyncBuffer[i];
+                        _readBuffer.Enqueue(b);
+                    }
                     DataAvailable();
                 }
                 catch { }
@@ -45,8 +53,6 @@ namespace ESCPOS_NET
 
         public virtual void Write(byte[] bytes)
         {
-            
-            _flushTimer.Stop();
             int bytePointer = 0;
             int bytesLeft = bytes.Length;
             bool hasFlushed = false;
@@ -54,8 +60,8 @@ namespace ESCPOS_NET
             {
                 int count = Math.Min(_maxBytesPerWrite, bytesLeft);
                 _writer.Write(bytes, bytePointer, count);
-                _bytesWritten += count;
-                if (_bytesWritten >= 200)
+                _bytesWrittenSinceLastFlush += count;
+                if (_bytesWrittenSinceLastFlush >= 200)
                 {
                     // Immediately trigger a flush before proceeding so the output buffer will not be delayed.
                     hasFlushed = true;
@@ -69,20 +75,11 @@ namespace ESCPOS_NET
                 _flushTimer.Start();
             }
         }
-            {
-                // Immediately trigger a flush before proceeding so the output buffer will not be delayed.
-                Flush(null, null);
-            }
-            else
-            {
-                _writeTimer.Start();
-            }
-        }
 
         protected virtual void Flush(object sender, ElapsedEventArgs e)
         {
-            _bytesWritten = 0;
-            _writeTimer.Stop();
+            _bytesWrittenSinceLastFlush = 0;
+            _flushTimer.Stop();
             _writer.Flush();
         }
 
