@@ -1,11 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace ESCPOS_NET.Emitters
 {
 
     public abstract partial class BaseCommandEmitter : ICommandEmitter
     {
+        private Encoding ibm858;
+
+        public BaseCommandEmitter()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            ibm858 = Encoding.GetEncoding("IBM00858");
+        }
+
         /* Printing Commands */
         public byte[] Print(string data)
         {
@@ -14,8 +23,7 @@ namespace ESCPOS_NET.Emitters
             data = data.Replace("\r\n", "\n");
             data = data.Replace("\r", "\n");
 
-            // TODO: Sanitize...
-            return data.ToCharArray().Select(x => (byte)x).ToArray();
+            return ibm858.GetBytes(data);
         }
 
         public byte[] PrintLine(string line)

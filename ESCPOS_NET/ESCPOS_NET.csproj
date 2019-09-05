@@ -18,6 +18,7 @@ Allows creating receipts with all common functionality supported.</Description>
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
     <PackageReference Include="System.IO.Ports" Version="4.6.0-preview9.19421.4" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.5.1" />
   </ItemGroup>
 
 </Project>
