@@ -56,7 +56,6 @@ namespace ESCPOS_NET
 
         public void Dispose()
         {
-            _reader.Close();
             _serialPort.Close();
         }
     }
