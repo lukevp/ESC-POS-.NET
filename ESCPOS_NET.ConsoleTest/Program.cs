@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ESCPOS_NET.ConsoleTest
 {
@@ -131,8 +132,8 @@ namespace ESCPOS_NET.ConsoleTest
                 { 
                     printer.StartMonitoring();
                 }
-                Setup();
-                printer.Write(e.PrintLine($"== [ Start {testCases[choice - 1]} ] =="));
+                Setup(monitor);
+                printer?.Write(e.PrintLine($"== [ Start {testCases[choice - 1]} ] =="));
 
                 switch (choice)
                 {
@@ -219,9 +220,9 @@ namespace ESCPOS_NET.ConsoleTest
                         break;
                 }
 
-                Setup();
-                printer.Write(e.PrintLine($"== [ End {testCases[choice - 1]} ] =="));
-                printer.Write(e.PartialCutAfterFeed(5));
+                Setup(monitor);
+                printer?.Write(e.PrintLine($"== [ End {testCases[choice - 1]} ] =="));
+                printer?.Write(e.PartialCutAfterFeed(5));
 
                 //TestCutter();
                 //TestMultiLineWrite();
@@ -241,13 +242,21 @@ namespace ESCPOS_NET.ConsoleTest
             Console.WriteLine($"Printer Online Status: {status.IsPrinterOnline}");
             Console.WriteLine(JsonConvert.SerializeObject(status));
         }
+        private static bool _hasEnabledStatusMonitoring = false;
 
-        static void Setup()
+        static void Setup(bool enableStatusBackMonitoring)
         {
-            printer.Write(e.Initialize());
-            printer.Write(e.Enable());
-            printer.Write(e.EnableAutomaticStatusBack());
-            printer.StatusChanged += StatusChanged;
+            if (printer != null)
+            {
+                printer?.Write(e.Initialize());
+                printer?.Write(e.Enable());
+                if (enableStatusBackMonitoring && !_hasEnabledStatusMonitoring)
+                { 
+                    printer.Write(e.EnableAutomaticStatusBack());
+                    printer.StatusChanged += StatusChanged;
+                    _hasEnabledStatusMonitoring = true;
+                }
+            }
         }
 
         /*
