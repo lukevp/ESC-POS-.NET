@@ -15,10 +15,8 @@ Allows creating receipts with all common functionality supported.</Description>
     <PackageTags>epson thermal receipt printing esc pos escpos escp</PackageTags>
     <Version>0.4.0</Version>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="SerialPortStream" Version="2.2.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0006" />
+    <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
   </ItemGroup>
 
 </Project>

@@ -1,11 +1,9 @@
-﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Advanced;
-using System.Collections.Generic;
-using System.Linq;
-using ESCPOS_NET.Utilities;
+﻿using ESCPOS_NET.Utilities;
 using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
 
 namespace ESCPOS_NET.Emitters
 {
@@ -61,17 +59,16 @@ namespace ESCPOS_NET.Emitters
                     break;
             }
 
-            using (Image<Rgba32> img = Image.Load(image))
-            {
+            using (var originalImg = Image.FromStream(new MemoryStream(image))) {
+                var img = (Bitmap) originalImg;
                 int width = img.Width;
                 int height = img.Height;
                 // Use native width/height of image without resizing if maxWidth is default value.
-                if (maxWidth != -1)
-                {
+                if (maxWidth != -1) {
                     width = maxWidth;
                     // Get closest height that's the same aspect ratio as the width.
                     height = (int)(maxWidth * (Convert.ToDouble(img.Height) / img.Width));
-                    img.Mutate(x => x.Resize(width, height));
+                    img = ResizeImage(img, width, height);
                 }
                 byte widthL = (byte)(width);
                 byte widthH = (byte)(width >> 8);
@@ -82,20 +79,16 @@ namespace ESCPOS_NET.Emitters
                 // TODO: test making a List<byte> if it's faster than using ByteArrayBuilder.
 
                 // Bit pack every 8 horizontal bits into a single byte.
-                for (int y = 0; y < img.Height; y++)
-                {
-                    Span<Rgba32> pixelRowSpan = img.GetPixelRowSpan(y);
+                for (int y = 0; y < img.Height; y++) {
                     byte buffer = 0x00;
                     int bufferCount = 7;
-                    for (int x = 0; x < img.Width; x++)
-                    {
+                    for (int x = 0; x < img.Width; x++) {
                         // Determine if pixel should be colored in.
-                        if ((0.30 * pixelRowSpan[x].R) + (0.59 * pixelRowSpan[x].G) + (0.11 * pixelRowSpan[x].B) <= 127)
-                        {
+                        var pixel = img.GetPixel(x, y);
+                        if ((0.30 * pixel.R) + (0.59 * pixel.G) + (0.11 * pixel.B) <= 127) {
                             buffer |= (byte)(0x01 << bufferCount);
                         }
-                        if (bufferCount == 0)
-                        {
+                        if (bufferCount == 0) {
                             bufferCount = 8;
                             imageCommand.Append(new byte[] { buffer });
                             buffer = 0x00;
@@ -103,8 +96,7 @@ namespace ESCPOS_NET.Emitters
                         bufferCount -= 1;
                     }
                     // For images not divisible by 8
-                    if (bufferCount != 7)
-                    {
+                    if (bufferCount != 7) {
                         imageCommand.Append(new byte[] { buffer });
                     }
                 }
@@ -126,10 +118,40 @@ namespace ESCPOS_NET.Emitters
             response.Append(printCommandBytes);
             return response.ToArray();
         }
+
         public byte[] PrintImage(byte[] image, bool isHiDPI, int maxWidth = -1, int color = 1)
         {
             return ByteSplicer.Combine(SetImageDensity(isHiDPI), BufferImage(image, maxWidth, color), WriteImageFromBuffer());
-            
+        }
+
+        /// <summary>
+        /// Resize the image to the specified width and height.
+        /// See https://stackoverflow.com/a/24199315/518491
+        /// </summary>
+        /// <param name="image">The image to resize.</param>
+        /// <param name="width">The width to resize to.</param>
+        /// <param name="height">The height to resize to.</param>
+        /// <returns>The resized image.</returns>
+        public static Bitmap ResizeImage(Image image, int width, int height) {
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+
+            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            using (var graphics = Graphics.FromImage(destImage)) {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes()) {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            return destImage;
         }
     }
 }
