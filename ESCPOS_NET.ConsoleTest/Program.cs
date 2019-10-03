@@ -245,13 +245,17 @@ namespace ESCPOS_NET.ConsoleTest
         {
             if (printer != null)
             {
-                printer?.Write(e.Initialize());
-                printer?.Write(e.Enable());
-                if (enableStatusBackMonitoring && !_hasEnabledStatusMonitoring)
-                { 
-                    printer.Write(e.EnableAutomaticStatusBack());
+                // Only register status monitoring once.
+                if (!_hasEnabledStatusMonitoring)
+                {
                     printer.StatusChanged += StatusChanged;
                     _hasEnabledStatusMonitoring = true;
+                }
+                printer?.Write(e.Initialize());
+                printer?.Write(e.Enable());
+                if (enableStatusBackMonitoring)
+                {
+                    printer.Write(e.EnableAutomaticStatusBack());
                 }
             }
         }
