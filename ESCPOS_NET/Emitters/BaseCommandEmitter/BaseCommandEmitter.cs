@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace ESCPOS_NET.Emitters
+﻿namespace ESCPOS_NET.Emitters
 {
     public static class Cmd
     {
@@ -18,6 +15,9 @@ namespace ESCPOS_NET.Emitters
     {
         public static readonly byte StyleMode = 0x21;
         public static readonly byte Alignment = 0x61;
+        public static readonly byte ReversePrintMode = 0x42;
+        public static readonly byte RightCharacterSpacing = 0x20;
+        public static readonly byte UpsideDownMode = 0x7B;
     }
     public static class Whitespace
     {

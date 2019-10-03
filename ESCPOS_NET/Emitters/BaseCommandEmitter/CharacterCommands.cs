@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace ESCPOS_NET.Emitters
+﻿namespace ESCPOS_NET.Emitters
 {
     public abstract partial class BaseCommandEmitter : ICommandEmitter
     {
@@ -10,5 +7,6 @@ namespace ESCPOS_NET.Emitters
         public byte[] LeftAlign() => new byte[] { Cmd.ESC, Chars.Alignment, (byte)Align.Left };
         public byte[] CenterAlign() => new byte[] { Cmd.ESC, Chars.Alignment, (byte)Align.Center };
         public byte[] RightAlign() => new byte[] { Cmd.ESC, Chars.Alignment, (byte)Align.Right };
+        public byte[] RightCharacterSpacing(int spaceCount) => new byte[] { Cmd.ESC, Chars.RightCharacterSpacing, (byte)spaceCount };
     }
 }

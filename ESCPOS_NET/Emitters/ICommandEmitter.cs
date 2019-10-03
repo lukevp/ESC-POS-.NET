@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ESCPOS_NET.Emitters
+﻿namespace ESCPOS_NET.Emitters
 {
     public interface ICommandEmitter
     {
@@ -27,6 +23,9 @@ namespace ESCPOS_NET.Emitters
         byte[] LeftAlign();
         byte[] RightAlign();
         byte[] CenterAlign();
+        byte[] ReverseMode(bool activate);
+        byte[] RightCharacterSpacing(int spaceCount);
+        byte[] UpsideDownMode(bool activate);
 
         /* Action Commands */
         byte[] FullCut();
