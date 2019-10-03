@@ -45,7 +45,7 @@ namespace ESCPOS_NET
                 }
                 catch
                 {
-                    Thread.Sleep(150);
+                    Thread.Sleep(100);
                 }
             }
         }
