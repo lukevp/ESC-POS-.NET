@@ -18,7 +18,7 @@ Allows creating receipts with all common functionality supported.</Description>
 
   <ItemGroup>
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0006" />
-    <PackageReference Include="System.IO.Ports" Version="4.6.0-preview8.19405.3" />
+    <PackageReference Include="System.IO.Ports" Version="4.6.0" />
   </ItemGroup>
 
 </Project>
