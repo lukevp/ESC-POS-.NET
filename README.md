@@ -15,6 +15,9 @@ This package is available on NuGet @ https://www.nuget.org/packages/ESCPOS_NET/
 
 Please comment / DM / open issues and let me know how the library is working for you!
 
+## Contributors
+Thanks to all of our contributors working to make this the best .NET thermal printer library out there! @lukevp, @juliogamasso, @naaeef, @netgg93, @igorocampos
+
 # Implemented Commands
 
 ## Bit Image Commands
