@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 /* FROM: https://www.codeproject.com/Tips/674256/ByteArrayBuilder-a-StringBuilder-for-Bytes 2/9/2019 */
 namespace ESCPOS_NET.Utilities
     {
@@ -84,6 +86,18 @@ namespace ESCPOS_NET.Utilities
         public ByteArrayBuilder Append(byte[] b)
         {
             AddBytes(b);
+            return this;
+        }
+
+        public ByteArrayBuilder Append(byte b)
+        {
+            AddBytes(new byte[] { b });
+            return this;
+        }
+
+        public ByteArrayBuilder Append(IEnumerable<byte> b)
+        {
+            AddBytes(b.ToArray());
             return this;
         }
 
