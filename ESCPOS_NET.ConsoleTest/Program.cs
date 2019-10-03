@@ -36,11 +36,11 @@ namespace ESCPOS_NET.ConsoleTest
                 {
                     while (!comPort.StartsWith("COM"))
                     { 
-                        Console.Write("COM Port (eg. COM2): ");
+                        Console.Write("COM Port (eg. COM5): ");
                         comPort = Console.ReadLine();
                         if (string.IsNullOrWhiteSpace(comPort))
                         {
-                            comPort = "COM2";
+                            comPort = "COM5";
                         }
                     }
                     Console.Write("Baud Rate (eg. 115200): ");
@@ -224,9 +224,6 @@ namespace ESCPOS_NET.ConsoleTest
                 printer?.Write(e.PrintLine($"== [ End {testCases[choice - 1]} ] =="));
                 printer?.Write(e.PartialCutAfterFeed(5));
 
-                //TestCutter();
-                //TestMultiLineWrite();
-                //TestHEBReceipt();
                 // TODO: write a sanitation check.
                 // TODO: make DPI to inch conversion function
                 // TODO: full cuts and reverse feeding not implemented on epson...  should throw exception?
