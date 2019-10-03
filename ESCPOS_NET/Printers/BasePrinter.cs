@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -27,27 +28,25 @@ namespace ESCPOS_NET
             _flushTimer.Elapsed += Flush;
             _flushTimer.AutoReset = false;
         }
-        private byte[] _readAsyncBuffer = new byte[1024];
-
-        public virtual void HasDataToRead
         public virtual void Read()
         {
             while (true)
             {
                 try
                 {
-                    // Sometimes the serial port lib will throw an exception and read past the end of the queue if a
-                    // status changes while data is being written.  We just ignore these bytes.
-                    _readAsyncBuffer = new byte[1024];
-                    var bytesRead = _reader.BaseStream(_readAsyncBuffer, 0, 1024).Result;
-                    for (int i = 0; i < bytesRead; i++)
+                    if (_monitoring)
                     {
-                        var b = _readAsyncBuffer[i];
+                        // Sometimes the serial port lib will throw an exception and read past the end of the queue if a
+                        // status changes while data is being written.  We just ignore these bytes.
+                        var b = _reader.ReadByte();
                         _readBuffer.Enqueue(b);
+                        DataAvailable();
                     }
-                    DataAvailable();
                 }
-                catch { }
+                catch
+                {
+                    Thread.Sleep(150);
+                }
             }
         }
 
@@ -85,14 +84,18 @@ namespace ESCPOS_NET
 
         public virtual void StartMonitoring()
         {
+            if (_readThread == null)
+            {
+                _readThread = new Thread(new ThreadStart(Read));
+                _readThread.Start();
+            }
             _readBuffer = new ConcurrentQueue<byte>();
-            _readThread = new Thread(new ThreadStart(Read));
-            _readThread.Start();
+            _monitoring = true;
         }
 
         public virtual void StopMonitoring()
         {
-            _readThread.Abort();
+            _monitoring = false;
             _readBuffer = new ConcurrentQueue<byte>();
         }
 
@@ -111,6 +114,7 @@ namespace ESCPOS_NET
             }
         }
 
+        private bool _monitoring = false;
 
         private void TryUpdatePrinterStatus(byte[] bytes)
         {
@@ -138,7 +142,7 @@ namespace ESCPOS_NET
 
         // ~~~START~~~ IDisposable
         // Flag: Has Dispose already been called?
-        bool disposed = false;
+        private bool disposed = false;
 
         protected virtual void OverridableDispose() // This method should only be called by the Dispose method.  // It allows synchronous disposing of derived class dependencies with base class disposes.
         {
