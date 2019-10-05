@@ -9,10 +9,10 @@ namespace ESCPOS_NET.ConsoleTest
 {
     public static partial class Tests
     {
-        public static void TestLargeByteArrays(ICommandEmitter e)
+        public static byte[] TestLargeByteArrays(ICommandEmitter e)
         {
-            var kitten = e.PrintImage(File.ReadAllBytes("images/kitten.jpg"), true, false, 500);
-            var cube = e.PrintImage(File.ReadAllBytes("images/Portal_Companion_Cube.jpg"), true, false, 500);
+            var kitten = e.PrintImage(File.ReadAllBytes("images/kitten.jpg"), true, true, 500);
+            var cube = e.PrintImage(File.ReadAllBytes("images/Portal_Companion_Cube.jpg"), true, true, 500);
             var expectedResult = ByteSplicer.Combine(
                 e.CenterAlign(),
                 kitten,
@@ -100,6 +100,8 @@ namespace ESCPOS_NET.ConsoleTest
                 Console.WriteLine("FilePrinter: Errors occured during testing, aborting!");
                 throw new ArgumentException();
             }
+
+            return expectedResult;
         }
     }
 }

@@ -161,54 +161,7 @@ namespace ESCPOS_NET.ConsoleTest
                     case 8:
                         try
                         {
-                            Tests.TestLargeByteArrays(e);
-
-                            // If tests above pass, we know we can safely use memory printer.
-
-                            var kitten = e.PrintImage(File.ReadAllBytes("images/kitten.jpg"), true, false, 500);
-                            var cube = e.PrintImage(File.ReadAllBytes("images/Portal_Companion_Cube.jpg"), true, false, 500);
-
-                            var mp = new MemoryPrinter();
-                            mp.Write(e.Initialize());
-                            mp.Write(e.Enable());
-                            mp.Write(e.CenterAlign());
-                            mp.Write(kitten);
-                            //mp.Write(e.PrintImage(File.ReadAllBytes("images/Portal_Companion_Cube.jpg"), true, false, 500));
-                            //mp.Write(e.PrintImage(File.ReadAllBytes("images/Portal_Companion_Cube.jpg"), true, false, 500));
-                            var result = mp.GetAllData();
-
-
-                            var mp2 = new MemoryPrinter();
-                            mp2.Write(e.Initialize());
-                            mp2.Write(e.Enable());
-                            mp2.Write(e.CenterAlign());
-                            for (var c = 0; c < 15; c++)
-                            {
-                                //mp2.Write(e.FeedLines(3));
-                                //mp2.Write(e.PrintLine("Done Feeding."));
-                                mp2.Write(kitten);
-                                //mp2.Write(e.FeedLines(3));
-                                //mp2.Write(e.PrintLine("Done Feeding."));
-                            }
-                            var result2 = mp2.GetAllData();
-                            printer.Write(result2);
-
-                            /*
-                            int iter = 0;
-                            while (iter < result2.Length)
-                            {
-                                if (result2[iter] != result[iter % result.Length])
-                                {
-                                    Console.WriteLine($"Mismatch at : {iter}");
-                                }
-                                iter += 1;
-                            }*/
-
-
-                            //var t = Task.Run(() => printer.Write(result2));
-                            //t.Wait();
-                            //var sleep = Task.Delay(3000);
-                            //sleep.Wait();
+                            printer.Write(Tests.TestLargeByteArrays(e));
                         }
                         catch (Exception e)
                         {
