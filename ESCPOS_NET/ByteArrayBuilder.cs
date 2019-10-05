@@ -75,28 +75,24 @@ namespace ESCPOS_NET.Utilities
         #endregion
 
         #region Public Methods
-        /// <summary>
-        /// Adds an array of bytes to an array
-        /// </summary>
-        /// <param name="b">Value to append to existing builder data</param>
-        /// <param name="addLength">
-        /// If true, the length is added before the value.
-        /// This allows extraction of individual elements back to the original input form.
-        /// </param>
-        public ByteArrayBuilder Append(byte[] b)
-        {
-            AddBytes(b);
-            return this;
-        }
-
         public ByteArrayBuilder Append(byte b)
         {
             AddBytes(new byte[] { b });
             return this;
         }
 
+        /// <summary>
+        /// Adds an IEnumerable of bytes to an array
+        /// </summary>
+        /// <param name="b">Value to append to existing builder data</param>
+        /// </param>
         public ByteArrayBuilder Append(IEnumerable<byte> b)
         {
+            if (b is byte[])
+            {
+                AddBytes((byte[])b);
+                return this;
+            }
             AddBytes(b.ToArray());
             return this;
         }
