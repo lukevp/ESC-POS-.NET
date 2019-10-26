@@ -1,6 +1,6 @@
 ﻿namespace ESCPOS_NET.Emitters
 {
-    public enum BarcodeType
+    public enum BarcodeType // All from Function B
     {
         UPC_A                       = 0x41,
         UPC_E                       = 0x42,

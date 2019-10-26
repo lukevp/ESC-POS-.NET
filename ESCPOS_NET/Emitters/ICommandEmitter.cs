@@ -44,7 +44,7 @@
         byte[] EnableAutomaticInkStatusBack();
 
         /* Barcode Commands */
-        byte[] PrintBarcode(BarcodeType type, string barcode);
+        byte[] PrintBarcode(BarcodeType type, string barcode, BarcodeCode code = BarcodeCode.CODE_B);
         byte[] SetBarcodeHeightInDots(int height);
         byte[] SetBarWidth(BarWidth width);
         byte[] SetBarLabelPosition(BarLabelPrintPosition position);

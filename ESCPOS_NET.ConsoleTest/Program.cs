@@ -93,6 +93,7 @@ namespace ESCPOS_NET.ConsoleTest
                 "Printing",
                 "Line Spacing",
                 "Barcode Styles",
+                "Barcode Types",
                 "Text Styles",
                 "Full Receipt",
                 "Images",
@@ -147,18 +148,21 @@ namespace ESCPOS_NET.ConsoleTest
                         printer.Write(Tests.BarcodeStyles(e));
                         break;
                     case 4:
-                        printer.Write(Tests.TextStyles(e));
+                        printer.Write(Tests.BarcodeTypes(e));
                         break;
                     case 5:
-                        printer.Write(Tests.Receipt(e));
+                        printer.Write(Tests.TextStyles(e));
                         break;
                     case 6:
-                        printer.Write(Tests.Images(e, false));
+                        printer.Write(Tests.Receipt(e));
                         break;
                     case 7:
-                        printer.Write(Tests.Images(e, true));
+                        printer.Write(Tests.Images(e, false));
                         break;
                     case 8:
+                        printer.Write(Tests.Images(e, true));
+                        break;
+                    case 9:
                         try
                         {
                             printer.Write(Tests.TestLargeByteArrays(e));
