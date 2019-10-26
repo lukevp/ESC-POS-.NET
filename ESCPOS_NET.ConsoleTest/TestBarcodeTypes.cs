@@ -29,33 +29,43 @@ namespace ESCPOS_NET.ConsoleTest
 
             e.PrintLine("GS1_128:"),
             e.PrintBarcode(BarcodeType.GS1_128, "(01)9501234567890*"),
+            e.PrintLine(),
 
             e.PrintLine("GS1_DATABAR_EXPANDED:"),
             e.PrintBarcode(BarcodeType.GS1_DATABAR_EXPANDED, "0001234567890"),
+            e.PrintLine(),
 
             e.PrintLine("GS1_DATABAR_LIMITED:"),
             e.PrintBarcode(BarcodeType.GS1_DATABAR_LIMITED, "0001234567890"),
+            e.PrintLine(),
 
             e.PrintLine("GS1_DATABAR_OMNIDIRECTIONAL:"),
             e.PrintBarcode(BarcodeType.GS1_DATABAR_OMNIDIRECTIONAL, "0001234567890"),
+            e.PrintLine(),
 
             e.PrintLine("GS1_DATABAR_TRUNCATED:"),
             e.PrintBarcode(BarcodeType.GS1_DATABAR_TRUNCATED, "0001234567890"),
+            e.PrintLine(),
 
             e.PrintLine("ITF:"),
             e.PrintBarcode(BarcodeType.ITF, "1234567895"),
+            e.PrintLine(),
 
             e.PrintLine("JAN13_EAN13:"),
             e.PrintBarcode(BarcodeType.JAN13_EAN13, "5901234123457"),
+            e.PrintLine(),
 
             e.PrintLine("JAN8_EAN8:"),
             e.PrintBarcode(BarcodeType.JAN8_EAN8, "96385074"),
+            e.PrintLine(),
 
             e.PrintLine("UPC_A:"),
             e.PrintBarcode(BarcodeType.UPC_A, "042100005264"),
+            e.PrintLine(),
 
             e.PrintLine("UPC_E:"),
-            e.PrintBarcode(BarcodeType.UPC_E, "425261")
+            e.PrintBarcode(BarcodeType.UPC_E, "425261"),
+            e.PrintLine()
 
         );
     }
