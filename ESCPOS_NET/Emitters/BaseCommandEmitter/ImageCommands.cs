@@ -1,11 +1,8 @@
-﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Advanced;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using ESCPOS_NET.Utilities;
 using System;
+using System.Drawing;
 
 namespace ESCPOS_NET.Emitters
 {
@@ -37,7 +34,7 @@ namespace ESCPOS_NET.Emitters
         {
             ByteArrayBuilder builder = new ByteArrayBuilder();
             byte dpiSetting = isHiDPI ? (byte)0x33 : (byte)0x32; // TODO: is this right??
-            byte[] baseCommand = new byte[] { 0x30, 0x31, dpiSetting, dpiSetting};
+            byte[] baseCommand = new byte[] { 0x30, 0x31, dpiSetting, dpiSetting };
             builder.Append(GetImageHeader(baseCommand.Length));
             builder.Append(baseCommand);
             return builder.ToArray();
@@ -61,17 +58,33 @@ namespace ESCPOS_NET.Emitters
                     break;
             }
 
-            using (Image<Rgba32> img = Image.Load(image))
+            Bitmap img = null, bmp = null;
+            try
             {
+                img = new Bitmap(new System.IO.MemoryStream(image), false);
                 int width = img.Width;
                 int height = img.Height;
                 // Use native width/height of image without resizing if maxWidth is default value.
                 if (maxWidth != -1)
                 {
                     width = maxWidth;
+
                     // Get closest height that's the same aspect ratio as the width.
                     height = (int)(maxWidth * (Convert.ToDouble(img.Height) / img.Width));
-                    img.Mutate(x => x.Resize(width, height));
+
+                    float scale = Math.Min((float)width / (float)img.Width, (float)height / (float)img.Height);
+                    bmp = new Bitmap((int)width, (int)height);
+                    var graph = Graphics.FromImage(bmp);
+
+                    var scaleWidth = (int)(img.Width * scale);
+                    var scaleHeight = (int)(img.Height * scale);
+
+                    var brush = new SolidBrush(Color.White);
+                    graph.FillRectangle(brush, new RectangleF(0, 0, width, height));
+                    graph.DrawImage(img, ((int)width - scaleWidth) / 2, ((int)height - scaleHeight) / 2, scaleWidth, scaleHeight);
+                    img.Dispose();
+                    img = bmp;
+                    //img.Mutate(x => x.Resize(width, height));
                 }
                 byte widthL = (byte)(width);
                 byte widthH = (byte)(width >> 8);
@@ -84,13 +97,16 @@ namespace ESCPOS_NET.Emitters
                 // Bit pack every 8 horizontal bits into a single byte.
                 for (int y = 0; y < img.Height; y++)
                 {
-                    Span<Rgba32> pixelRowSpan = img.GetPixelRowSpan(y);
+                    //Span<Rgba32> pixelRowSpan = img.GetPixelRowSpan(y);
                     byte buffer = 0x00;
                     int bufferCount = 7;
                     for (int x = 0; x < img.Width; x++)
                     {
                         // Determine if pixel should be colored in.
-                        if ((0.30 * pixelRowSpan[x].R) + (0.59 * pixelRowSpan[x].G) + (0.11 * pixelRowSpan[x].B) <= 127)
+                        //if ((0.30 * pixelRowSpan[x].R) + (0.59 * pixelRowSpan[x].G) + (0.11 * pixelRowSpan[x].B) <= 127)
+                        var pixel = img.GetPixel(x, y);
+
+                        if ((0.30 * pixel.R) + (0.59 * pixel.G) + (0.11 * pixel.B) <= 127)
                         {
                             buffer |= (byte)(0x01 << bufferCount);
                         }
@@ -109,6 +125,18 @@ namespace ESCPOS_NET.Emitters
                     }
                 }
             }
+            finally
+            {
+                if (img != null)
+                    img.Dispose();
+
+                if (bmp != null)
+                    bmp.Dispose();
+            }
+
+
+
+
             // Load image to print buffer
             byte[] imageCommandBytes = imageCommand.ToArray();
             ByteArrayBuilder response = new ByteArrayBuilder();
@@ -129,7 +157,7 @@ namespace ESCPOS_NET.Emitters
         public byte[] PrintImage(byte[] image, bool isHiDPI, int maxWidth = -1, int color = 1)
         {
             return ByteSplicer.Combine(SetImageDensity(isHiDPI), BufferImage(image, maxWidth, color), WriteImageFromBuffer());
-            
+
         }
     }
 }

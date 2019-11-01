@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "ESCPOS_NET.ConsoleTest": {
+      "commandName": "Project"
+    }
+  }
+}
