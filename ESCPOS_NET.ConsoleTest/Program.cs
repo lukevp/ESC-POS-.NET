@@ -30,22 +30,39 @@ namespace ESCPOS_NET.ConsoleTest
 
             if (choice == 1)
             {
-                while (!comPort.StartsWith("COM"))
-                { 
-                    Console.Write("COM Port (eg. COM20): ");
+#if !NETFULL
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+#endif
+                    while (!comPort.StartsWith("COM"))
+                    {
+                        Console.Write("COM Port (eg. COM20): ");
+                        comPort = Console.ReadLine();
+                        if (string.IsNullOrWhiteSpace(comPort))
+                        {
+                            comPort = "COM20";
+                        }
+                    }
+                    Console.Write("Baud Rate (eg. 115200): ");
+                    baudRate = Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(baudRate))
+                    {
+                        baudRate = "115200";
+                    }
+                    printer = new SerialPrinter(comPort, int.Parse(baudRate));
+#if !NETFULL               
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Console.Write("File / virtual com path (eg. /dev/usb/lp0): ");
                     comPort = Console.ReadLine();
                     if (string.IsNullOrWhiteSpace(comPort))
                     {
-                        comPort = "COM20";
+                        comPort = "/dev/usb/lp0";
                     }
+                    printer = new FilePrinter(comPort);
                 }
-                Console.Write("Baud Rate (eg. 115200): ");
-                baudRate = Console.ReadLine();
-                if (string.IsNullOrWhiteSpace(baudRate))
-                {
-                    baudRate = "115200";
-                }
-                printer = new SerialPrinter(comPort, int.Parse(baudRate));
+#endif
             }
             else if (choice == 2)
             {

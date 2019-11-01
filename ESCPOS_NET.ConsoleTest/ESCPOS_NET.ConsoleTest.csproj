@@ -64,4 +64,8 @@
     </None>
   </ItemGroup>
 
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45'">
+    <DefineConstants>NET45;NETFULL</DefineConstants>
+  </PropertyGroup>
+
 </Project>
