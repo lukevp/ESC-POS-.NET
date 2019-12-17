@@ -47,6 +47,9 @@ Please comment / DM / open issues and let me know how the library is working for
 ## Status Commands
 * `GS a` Enable/disable Automatic Status Back (ASB)
 
+## Open Cash Drawer Commands
+* `ESC p 0` Open cash drawer pin 2
+* `ESC p 1` Open cash drawer pin 5
 
 ## Miscellaneous Commands
 * `ESC @` Initialize printer
