@@ -18,6 +18,10 @@
         byte[] Enable();
         byte[] Disable();
 
+        /* Cash Drawer Commands */
+        byte[] CashDrawerOpenPin2();
+        byte[] CashDrawerOpenPin5();
+
         /* Character Commands */
         byte[] SetStyles(PrintStyle style);
         byte[] LeftAlign();
