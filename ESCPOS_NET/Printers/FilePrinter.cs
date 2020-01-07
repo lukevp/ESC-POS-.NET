@@ -12,8 +12,9 @@ namespace ESCPOS_NET
         public FilePrinter(string filePath) : base()
         {
             _path = filePath;
-            _file = File.OpenWrite(filePath);
+            _file = File.Open(filePath, FileMode.Open);
             _writer = new BinaryWriter(_file);
+            _reader = new BinaryReader(_file);
         }
 
         ~FilePrinter()
