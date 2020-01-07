@@ -98,7 +98,9 @@ namespace ESCPOS_NET.ConsoleTest
                 "Full Receipt",
                 "Images",
                 "Legacy Images",
-                "Large Byte Arrays"
+                "Large Byte Arrays",
+                "Cash Drawer Pin2",
+                "Cash Drawer Pin5"
             };
             while (true)
             {
@@ -171,6 +173,12 @@ namespace ESCPOS_NET.ConsoleTest
                         {
                             Console.WriteLine($"Aborting print due to test failure. Exception: {e?.Message}, Stack Trace: {e?.GetBaseException()?.StackTrace}");
                         }
+                        break;
+                    case 10:
+                        printer.Write(Tests.CashDrawerOpenPin2(e));
+                        break;
+                    case 11:
+                        printer.Write(Tests.CashDrawerOpenPin5(e));
                         break;
                     default:
                         Console.WriteLine("Invalid entry.");
