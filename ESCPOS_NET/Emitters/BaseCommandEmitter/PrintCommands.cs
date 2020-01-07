@@ -10,6 +10,7 @@ namespace ESCPOS_NET.Emitters
         public byte[] Print(string data)
         {
             List<byte> outputBytes = new List<byte>();
+
             // Fix OSX or Windows-style newlines
             data = data.Replace("\r\n", "\n");
             data = data.Replace("\r", "\n");
