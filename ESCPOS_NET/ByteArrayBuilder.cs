@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 /* FROM: https://www.codeproject.com/Tips/674256/ByteArrayBuilder-a-StringBuilder-for-Bytes 2/9/2019 */
 namespace ESCPOS_NET.Utilities
     {
@@ -64,7 +65,6 @@ namespace ESCPOS_NET.Utilities
         {
         }
 
-        #region Public Methods
         public ByteArrayBuilder Append(byte b)
         {
             AddBytes(new byte[] { b });

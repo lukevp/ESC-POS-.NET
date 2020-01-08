@@ -94,7 +94,6 @@ namespace ESCPOS_NET.Emitters
 
 
                 // TODO: test making a List<byte> if it's faster than using ByteArrayBuilder.
-
                 double[] ditherErrorsNext = new double[width + 2];
                 // Bit pack every 8 horizontal bits into a single byte.
                 for (int y = 0; y < img.Height; y++)

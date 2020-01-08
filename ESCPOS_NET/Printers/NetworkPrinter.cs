@@ -1,11 +1,11 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
 namespace ESCPOS_NET
 {
-    public class NetworkPrinter : BasePrinter, IDisposable
+    public class NetworkPrinter : BasePrinter
     {
         private readonly IPEndPoint _endPoint;
         private Socket _socket;
@@ -25,7 +25,6 @@ namespace ESCPOS_NET
 
         public NetworkPrinter(string ipAddress, int port) : base()
         {
-
             _endPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
             Connect();
         }
@@ -35,13 +34,15 @@ namespace ESCPOS_NET
             _socket = new Socket(_endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _socket.Connect(_endPoint);
             _sockStream = new NetworkStream(_socket);
-            _writer = new BinaryWriter(_sockStream);
-            _reader = new BinaryReader(_sockStream);
+
+            // Need to review the paramaters set here
+            Writer = new BinaryWriter(_sockStream, new UTF8Encoding(), true);
+            Reader = new BinaryReader(_sockStream, new UTF8Encoding(), true);
         }
 
         ~NetworkPrinter()
         {
-            Dispose();
+            Dispose(false);
         }
 
         protected override void OverridableDispose()

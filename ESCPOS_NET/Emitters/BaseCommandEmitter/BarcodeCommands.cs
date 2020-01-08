@@ -1,4 +1,6 @@
 ﻿using ESCPOS_NET.DataValidation;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ESCPOS_NET.Emitters
 {

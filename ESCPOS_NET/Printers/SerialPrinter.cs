@@ -1,24 +1,24 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.IO.Ports;
 using System.Threading.Tasks;
 
 namespace ESCPOS_NET
 {
-    public class SerialPrinter : BasePrinter,  IDisposable
+    public class SerialPrinter : BasePrinter
     {
-        private SerialPort _serialPort { get; set; }
+        private SerialPort _serialPort;
+
         public SerialPrinter(string portName, int baudRate) : base()
         {
             _serialPort = new SerialPort(portName, baudRate);
             _serialPort.Open();
-            _writer = new BinaryWriter(_serialPort.BaseStream);
-            _reader = new BinaryReader(_serialPort.BaseStream);
+            Writer = new BinaryWriter(_serialPort.BaseStream);
+            Reader = new BinaryReader(_serialPort.BaseStream);
         }
 
         ~SerialPrinter()
         {
-            Dispose();
+            Dispose(false);
         }
 
         protected override void OverridableDispose()

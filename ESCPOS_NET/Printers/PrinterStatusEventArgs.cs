@@ -2,7 +2,7 @@
 
 namespace ESCPOS_NET
 {
-    public class PrinterStatus : EventArgs
+    public class PrinterStatusEventArgs : EventArgs
     {
         public bool IsWaitingForOnlineRecovery { get; set; }
         public bool IsPaperCurrentlyFeeding { get; set; }
@@ -17,5 +17,6 @@ namespace ESCPOS_NET
         public bool DidUnrecoverableErrorOccur { get; set; }
         public bool DidAutocutterErrorOccur { get; set; }
         public bool DidRecoverableNonAutocutterErrorOccur { get; set; }
+        public bool DeviceConnectionTimeout { get; set; }
     }
 }
