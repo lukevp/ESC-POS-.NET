@@ -3,7 +3,7 @@
 
 # Supported Platforms
 Desktop support: Windows, Linux, and Mac OSX!
-Mobile support (IP only): iOS and Android!  
+Mobile support (IP only): Xamarin.iOS, Xamarin.Android and UWP!
 Epson thermal receipt printers are supported, and most common functions such as test printing, styling, alignment, image printing, and barcode printing.
 BemaTech printers are also tested by some members of the community, @juliogamasso and @ivanmontilla.
 
