@@ -197,7 +197,7 @@ namespace ESCPOS_NET.ConsoleTest
 
         static void StatusChanged(object sender, EventArgs ps)
         {
-            var status = (PrinterStatus)ps;
+            var status = (PrinterStatusEventArgs)ps;
             Console.WriteLine($"Printer Online Status: {status.IsPrinterOnline}");
             Console.WriteLine(JsonConvert.SerializeObject(status));
         }
