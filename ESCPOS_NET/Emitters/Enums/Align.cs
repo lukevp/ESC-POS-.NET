@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ESCPOS_NET.Emitters
+﻿namespace ESCPOS_NET.Emitters
 {
     public enum Align
     {

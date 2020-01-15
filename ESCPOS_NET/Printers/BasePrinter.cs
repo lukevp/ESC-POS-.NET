@@ -24,7 +24,7 @@ namespace ESCPOS_NET
         protected ConcurrentQueue<byte> ReadBuffer { get; set; } = new ConcurrentQueue<byte>();
         protected int BytesWrittenSinceLastFlush { get; set; } = 0;
 
-        public BasePrinter()
+        protected BasePrinter()
         {
             FlushTimer = new System.Timers.Timer(50);
             FlushTimer.Elapsed += Flush;
@@ -207,7 +207,12 @@ namespace ESCPOS_NET
             StatusChanged?.Invoke(this, Status);
         }
 
-        public virtual void Dispose()
+        ~BasePrinter()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
         {            
             Dispose(true);
             GC.SuppressFinalize(this);
@@ -242,11 +247,6 @@ namespace ESCPOS_NET
                 OverridableDispose();
             }
             disposed = true;
-        }
-
-        private void TryUpdateInkStatus()
-        {
-            throw new NotImplementedException();
         }
     }
 }

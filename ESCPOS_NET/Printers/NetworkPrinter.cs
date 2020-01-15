@@ -40,11 +40,6 @@ namespace ESCPOS_NET
             Reader = new BinaryReader(_sockStream, new UTF8Encoding(), true);
         }
 
-        ~NetworkPrinter()
-        {
-            Dispose(false);
-        }
-
         protected override void OverridableDispose()
         {
             _sockStream?.Close();

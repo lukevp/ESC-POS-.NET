@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.IO.Ports;
 using System.Threading.Tasks;
 
@@ -14,11 +14,6 @@ namespace ESCPOS_NET
             _serialPort.Open();
             Writer = new BinaryWriter(_serialPort.BaseStream);
             Reader = new BinaryReader(_serialPort.BaseStream);
-        }
-
-        ~SerialPrinter()
-        {
-            Dispose(false);
         }
 
         protected override void OverridableDispose()
