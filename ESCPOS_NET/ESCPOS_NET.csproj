@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
@@ -13,12 +13,12 @@ Allows creating receipts with all common functionality supported.</Description>
     <RepositoryUrl>https://github.com/lukevp/ESC-POS-.NET</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>epson thermal receipt printing esc pos escpos escp</PackageTags>
-    <Version>0.4.0</Version>
+    <Version>1.0.0-beta</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SerialPortStream" Version="2.2.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0006" />
+    <PackageReference Include="System.IO.Ports" Version="4.6.0" />
   </ItemGroup>
 
 </Project>
