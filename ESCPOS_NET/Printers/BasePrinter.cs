@@ -26,18 +26,51 @@ namespace ESCPOS_NET
         protected Thread _readThread;
         protected ConcurrentQueue<byte> _readBuffer = new ConcurrentQueue<byte>();
         protected int _bytesWrittenSinceLastFlush = 0;
-        private readonly int _maxBytesPerWrite = 15000; // max byte chunks to write at once.
+
+        public int FlushBufferSize
+        {
+            get; private set;
+        }
+
+        // Max byte chunks to write at once.
+        public int MaxBytesPerWrite
+        {
+            get; private set;
+        }
+
+        public int FlushThreshold
+        {
+            get; private set;
+        }
 
         #region Constructor
 
         public BasePrinter()
         {
-            _flushTimer = new System.Timers.Timer(50);
+            // Default values;
+            this.FlushBufferSize = 200;
+            this.FlushThreshold = 50;
+
+            _flushTimer = new System.Timers.Timer(FlushThreshold);
             _flushTimer.Elapsed += Flush;
             _flushTimer.AutoReset = false;
         }
 
+        /// <summary>
+        /// Make it all configurable.
+        /// </summary>
+        /// <param name="flushBufferSize"></param>
+        /// <param name="maxBytes"></param>
+        public BasePrinter(int flushBufferSize, int maxBytes, int flushThreshold) : this()
+        {
+            this.MaxBytesPerWrite = maxBytes;
+            this.FlushBufferSize = flushBufferSize;
+            this.FlushThreshold = flushThreshold;
+        }
+
         #endregion
+
+        protected abstract void InitPrinter();
 
         /// <summary>
         /// Read
@@ -85,10 +118,10 @@ namespace ESCPOS_NET
 
             while (bytesLeft > 0)
             {
-                int count = Math.Min(_maxBytesPerWrite, bytesLeft);
+                int count = Math.Min(MaxBytesPerWrite, bytesLeft);
                 _writer.Write(bytes, bytePointer, count);
                 _bytesWrittenSinceLastFlush += count;
-                if (_bytesWrittenSinceLastFlush >= 200)
+                if (_bytesWrittenSinceLastFlush >= this.FlushBufferSize)
                 {
                     // Immediately trigger a flush before proceeding so the output buffer will not be delayed.
                     hasFlushed = true;

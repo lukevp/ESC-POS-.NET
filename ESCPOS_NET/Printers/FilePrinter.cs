@@ -19,6 +19,13 @@ namespace ESCPOS_NET
         public FilePrinter(string filePath) : base()
         {
             this._path = filePath;
+            this.InitPrinter();
+        }
+
+        #endregion
+
+        protected override void InitPrinter()
+        {
             try
             {
                 this._file = File.Open(this._path, FileMode.Open);
@@ -35,7 +42,18 @@ namespace ESCPOS_NET
             }
         }
 
-        #endregion
+        public override void Write(byte[] bytes)
+        {
+            if (!this._file.CanWrite || !this._writer.BaseStream.CanWrite)
+            {
+                this.InitPrinter();
+            }
+
+            base.Write(bytes);
+
+            this._writer.Close();
+            this._file.Close();
+        }
 
         #region Dispose
 

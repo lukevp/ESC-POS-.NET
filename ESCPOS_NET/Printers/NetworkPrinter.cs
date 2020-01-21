@@ -21,13 +21,13 @@ namespace ESCPOS_NET
         public NetworkPrinter(IPEndPoint endPoint) : base()
         {
             this._endPoint = endPoint;
-            this.Connect();
+            this.InitPrinter();
         }
 
         public NetworkPrinter(IPAddress ipAddress, int port) : base()
         {
             this._endPoint = new IPEndPoint(ipAddress, port);
-            this.Connect();
+            this.InitPrinter();
         }
 
         public NetworkPrinter(string ipAddress, int port) : base()
@@ -35,7 +35,7 @@ namespace ESCPOS_NET
             if (IPAddress.TryParse(ipAddress, out IPAddress address))
             {
                 this._endPoint = new IPEndPoint(address, port);
-                this.Connect();
+                this.InitPrinter();
             }
             else
             {
@@ -49,9 +49,26 @@ namespace ESCPOS_NET
 
         #endregion
 
+        /// <summary>
+        /// Override to ensure that the socket is connected.
+        /// </summary>
+        /// <param name="bytes"></param>
+        public override void Write(byte[] bytes)
+        {
+            if (!this._socket.Connected)
+            {
+                this.InitPrinter();
+            }
+  
+            base.Write(bytes);
+
+            this._socket.Close();
+        }
+
+
         #region Private Methods
 
-        private void Connect()
+        protected override void InitPrinter()
         {
             try
             {
