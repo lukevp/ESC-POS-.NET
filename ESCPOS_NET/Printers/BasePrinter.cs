@@ -14,9 +14,9 @@ namespace ESCPOS_NET
     	private bool disposed = false;
         private volatile bool _isMonitoring;
         private CancellationTokenSource _cancellationTokenSource;
-		private readonly int _maxBytesPerWrite = 15000; // max byte chunks to write at once.
-		
-		public PrinterStatusEventArgs Status { get; private set; } = null;
+        private readonly int _maxBytesPerWrite = 15000; // max byte chunks to write at once.
+        
+        public PrinterStatusEventArgs Status { get; private set; } = null;
         public event EventHandler StatusChanged;
         protected BinaryWriter Writer { get; set; }
         protected BinaryReader Reader { get; set; }
