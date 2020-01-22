@@ -51,6 +51,7 @@ namespace ESCPOS_NET
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Failed to reconnect: {ex.Message}");
+                throw;
             }
         }
 
