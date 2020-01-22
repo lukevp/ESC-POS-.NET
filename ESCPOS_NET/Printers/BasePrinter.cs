@@ -23,12 +23,18 @@ namespace ESCPOS_NET
         protected System.Timers.Timer FlushTimer { get; set; }
         protected ConcurrentQueue<byte> ReadBuffer { get; set; } = new ConcurrentQueue<byte>();
         protected int BytesWrittenSinceLastFlush { get; set; } = 0;
+        protected virtual bool IsConnected => false;
 
         protected BasePrinter()
         {
             FlushTimer = new System.Timers.Timer(50);
             FlushTimer.Elapsed += Flush;
             FlushTimer.AutoReset = false;
+        }
+
+        protected virtual void Reconnect()
+        {
+             // Implemented in the network printer
         }
 
         public virtual void Read()
@@ -59,8 +65,11 @@ namespace ESCPOS_NET
                 {
                     // Thrown if the printer times out the socket connection 
                     // default is 90 seconds
+                    Thread.Sleep(100);
+                    _isMonitoring = false;
                     DataAvailable(true);
                     Debug.WriteLine($"Read Exception: {ex.Message}");
+                    
                 }
                 catch (Exception ex)
                 {
@@ -160,13 +169,23 @@ namespace ESCPOS_NET
         {
             if (timeout)
             {
-                Status = new PrinterStatusEventArgs()
+                // try to reconnect
+                if (!IsConnected)
                 {
-                    DeviceConnectionTimeout = true,
-                };
+                    Reconnect();
+                }
 
-                StatusChanged?.Invoke(this, Status);
-                return;
+                // Test if re-connection worked
+                if (!IsConnected)
+                {
+                    Status = new PrinterStatusEventArgs()
+                    {
+                        DeviceConnectionTimeout = true,
+                    };
+
+                    StatusChanged?.Invoke(this, Status);
+                    return;
+                }
             }
 #if DEBUG
             var bytesToString = string.Empty;

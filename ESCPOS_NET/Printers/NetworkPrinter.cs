@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -10,6 +11,7 @@ namespace ESCPOS_NET
         private readonly IPEndPoint _endPoint;
         private Socket _socket;
         private NetworkStream _sockStream;
+        protected override bool IsConnected => !((_socket.Poll(1000, SelectMode.SelectRead) && (_socket.Available == 0)) || !_socket.Connected);
 
         public NetworkPrinter(IPEndPoint endPoint) : base()
         {
@@ -27,6 +29,29 @@ namespace ESCPOS_NET
         {
             _endPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
             Connect();
+        }
+
+        protected override void Reconnect()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("Trying to reconnect...");
+                StopMonitoring();
+                Writer?.Flush();
+                Writer?.Close();
+                Reader?.Close();
+
+                _sockStream?.Close();
+                _socket?.Close();
+
+                Connect();
+                System.Diagnostics.Debug.WriteLine("Reconnected!");
+                StartMonitoring();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to reconnect: {ex.Message}");
+            }
         }
 
         private void Connect()
