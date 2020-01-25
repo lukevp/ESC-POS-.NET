@@ -66,19 +66,28 @@ namespace ESCPOS_NET.ConsoleTest
             }
             else if (choice == 2)
             {
-                Console.Write("IP Address (eg. 192.168.1.240): ");
+                Console.Write("IP Address (eg. 192.168.0.51): ");
                 ip = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(ip))
                 {
-                    ip = "192.168.1.240";
+                    ip = "192.168.0.51";
                 }
-                Console.Write("TCP Port (eg. 9000): ");
+                Console.Write("TCP Port (eg. 9100): ");
                 networkPort = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(networkPort))
                 {
-                    networkPort = "9000";
+                    networkPort = "9100";
                 }
-                printer = new NetworkPrinter(ip, int.Parse(networkPort));
+
+                bool isBinary = false;
+                Console.Write("Is Binary? (y/n): ");
+                response = Console.ReadLine().Trim().ToLowerInvariant();
+                if ((response.Length >= 1 && response[0] == 'y'))
+                {
+                    isBinary = true;
+                }
+
+                printer = new NetworkPrinter(ip, int.Parse(networkPort), isBinary);
             }
 
             bool monitor = false;

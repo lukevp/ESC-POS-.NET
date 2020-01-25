@@ -14,27 +14,32 @@ namespace ESCPOS_NET
         private Socket _socket;
         private NetworkStream _sockStream;
 
+        private bool _IsBinary = true;
+
         #endregion
 
         #region Constructors
 
-        public NetworkPrinter(IPEndPoint endPoint) : base()
+        public NetworkPrinter(IPEndPoint endPoint, bool isBinary) : base()
         {
             this._endPoint = endPoint;
+            this._IsBinary = isBinary;
             this.InitPrinter();
         }
 
-        public NetworkPrinter(IPAddress ipAddress, int port) : base()
+        public NetworkPrinter(IPAddress ipAddress, int port, bool isBinary) : base()
         {
             this._endPoint = new IPEndPoint(ipAddress, port);
+            this._IsBinary = isBinary;
             this.InitPrinter();
         }
 
-        public NetworkPrinter(string ipAddress, int port) : base()
+        public NetworkPrinter(string ipAddress, int port, bool isBinary) : base()
         {
             if (IPAddress.TryParse(ipAddress, out IPAddress address))
             {
                 this._endPoint = new IPEndPoint(address, port);
+                this._IsBinary = isBinary;
                 this.InitPrinter();
             }
             else
@@ -59,10 +64,15 @@ namespace ESCPOS_NET
             {
                 this.InitPrinter();
             }
-  
-            base.Write(bytes);
 
-            this._socket.Close();
+            if (this._IsBinary)
+            {
+                base.Write(bytes);
+            }
+            else
+            {
+                this._socket.Send(bytes);
+            }            
         }
 
 
@@ -74,7 +84,7 @@ namespace ESCPOS_NET
             {
                 this._socket = new Socket(_endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 this._socket.Connect(_endPoint);
-                this._sockStream = new NetworkStream(_socket);
+                this._sockStream = new NetworkStream(_socket, true);
                 this._writer = new BinaryWriter(_sockStream);
                 this._reader = new BinaryReader(_sockStream);
             }
