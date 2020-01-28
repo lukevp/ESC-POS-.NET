@@ -247,21 +247,22 @@ namespace ESCPOS_NET
                 return;
             }
 
+
+            _cancellationTokenSource?.Cancel();
+            FlushTimer?.Stop();
+            if (FlushTimer != null)
+            {
+                FlushTimer.Elapsed -= Flush;
+            }
+
+            FlushTimer?.Dispose();
+            Reader?.Close();
+            Reader?.Dispose();
+            Writer?.Close();
+            Writer?.Dispose();
+
             if (disposing)
             {
-                _cancellationTokenSource?.Cancel();
-                FlushTimer?.Stop();
-                if (FlushTimer != null)
-                {
-                    FlushTimer.Elapsed -= Flush;
-                }
-               
-                FlushTimer?.Dispose();
-                Reader?.Close();
-                Reader?.Dispose();
-                Writer?.Close();
-                Writer?.Dispose();
-                
                 OverridableDispose();
             }
             disposed = true;
