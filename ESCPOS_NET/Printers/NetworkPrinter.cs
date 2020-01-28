@@ -8,25 +8,31 @@ namespace ESCPOS_NET
 {
     public class NetworkPrinter : BasePrinter
     {
+        // flag which allows an attempt to reconnect on timeout.
+        private readonly bool _reconnectOnTimeout;
         private readonly IPEndPoint _endPoint;
         private Socket _socket;
         private NetworkStream _sockStream;
+
         protected override bool IsConnected => !((_socket.Poll(1000, SelectMode.SelectRead) && (_socket.Available == 0)) || !_socket.Connected);
 
-        public NetworkPrinter(IPEndPoint endPoint) : base()
+        public NetworkPrinter(IPEndPoint endPoint, bool reconnectOnTimeout) : base()
         {
+            _reconnectOnTimeout = reconnectOnTimeout;
             _endPoint = endPoint;
             Connect();
         }
 
-        public NetworkPrinter(IPAddress ipAddress, int port) : base()
+        public NetworkPrinter(IPAddress ipAddress, int port, bool reconnectOnTimeout) : base()
         {
+            _reconnectOnTimeout = reconnectOnTimeout;
             _endPoint = new IPEndPoint(ipAddress, port);
             Connect();
         }
 
-        public NetworkPrinter(string ipAddress, int port) : base()
+        public NetworkPrinter(string ipAddress, int port, bool reconnectOnTimeout) : base()
         {
+            _reconnectOnTimeout = reconnectOnTimeout;
             _endPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
             Connect();
         }
@@ -35,18 +41,21 @@ namespace ESCPOS_NET
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("Trying to reconnect...");
-                StopMonitoring();
-                Writer?.Flush();
-                Writer?.Close();
-                Reader?.Close();
+                if (_reconnectOnTimeout)
+                {
+                    Console.WriteLine("Trying to reconnect...");
+                    StopMonitoring();
+                    Writer?.Flush();
+                    Writer?.Close();
+                    Reader?.Close();
 
-                _sockStream?.Close();
-                _socket?.Close();
+                    _sockStream?.Close();
+                    _socket?.Close();
 
-                Connect();
-                System.Diagnostics.Debug.WriteLine("Reconnected!");
-                StartMonitoring();
+                    Connect();
+                    Console.WriteLine("Reconnected!");
+                    StartMonitoring();
+                }
             }
             catch (Exception ex)
             {

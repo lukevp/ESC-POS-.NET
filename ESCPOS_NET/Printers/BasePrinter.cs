@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
@@ -115,7 +115,7 @@ namespace ESCPOS_NET
         {
             if (!_isMonitoring)
             {
-                Debug.WriteLine(nameof(StartMonitoring));
+                Console.WriteLine(nameof(StartMonitoring));
                 ReadBuffer = new ConcurrentQueue<byte>();
 
                 _isMonitoring = true;
@@ -128,7 +128,7 @@ namespace ESCPOS_NET
         {
             if (_isMonitoring)
             {
-                Debug.WriteLine(nameof(StopMonitoring));
+                Console.WriteLine(nameof(StopMonitoring));
 				_isMonitoring = false;
 				ReadBuffer = new ConcurrentQueue<byte>();
 
