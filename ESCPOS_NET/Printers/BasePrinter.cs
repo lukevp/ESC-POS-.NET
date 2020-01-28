@@ -69,7 +69,6 @@ namespace ESCPOS_NET
                     _isMonitoring = false;
                     DataAvailable(true);
                     Debug.WriteLine($"Read Exception: {ex.Message}");
-                    
                 }
                 catch (Exception ex)
                 {
