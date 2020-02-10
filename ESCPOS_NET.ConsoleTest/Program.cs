@@ -2,10 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ESCPOS_NET.ConsoleTest
 {
@@ -200,7 +197,7 @@ namespace ESCPOS_NET.ConsoleTest
 
         static void StatusChanged(object sender, EventArgs ps)
         {
-            var status = (PrinterStatus)ps;
+            var status = (PrinterStatusEventArgs)ps;
             Console.WriteLine($"Printer Online Status: {status.IsPrinterOnline}");
             Console.WriteLine(JsonConvert.SerializeObject(status));
         }

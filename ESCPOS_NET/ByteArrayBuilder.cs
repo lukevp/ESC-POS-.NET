@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 /* FROM: https://www.codeproject.com/Tips/674256/ByteArrayBuilder-a-StringBuilder-for-Bytes 2/9/2019 */
 namespace ESCPOS_NET.Utilities
     {
@@ -36,45 +37,34 @@ namespace ESCPOS_NET.Utilities
     ///        }
     /// </example>
     public class ByteArrayBuilder : IDisposable
-        {
-        #region Constants
+    {
         /// <summary>
         /// True in a byte form of the Line
         /// </summary>
-        const byte streamTrue = (byte)1;
+        private const byte StreamTrue = (byte)1;
+
         /// <summary>
         /// False in the byte form of a line
         /// </summary>
-        const byte streamFalse = (byte)0;
-        #endregion
+        private const byte StreamFalse = (byte)0;
 
-        #region Internal
         /// <summary>
         /// Holds the actual bytes.
         /// </summary>
-        MemoryStream store = new MemoryStream();
-        #endregion
+        private MemoryStream store = new MemoryStream();
 
-        #region Properties
         /// <summary>
         /// Bytes in the store.
         /// </summary>
-        public int Length
-            {
-            get { return (int)store.Length; }
-            }
-        #endregion
+        public int Length => (int)store.Length;
 
-        #region Constructors
         /// <summary>
         /// Create a new, empty builder ready to be filled.
         /// </summary>
         public ByteArrayBuilder()
-            {
-            }
-        #endregion
+        {
+        }
 
-        #region Public Methods
         public ByteArrayBuilder Append(byte b)
         {
             AddBytes(new byte[] { b });
@@ -97,23 +87,24 @@ namespace ESCPOS_NET.Utilities
             return this;
         }
 
-        #region Interaction
         /// <summary>
         /// Clear all content from the builder
         /// </summary>
         public void Clear()
-            {
+        {
             store.Close();
             store.Dispose();
             store = new MemoryStream();
-            }
+        }
+
         /// <summary>
         /// Rewind the builder ready to read data
         /// </summary>
         public void Rewind()
-            {
+        {
             store.Seek(0, SeekOrigin.Begin);
-            }
+        }
+
         /// <summary>
         /// Set an absolute position in the builder.
         /// **WARNING**
@@ -122,73 +113,67 @@ namespace ESCPOS_NET.Utilities
         /// A builder does not store just objects - for some it stores additional
         /// information as well.
         /// </summary>
-        /// <param name="position"></param>
+        /// <param name="position">the position to seek</param>
         public void Seek(int position)
-            {
+        {
             store.Seek((long)position, SeekOrigin.Begin);
-            }
+        }
+
         /// <summary>
         /// Returns the builder as an array of bytes
         /// </summary>
-        /// <returns></returns>
+        /// <returns>An array</returns>
         public byte[] ToArray()
-            {
+        {
             byte[] data = new byte[Length];
             Array.Copy(store.GetBuffer(), data, Length);
             return data;
-            }
-        #endregion
-        #endregion
+        }
 
-        #region Overrides
         /// <summary>
         /// Returns a text based (Base64) string version of the current content
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The converted string</returns>
         public override string ToString()
-            {
+        {
             return Convert.ToBase64String(ToArray());
-            }
-        #endregion
+        }
 
-        #region Private Methods
         /// <summary>
         /// Add a string of raw bytes to the store
         /// </summary>
-        /// <param name="b"></param>
-        private void AddBytes(byte[] b)
-            {
-            store.Write(b, 0, b.Length);
-            }
+        /// <param name="byteArray">the byte array</param>
+        private void AddBytes(byte[] byteArray)
+        {
+            store.Write(byteArray, 0, byteArray.Length);
+        }
+
         /// <summary>
         /// Reads a specific number of bytes from the store
         /// </summary>
-        /// <param name="length"></param>
-        /// <returns></returns>
+        /// <param name="length">The length</param>
+        /// <returns>The byte array</returns>
         private byte[] GetBytes(int length)
-            {
+        {
             byte[] data = new byte[length];
             if (length > 0)
-                {
+            {
                 int read = store.Read(data, 0, length);
                 if (read != length)
-                    {
+                {
                     throw new ApplicationException("Buffer did not contain " + length + " bytes");
-                    }
                 }
-            return data;
             }
-        #endregion
+            return data;
+        }
 
-        #region IDisposable Implememntation
         /// <summary>
         /// Dispose of this builder and it's resources
         /// </summary>
         public void Dispose()
-            {
+        {
             store.Close();
             store.Dispose();
-            }
-        #endregion  
         }
     }
+}

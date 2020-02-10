@@ -2,7 +2,8 @@
 .NET (C#) Implementation of the Epson ESC/POS standard.   MIT licensed.
 
 # Supported Platforms
-Supports Windows, Linux, and Mac OSX!  
+Desktop support: Windows, Linux, and Mac OSX!
+Mobile support (IP only): Xamarin.iOS, Xamarin.Android and UWP!
 Epson thermal receipt printers are supported, and most common functions such as test printing, styling, alignment, image printing, and barcode printing.
 BemaTech printers are also tested by some members of the community, @juliogamasso and @ivanmontilla.
 
@@ -16,7 +17,7 @@ This package is available on NuGet @ https://www.nuget.org/packages/ESCPOS_NET/
 Please comment / DM / open issues and let me know how the library is working for you!
 
 ## Contributors
-Thanks to all of our contributors working to make this the best .NET thermal printer library out there! @lukevp, @juliogamasso, @naaeef, @netgg93, @igorocampos
+Thanks to all of our contributors working to make this the best .NET thermal printer library out there! @lukevp, @juliogamasso, @naaeef, @netgg93, @igorocampos, @kodejack
 
 # Implemented Commands
 

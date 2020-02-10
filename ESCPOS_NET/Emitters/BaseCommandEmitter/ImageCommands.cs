@@ -2,8 +2,6 @@
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Advanced;
-using System.Collections.Generic;
-using System.Linq;
 using ESCPOS_NET.Utilities;
 using System;
 
@@ -36,7 +34,7 @@ namespace ESCPOS_NET.Emitters
         {
             ByteArrayBuilder builder = new ByteArrayBuilder();
             byte dpiSetting = isHiDPI ? (byte)0x33 : (byte)0x32; // TODO: is this right??
-            byte[] baseCommand = new byte[] { 0x30, 0x31, dpiSetting, dpiSetting};
+            byte[] baseCommand = new byte[] { 0x30, 0x31, dpiSetting, dpiSetting };
             builder.Append(GetImageHeader(baseCommand.Length));
             builder.Append(baseCommand);
             return builder.ToArray();
@@ -96,7 +94,6 @@ namespace ESCPOS_NET.Emitters
 
 
                 // TODO: test making a List<byte> if it's faster than using ByteArrayBuilder.
-
                 double[] ditherErrorsNext = new double[width + 2];
                 // Bit pack every 8 horizontal bits into a single byte.
                 for (int y = 0; y < img.Height; y++)
@@ -159,7 +156,7 @@ namespace ESCPOS_NET.Emitters
             ByteArrayBuilder response = new ByteArrayBuilder();
             byte[] imageCommandBytes = imageCommand.ToArray();
             if (!isLegacy)
-            { 
+            {
                 response.Append(GetImageHeader(imageCommandBytes.Length));
             }
             response.Append(imageCommandBytes);
@@ -182,7 +179,7 @@ namespace ESCPOS_NET.Emitters
                 return ByteSplicer.Combine(BufferImage(image, maxWidth, isLegacy));
             }
             else
-            { 
+            {
                 return ByteSplicer.Combine(SetImageDensity(isHiDPI), BufferImage(image, maxWidth, isLegacy, color), WriteImageFromBuffer());
             }
         }
