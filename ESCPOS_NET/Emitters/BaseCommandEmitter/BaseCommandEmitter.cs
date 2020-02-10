@@ -5,6 +5,10 @@
         public static readonly byte ESC = 0x1B;
         public static readonly byte GS = 0x1D;
     }
+    public static class Display
+    {
+        public static readonly byte CLR = 0x0C;
+    }
     public static class Ops
     {
         public static readonly byte Initialize = 0x40;
