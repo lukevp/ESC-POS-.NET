@@ -50,6 +50,9 @@ Thanks to all of our contributors working to make this the best .NET thermal pri
 ## Status Commands
 * `GS a` Enable/disable Automatic Status Back (ASB)
 
+## Open Cash Drawer Commands
+* `ESC p 0` Open cash drawer pin 2
+* `ESC p 1` Open cash drawer pin 5
 
 ## Miscellaneous Commands
 * `ESC @` Initialize printer

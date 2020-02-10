@@ -3,78 +3,99 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace ESCPOS_NET
 {
-    public abstract partial class BasePrinter
+    public abstract partial class BasePrinter : IDisposable
     {
         public PrinterStatus Status = null;
         public event EventHandler StatusChanged;
         protected BinaryWriter _writer;
         protected BinaryReader _reader;
-        protected System.Timers.Timer _writeTimer;
+        protected System.Timers.Timer _flushTimer;
         protected Thread _readThread;
         protected ConcurrentQueue<byte> _readBuffer = new ConcurrentQueue<byte>();
-        protected int _bytesWritten = 0;
+        protected int _bytesWrittenSinceLastFlush = 0;
+        private readonly int _maxBytesPerWrite = 15000; // max byte chunks to write at once.
 
         public BasePrinter()
         {
-            _writeTimer = new System.Timers.Timer(20);
-            _writeTimer.Elapsed += Flush;
-            _writeTimer.AutoReset = false;
+            _flushTimer = new System.Timers.Timer(50);
+            _flushTimer.Elapsed += Flush;
+            _flushTimer.AutoReset = false;
         }
-
         public virtual void Read()
         {
             while (true)
             {
                 try
                 {
-                    // Sometimes the serial port lib will throw an exception and read past the end of the queue if a
-                    // status changes while data is being written.  We just ignore these bytes.
-                    var b = _reader.ReadByte();
-                    _readBuffer.Enqueue(b);
-                    DataAvailable();
+                    if (_monitoring)
+                    {
+                        // Sometimes the serial port lib will throw an exception and read past the end of the queue if a
+                        // status changes while data is being written.  We just ignore these bytes.
+                        var b = _reader.ReadByte();
+                        _readBuffer.Enqueue(b);
+                        DataAvailable();
+                    }
                 }
-                catch { }
+                catch
+                {
+                    Thread.Sleep(100);
+                }
             }
         }
 
         public virtual void Write(byte[] bytes)
         {
-            _writeTimer.Stop();
-            _writer.Write(bytes);
-            _bytesWritten += bytes.Length;
-            if (_bytesWritten >= 200)
+            int bytePointer = 0;
+            int bytesLeft = bytes.Length;
+            bool hasFlushed = false;
+            while (bytesLeft > 0)
             {
-                // Immediately trigger a flush before proceeding so the output buffer will not be delayed.
-                Flush(null, null);
+                int count = Math.Min(_maxBytesPerWrite, bytesLeft);
+                _writer.Write(bytes, bytePointer, count);
+                _bytesWrittenSinceLastFlush += count;
+                if (_bytesWrittenSinceLastFlush >= 200)
+                {
+                    // Immediately trigger a flush before proceeding so the output buffer will not be delayed.
+                    hasFlushed = true;
+                    Flush(null, null);
+                }
+                bytePointer += count;
+                bytesLeft -= count;
             }
-            else
+            if (!hasFlushed)
             {
-                _writeTimer.Start();
+                _flushTimer.Start();
             }
         }
 
         protected virtual void Flush(object sender, ElapsedEventArgs e)
         {
-            _bytesWritten = 0;
-            _writeTimer.Stop();
+            _bytesWrittenSinceLastFlush = 0;
+            _flushTimer.Stop();
             _writer.Flush();
         }
 
         public virtual void StartMonitoring()
         {
+            if (_readThread == null)
+            {
+                _readThread = new Thread(new ThreadStart(Read));
+                _readThread.Start();
+            }
             _readBuffer = new ConcurrentQueue<byte>();
-            _readThread = new Thread(new ThreadStart(Read));
-            _readThread.Start();
+            _monitoring = true;
         }
 
         public virtual void StopMonitoring()
         {
-            _readThread.Abort();
+            _monitoring = false;
             _readBuffer = new ConcurrentQueue<byte>();
         }
 
@@ -93,6 +114,7 @@ namespace ESCPOS_NET
             }
         }
 
+        private bool _monitoring = false;
 
         private void TryUpdatePrinterStatus(byte[] bytes)
         {
@@ -118,6 +140,34 @@ namespace ESCPOS_NET
             StatusChanged?.Invoke(this, Status);
         }
 
+        // ~~~START~~~ IDisposable
+        // Flag: Has Dispose already been called?
+        private bool disposed = false;
+
+        protected virtual void OverridableDispose() // This method should only be called by the Dispose method.  // It allows synchronous disposing of derived class dependencies with base class disposes.
+        {
+        }
+        public virtual void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+            if (disposing)
+            {
+                _readThread?.Abort();
+                _writer?.Close();
+                _writer?.Dispose();
+                _reader?.Close();
+                _reader?.Dispose();
+                OverridableDispose();
+            }
+            disposed = true;
+        }
+        // ~~~END~~~ IDisposable
         private void TryUpdateInkStatus()
         {
             throw new NotImplementedException();

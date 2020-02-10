@@ -44,12 +44,12 @@ namespace ESCPOS_NET
             Dispose();
         }
 
-        public void Dispose()
+        protected override void OverridableDispose()
         {
-            _writer.Close();
-            _reader.Close();
-            _socket.Close();
-            _socket.Dispose();
+            _sockStream?.Close();
+            _sockStream?.Dispose();
+            _socket?.Close();
+            _socket?.Dispose();
         }
     }
 }

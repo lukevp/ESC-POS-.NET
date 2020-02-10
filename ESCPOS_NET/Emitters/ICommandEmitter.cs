@@ -18,6 +18,10 @@
         byte[] Enable();
         byte[] Disable();
 
+        /* Cash Drawer Commands */
+        byte[] CashDrawerOpenPin2();
+        byte[] CashDrawerOpenPin5();
+
         /* Character Commands */
         byte[] SetStyles(PrintStyle style);
         byte[] LeftAlign();
@@ -36,16 +40,15 @@
 
         /* Image Commands */
         byte[] SetImageDensity(bool isHiDPI);
-        byte[] BufferImage(byte[] image, int maxWidth, int color = 1);
+        byte[] BufferImage(byte[] image, int maxWidth, bool isLegacy = false, int color = 1);
         byte[] WriteImageFromBuffer();
-        byte[] PrintImage(byte[] image, bool isHiDPI, int maxWidth = -1, int color = 1);
-
+        byte[] PrintImage(byte[] image, bool isHiDPI, bool isLegacy = false, int maxWidth = -1, int color = 1);
         /* Status Commands */
         byte[] EnableAutomaticStatusBack();
         byte[] EnableAutomaticInkStatusBack();
 
         /* Barcode Commands */
-        byte[] PrintBarcode(BarcodeType type, string barcode);
+        byte[] PrintBarcode(BarcodeType type, string barcode, BarcodeCode code = BarcodeCode.CODE_B);
         byte[] SetBarcodeHeightInDots(int height);
         byte[] SetBarWidth(BarWidth width);
         byte[] SetBarLabelPosition(BarLabelPrintPosition position);

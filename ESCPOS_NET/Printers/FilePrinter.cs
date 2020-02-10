@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace ESCPOS_NET
 {
@@ -18,7 +19,13 @@ namespace ESCPOS_NET
 
         ~FilePrinter()
         {
-            _file.Close();
+            Dispose();
+        }
+
+        protected override void OverridableDispose()
+        {
+            _file?.Close();
+            _file?.Dispose();
         }
     }
 }

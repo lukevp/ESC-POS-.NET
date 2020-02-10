@@ -60,7 +60,6 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintLine("Font B Label Below:"),
             e.SetBarLabelFontB(true),
             e.PrintBarcode(BarcodeType.UPC_A, "012345678905")
-
         );
     }
 }

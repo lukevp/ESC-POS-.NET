@@ -2,8 +2,10 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ESCPOS_NET.ConsoleTest
 {
@@ -34,11 +36,11 @@ namespace ESCPOS_NET.ConsoleTest
                 {
                     while (!comPort.StartsWith("COM"))
                     { 
-                        Console.Write("COM Port (eg. COM20): ");
+                        Console.Write("COM Port (eg. COM5): ");
                         comPort = Console.ReadLine();
                         if (string.IsNullOrWhiteSpace(comPort))
                         {
-                            comPort = "COM20";
+                            comPort = "COM5";
                         }
                     }
                     Console.Write("Baud Rate (eg. 115200): ");
@@ -91,9 +93,14 @@ namespace ESCPOS_NET.ConsoleTest
                 "Printing",
                 "Line Spacing",
                 "Barcode Styles",
+                "Barcode Types",
                 "Text Styles",
                 "Full Receipt",
-                "Images"
+                "Images",
+                "Legacy Images",
+                "Large Byte Arrays",
+                "Cash Drawer Pin2",
+                "Cash Drawer Pin5"
             };
             while (true)
             {
@@ -128,8 +135,8 @@ namespace ESCPOS_NET.ConsoleTest
                 { 
                     printer.StartMonitoring();
                 }
-                Setup();
-                printer.Write(e.PrintLine($"== [ Start {testCases[choice - 1]} ] =="));
+                Setup(monitor);
+                printer?.Write(e.PrintLine($"== [ Start {testCases[choice - 1]} ] =="));
 
                 switch (choice)
                 {
@@ -143,26 +150,45 @@ namespace ESCPOS_NET.ConsoleTest
                         printer.Write(Tests.BarcodeStyles(e));
                         break;
                     case 4:
-                        printer.Write(Tests.TextStyles(e));
+                        printer.Write(Tests.BarcodeTypes(e));
                         break;
                     case 5:
-                        printer.Write(Tests.Receipt(e));
+                        printer.Write(Tests.TextStyles(e));
                         break;
                     case 6:
-                        printer.Write(Tests.Images(e));
+                        printer.Write(Tests.Receipt(e));
+                        break;
+                    case 7:
+                        printer.Write(Tests.Images(e, false));
+                        break;
+                    case 8:
+                        printer.Write(Tests.Images(e, true));
+                        break;
+                    case 9:
+                        try
+                        {
+                            printer.Write(Tests.TestLargeByteArrays(e));
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine($"Aborting print due to test failure. Exception: {e?.Message}, Stack Trace: {e?.GetBaseException()?.StackTrace}");
+                        }
+                        break;
+                    case 10:
+                        printer.Write(Tests.CashDrawerOpenPin2(e));
+                        break;
+                    case 11:
+                        printer.Write(Tests.CashDrawerOpenPin5(e));
                         break;
                     default:
                         Console.WriteLine("Invalid entry.");
                         break;
                 }
 
-                Setup();
-                printer.Write(e.PrintLine($"== [ End {testCases[choice - 1]} ] =="));
-                printer.Write(e.PartialCutAfterFeed(5));
+                Setup(monitor);
+                printer?.Write(e.PrintLine($"== [ End {testCases[choice - 1]} ] =="));
+                printer?.Write(e.PartialCutAfterFeed(5));
 
-                //TestCutter();
-                //TestMultiLineWrite();
-                //TestHEBReceipt();
                 // TODO: write a sanitation check.
                 // TODO: make DPI to inch conversion function
                 // TODO: full cuts and reverse feeding not implemented on epson...  should throw exception?
@@ -178,13 +204,25 @@ namespace ESCPOS_NET.ConsoleTest
             Console.WriteLine($"Printer Online Status: {status.IsPrinterOnline}");
             Console.WriteLine(JsonConvert.SerializeObject(status));
         }
+        private static bool _hasEnabledStatusMonitoring = false;
 
-        static void Setup()
+        static void Setup(bool enableStatusBackMonitoring)
         {
-            printer.Write(e.Initialize());
-            printer.Write(e.Enable());
-            printer.Write(e.EnableAutomaticStatusBack());
-            printer.StatusChanged += StatusChanged;
+            if (printer != null)
+            {
+                // Only register status monitoring once.
+                if (!_hasEnabledStatusMonitoring)
+                {
+                    printer.StatusChanged += StatusChanged;
+                    _hasEnabledStatusMonitoring = true;
+                }
+                printer?.Write(e.Initialize());
+                printer?.Write(e.Enable());
+                if (enableStatusBackMonitoring)
+                {
+                    printer.Write(e.EnableAutomaticStatusBack());
+                }
+            }
         }
 
         /*
