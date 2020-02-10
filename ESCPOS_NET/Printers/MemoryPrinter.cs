@@ -10,12 +10,12 @@ namespace ESCPOS_NET
         public MemoryPrinter() : base()
         {
             _ms = new MemoryStream();
-            _writer = new BinaryWriter(_ms);
+            Writer = new BinaryWriter(_ms);
         }
 
         ~MemoryPrinter()
         {
-            Dispose();
+            Dispose(false);
         }
 
         public byte[] GetAllData()

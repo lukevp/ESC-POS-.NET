@@ -9,11 +9,14 @@ namespace ESCPOS_NET.Utilities
             ByteArrayBuilder builder = new ByteArrayBuilder();
             foreach (var byteArray in byteArrays)
             {
-                if (!(byteArray is byte[])) throw new ArgumentException("All passed in objects must be byte arrays.");
+                if (!(byteArray is byte[]))
+                {
+                    throw new ArgumentException("All passed in objects must be byte arrays.");
+                }
+
                 builder.Append((byte[])byteArray);
             }
             return builder.ToArray();
-
         }
     }
 }

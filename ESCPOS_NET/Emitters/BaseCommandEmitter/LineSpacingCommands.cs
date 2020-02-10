@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ESCPOS_NET.Emitters
+﻿namespace ESCPOS_NET.Emitters
 {
     public abstract partial class BaseCommandEmitter : ICommandEmitter
     {

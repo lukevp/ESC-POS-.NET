@@ -7,7 +7,7 @@ namespace ESCPOS_NET.DataValidation
 {
     public static class DataValidator
     {
-        private static Dictionary<BarcodeType, DataConstraint> Constraints = new Dictionary<BarcodeType, DataConstraint>()
+        private static Dictionary<BarcodeType, DataConstraint> _constraints = new Dictionary<BarcodeType, DataConstraint>()
         {
             { BarcodeType.UPC_A, new DataConstraint() { MinLength = 11, MaxLength = 12, ValidChars = "0123456789" } },
             { BarcodeType.UPC_E, new DataConstraint() { ValidLengths = new List<int>() { 6, 7, 8, 11, 12 }, ValidChars = "0123456789" } },
@@ -31,8 +31,9 @@ namespace ESCPOS_NET.DataValidation
             {
                 throw new ArgumentNullException(nameof(barcode));
             }
+
             // Validate constraints on barcode.
-            Constraints.TryGetValue(type, out var constraints);
+            _constraints.TryGetValue(type, out var constraints);
             if (constraints != null)
             {
                 // Check lengths
