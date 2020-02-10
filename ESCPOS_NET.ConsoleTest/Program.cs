@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Runtime.InteropServices;
 
 namespace ESCPOS_NET.ConsoleTest
@@ -73,7 +74,7 @@ namespace ESCPOS_NET.ConsoleTest
                 {
                     networkPort = "9000";
                 }
-                printer = new NetworkPrinter(ip, int.Parse(networkPort));
+                printer = new NetworkPrinter(ip, int.Parse(networkPort), true);
             }
 
             bool monitor = false;
