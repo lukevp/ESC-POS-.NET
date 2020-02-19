@@ -13,9 +13,9 @@ Allows creating receipts with all common functionality supported.</Description>
     <RepositoryUrl>https://github.com/lukevp/ESC-POS-.NET</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>epson thermal receipt printing esc pos escpos escp</PackageTags>
-    <Version>1.0.0.1-beta2</Version>
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
-    <FileVersion>1.0.0.1</FileVersion>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
