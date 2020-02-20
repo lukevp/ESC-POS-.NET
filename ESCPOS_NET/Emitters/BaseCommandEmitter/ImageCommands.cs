@@ -1,9 +1,6 @@
-﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Advanced;
-using ESCPOS_NET.Utilities;
-using System;
+﻿using ESCPOS_NET.Utilities;
+
+using SixLabors.ImageSharp;
 
 namespace ESCPOS_NET.Emitters
 {
@@ -58,100 +55,35 @@ namespace ESCPOS_NET.Emitters
                     break;
             }
 
-            using (Image<Rgba32> img = Image.Load(image))
+            int width;
+            int height;
+            byte[] imageData;
+            using (var img = Image.Load(image))
             {
-                int width = img.Width;
-                int height = img.Height;
-                // Use native width/height of image without resizing if maxWidth is default value.
-                if (maxWidth != -1)
-                {
-                    width = maxWidth;
-                    // Get closest height that's the same aspect ratio as the width.
-                    height = (int)(maxWidth * (Convert.ToDouble(img.Height) / img.Width));
-                    img.Mutate(x => x.Resize(width, height));
-                }
-                byte heightL = (byte)(height);
-                byte heightH = (byte)(height >> 8);
-
-                if (isLegacy)
-                {
-                    // TODO: if there's a remainder, need to add 1?
-                    var byteWidth = width / 8;
-                    if (width % 8 != 0)
-                    {
-                        byteWidth += 1;
-                    }
-                    byte widthL = (byte)byteWidth;
-                    byte widthH = (byte)(byteWidth >> 8);
-                    imageCommand.Append(new byte[] { Cmd.GS, Images.ImageCmdLegacy, 0x30, 0x00, widthL, widthH, heightL, heightH });
-                }
-                else
-                {
-                    byte widthL = (byte)(width);
-                    byte widthH = (byte)(width >> 8);
-                    imageCommand.Append(new byte[] { 0x30, 0x70, 0x30, 0x01, 0x01, colorByte, widthL, widthH, heightL, heightH });
-                }
-
-
-                // TODO: test making a List<byte> if it's faster than using ByteArrayBuilder.
-                double[] ditherErrorsNext = new double[width + 2];
-                // Bit pack every 8 horizontal bits into a single byte.
-                for (int y = 0; y < img.Height; y++)
-                {
-                    // Create an array for capturing dither errors
-                    double[] ditherErrorsCurrent = ditherErrorsNext;
-                    ditherErrorsNext = new double[width + 2];
-
-                    Span<Rgba32> pixelRowSpan = img.GetPixelRowSpan(y);
-                    byte buffer = 0x00;
-                    int bufferCount = 7;
-                    for (int x = 0; x < img.Width; x++)
-                    {
-                        // Determine if pixel should be colored in.
-                        var pixelValue = ((0.30 * pixelRowSpan[x].R) + (0.59 * pixelRowSpan[x].G) + (0.11 * pixelRowSpan[x].B) + (ditherErrorsCurrent[x]));
-                        double error = 0;
-                        if (pixelValue <= 127)
-                        {
-                            // Pixel value should be black (0), if it is greater than zero then the error is the difference (pixelvalue - 0)
-                            // which is just the pixel value.
-                            error = pixelValue;
-                            buffer |= (byte)(0x01 << bufferCount);
-                        }
-                        else
-                        {
-                            // Pixel should be white, so error is pixelvalue - 255
-                            error = pixelValue - 255;
-                        }
-
-                        // Propagate dither.
-                        //error <<= 1; // error * 32
-                        double pixelValue8 = error / 4;
-                        double pixelValue4 = error / 8;
-                        double pixelValue2 = error / 16;
-                        ditherErrorsCurrent[x + 1] += pixelValue8;
-                        ditherErrorsCurrent[x + 2] += pixelValue4;
-
-                        if (x - 2 > 0) ditherErrorsNext[x - 2] += pixelValue2;
-                        if (x - 1 > 0) ditherErrorsNext[x - 1] += pixelValue4;
-                        ditherErrorsNext[x] += pixelValue8;
-                        ditherErrorsNext[x + 1] += pixelValue4;
-                        ditherErrorsNext[x + 2] += pixelValue2;
-
-                        if (bufferCount == 0)
-                        {
-                            bufferCount = 8;
-                            imageCommand.Append(new byte[] { buffer });
-                            buffer = 0x00;
-                        }
-                        bufferCount -= 1;
-                    }
-                    // For images not divisible by 8
-                    if (bufferCount != 7)
-                    {
-                        imageCommand.Append(new byte[] { buffer });
-                    }
-                }
+                imageData = img.ToSingleBitPixelByteArray(maxWidth: maxWidth == -1 ? (int?)null : maxWidth);
+                height = img.Height;
+                width = img.Width;
             }
+
+            byte heightL = (byte)height;
+            byte heightH = (byte)(height >> 8);
+
+            if (isLegacy)
+            {
+                var byteWidth = (width + 7 & -8) / 8;
+                byte widthL = (byte)byteWidth;
+                byte widthH = (byte)(byteWidth >> 8);
+                imageCommand.Append(new byte[] { Cmd.GS, Images.ImageCmdLegacy, 0x30, 0x00, widthL, widthH, heightL, heightH });
+            }
+            else
+            {
+                byte widthL = (byte)width;
+                byte widthH = (byte)(width >> 8);
+                imageCommand.Append(new byte[] { 0x30, 0x70, 0x30, 0x01, 0x01, colorByte, widthL, widthH, heightL, heightH });
+            }
+
+            imageCommand.Append(imageData);
+
             // Load image to print buffer
             ByteArrayBuilder response = new ByteArrayBuilder();
             byte[] imageCommandBytes = imageCommand.ToArray();
@@ -172,6 +104,7 @@ namespace ESCPOS_NET.Emitters
             response.Append(printCommandBytes);
             return response.ToArray();
         }
+
         public byte[] PrintImage(byte[] image, bool isHiDPI, bool isLegacy = false, int maxWidth = -1, int color = 1)
         {
             if (isLegacy)
