@@ -44,8 +44,10 @@ namespace SixLabors.ImageSharp
 
                 for (int x = 0; x < row.Length; x++)
                 {
-                    if (row[x].IsBlack() == false)
+                    if (!row[x].IsBlack())
+                    {
                         continue;
+                    }
 
                     result[rowStartPosition + x / 8] |= (byte)(0x01 << (7 - (x % 8)));
                 }
