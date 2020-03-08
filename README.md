@@ -10,18 +10,18 @@ Desktop support (WiFI, Ethernet, Bluetooth, USB, Serial):
 * Windows
   - Windows 7+ can support .NET Core or the .NET 471 runtime, and can use this library.
 * Linux 
-- ARM platforms such as Raspberry Pi
-- x86/64 platform
+  - ARM platforms such as Raspberry Pi
+  - x86/64 platform
 * Mac OSX
-- Tested on high sierra
+  - Tested on high sierra
 
 Mobile support (WiFi/Ethernet only):
 * iOS
-- Xamarin.iOS
+  - Xamarin.iOS
 * Android
-- Xamarin.Android
+  - Xamarin.Android
 * Windows
-- UWP
+  - UWP
 
 # Supported Hardware
 Epson thermal receipt printers are supported, and most common functions such as test printing, styling, alignment, image printing, and barcode printing.
