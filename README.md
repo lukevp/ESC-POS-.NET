@@ -1,12 +1,34 @@
 # ESC-POS-.NET
-.NET (C#) Implementation of the Epson ESC/POS standard.   MIT licensed.
+ESC-POS.NET is an MIT licensed library that supports the most common functionality of the ESC/POS standard by Epson.  This is used in thermal receipt printers, line displays, cash drawers, and more!
+
+ESC/POS is a binary protocol that's a type of "raw" text, which means you do not need drivers to use it.  
+
+This library encompasses helper functions that assist in creating the binary command stream that is needed to control this hardware, as well as the underlying communications that are needed to interface with the hardware.  This means that Bluetooth, WiFi, Ethernet, USB, and Serial printers are all usable with just this software library and nothing else.
 
 # Supported Platforms
-Desktop support: Windows, Linux, and Mac OSX!
-Mobile support (IP only): Xamarin.iOS, Xamarin.Android and UWP!
-Epson thermal receipt printers are supported, and most common functions such as test printing, styling, alignment, image printing, and barcode printing.
-BemaTech printers are also tested by some members of the community, @juliogamasso and @ivanmontilla.
+Desktop support (WiFI, Ethernet, Bluetooth, USB, Serial):
+* Windows
+  - Windows 7+ can support .NET Core or the .NET 471 runtime, and can use this library.
+* Linux 
+- ARM platforms such as Raspberry Pi
+- x86/64 platform
+* Mac OSX
+- Tested on high sierra
 
+Mobile support (WiFi/Ethernet only):
+* iOS
+- Xamarin.iOS
+* Android
+- Xamarin.Android
+* Windows
+- UWP
+
+# Supported Hardware
+Epson thermal receipt printers are supported, and most common functions such as test printing, styling, alignment, image printing, and barcode printing.
+
+Generic thermal printers that implement ESC/POS typically work, for example the Royal PT-300, and BemaTech printers are also tested by some members of the community, @juliogamasso and @ivanmontilla.
+
+Cash Drawers are supported, as are Line Displays.
 
 ## Getting Started
 Check out the ESCPOS_NET.ConsoleTest for a comprehensive test suite that covers all implemented functions.
