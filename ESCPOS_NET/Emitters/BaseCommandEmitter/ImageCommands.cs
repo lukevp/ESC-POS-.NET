@@ -4,6 +4,7 @@ using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Advanced;
 using ESCPOS_NET.Utilities;
 using System;
+using ESCPOS_NET.Emitters.BaseCommandValues;
 
 namespace ESCPOS_NET.Emitters
 {
