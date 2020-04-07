@@ -30,6 +30,7 @@ Generic thermal printers that implement ESC/POS typically work, for example the 
 
 Cash Drawers are supported, as are Line Displays.
 
+
 ## Getting Started
 Check out the ESCPOS_NET.ConsoleTest for a comprehensive test suite that covers all implemented functions.
 
@@ -40,6 +41,21 @@ Please comment / DM / open issues and let me know how the library is working for
 
 ## Contributors
 Thanks to all of our contributors working to make this the best .NET thermal printer library out there! @lukevp, @juliogamasso, @naaeef, @netgg93, @igorocampos, @kodejack
+
+# USB Usage Guide
+
+For cross-platform support and ease of maintenance, all USB printers are supported over Serial-USB interfaces.  These are full-speed and work just as well as native USB as long as you have your port settings optimized.
+
+On Linux and Mac, USB for Epson printers is exposed as a serial port directly by the os under /dev/ttyusb or something similar based on your platform, and doesn't require drivers.  
+
+On Windows, you must install some type of virtual COM port driver for native USB support, and then map your printer to a specific port, or use a USB-Serial cable and use a serial printer.
+
+If you have an official Epson printer, the link to install it from Epson is here: https://download.epson-biz.com/modules/pos/index.php?page=single_soft&cid=6175&scat=36&pcat=3
+
+If you do not have an official Epson printer, you will have to find a compatible way to expose the USB interface as a virtual Serial port.
+
+NOTE: The cross platform .NET library we use from Microsoft only supports COM ports 8 and below on windows, so be sure not to use a very high # COM port.
+
 
 # Implemented Commands
 
