@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using ESCPOS_NET.Emitters.BaseCommandValues;
+using System.Linq;
 
 namespace ESCPOS_NET.Emitters
 {

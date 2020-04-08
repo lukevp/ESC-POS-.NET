@@ -1,11 +1,34 @@
 # ESC-POS-.NET
-.NET (C#) Implementation of the Epson ESC/POS standard.   MIT licensed.
+ESC-POS.NET is an MIT licensed library that supports the most common functionality of the ESC/POS standard by Epson.  This is used in thermal receipt printers, line displays, cash drawers, and more!
+
+ESC/POS is a binary protocol that's a type of "raw" text, which means you do not need drivers to use it.  
+
+This library encompasses helper functions that assist in creating the binary command stream that is needed to control this hardware, as well as the underlying communications that are needed to interface with the hardware.  This means that Bluetooth, WiFi, Ethernet, USB, and Serial printers are all usable with just this software library and nothing else.
 
 # Supported Platforms
-Desktop support: Windows, Linux, and Mac OSX!
-Mobile support (IP only): Xamarin.iOS, Xamarin.Android and UWP!
+Desktop support (WiFI, Ethernet, Bluetooth, USB, Serial):
+* Windows
+  - Windows 7+ can support .NET Core or the .NET 471 runtime, and can use this library.
+* Linux 
+  - ARM platforms such as Raspberry Pi
+  - x86/64 platform
+* Mac OSX
+  - Tested on high sierra
+
+Mobile support (WiFi/Ethernet only):
+* iOS
+  - Xamarin.iOS
+* Android
+  - Xamarin.Android
+* Windows
+  - UWP
+
+# Supported Hardware
 Epson thermal receipt printers are supported, and most common functions such as test printing, styling, alignment, image printing, and barcode printing.
-BemaTech printers are also tested by some members of the community, @juliogamasso and @ivanmontilla.
+
+Generic thermal printers that implement ESC/POS typically work, for example the Royal PT-300, and BemaTech printers are also tested by some members of the community, @juliogamasso and @ivanmontilla.
+
+Cash Drawers are supported, as are Line Displays.
 
 
 ## Getting Started
@@ -18,6 +41,21 @@ Please comment / DM / open issues and let me know how the library is working for
 
 ## Contributors
 Thanks to all of our contributors working to make this the best .NET thermal printer library out there! @lukevp, @juliogamasso, @naaeef, @netgg93, @igorocampos, @kodejack
+
+# USB Usage Guide
+
+For cross-platform support and ease of maintenance, all USB printers are supported over Serial-USB interfaces.  These are full-speed and work just as well as native USB as long as you have your port settings optimized.
+
+On Linux and Mac, USB for Epson printers is exposed as a serial port directly by the os under /dev/ttyusb or something similar based on your platform, and doesn't require drivers.  
+
+On Windows, you must install some type of virtual COM port driver for native USB support, and then map your printer to a specific port, or use a USB-Serial cable and use a serial printer.
+
+If you have an official Epson printer, the link to install it from Epson is here: https://download.epson-biz.com/modules/pos/index.php?page=single_soft&cid=6175&scat=36&pcat=3
+
+If you do not have an official Epson printer, you will have to find a compatible way to expose the USB interface as a virtual Serial port.
+
+NOTE: The cross platform .NET library we use from Microsoft only supports COM ports 8 and below on windows, so be sure not to use a very high # COM port.
+
 
 # Implemented Commands
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ESCPOS_NET.Emitters.BaseCommandValues;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ESCPOS_NET.Emitters
