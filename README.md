@@ -18,7 +18,7 @@ Ethernet or WiFi:
 ```var printer = new NetworkPrinter(ipAddress: "192.168.1.50", port: 9200, reconnectOnTimeout: true);```
 
 USB, Bluetooth, or Serial: 
-```var printer = new SerialPrinter(portName: "COM5", baudRate: 115200)```
+```var printer = new SerialPrinter(portName: "COM5", baudRate: 115200);```
 
 File Output (or Linux USB): 
 ```var printer = new FilePrinter(filePath: "/dev/usb/lp0");```
