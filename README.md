@@ -1,9 +1,99 @@
-# ESC-POS-.NET
-ESC-POS.NET is an MIT licensed library that supports the most common functionality of the ESC/POS standard by Epson.  This is used in thermal receipt printers, line displays, cash drawers, and more!
+# ESCPOS .NET
+ESCPOS.NET is a super easy to use library that supports the most common functionality of the ESC/POS standard by Epson.  It is highly compatible, and runs on full framework .NET as well as .NET Core.
+
+It works with Serial, USB, Ethernet, and WiFi printers, and works great on Windows, Linux and OSX.
+
+This library is used for thermal receipt printers, line displays, cash drawers, and more!
 
 ESC/POS is a binary protocol that's a type of "raw" text, which means you do not need drivers to use it.  
 
-This library encompasses helper functions that assist in creating the binary command stream that is needed to control this hardware, as well as the underlying communications that are needed to interface with the hardware.  This means that Bluetooth, WiFi, Ethernet, USB, and Serial printers are all usable with just this software library and nothing else.
+This library encompasses helper functions that assist in creating the binary command stream that is needed to control this hardware, as well as the underlying communications that are needed to interface with the hardware.  
+
+This means that Bluetooth, WiFi, Ethernet, USB, and Serial printers are all usable with just this software library and nothing else.
+
+# Super Easy to Use
+
+## Step 1: Create a Printer object
+Ethernet or WiFi: 
+```var printer = new NetworkPrinter(ipAddress: "192.168.1.50", port: 9200, reconnectOnTimeout: true);```
+
+USB, Bluetooth, or Serial: 
+```var printer = new SerialPrinter(portName: "COM5", baudRate: 115200)```
+
+File Output (or Linux USB): 
+```var printer = new FilePrinter(filePath: "/dev/usb/lp0");```
+## Step 1a (optional): Turn on Monitoring to get events (printing started/stopped, ran out of paper, etc.)
+```
+// Define a callback method.
+static void StatusChanged(object sender, EventArgs ps)
+{
+    var status = (PrinterStatusEventArgs)ps;
+    Console.WriteLine($"Status: {status.IsPrinterOnline}");
+    Console.WriteLine($"Has Paper? {status.IsPaperOut}");
+    Console.WriteLine($"Paper Running Low? {status.IsPaperLow}");
+    Console.WriteLine($"Cash Drawer Open? {status.IsCashDrawerOpen}");
+    Console.WriteLine($"Cover Open? {status.IsCoverOpen}");
+}
+
+... 
+
+// In your program, register event handler to call the method when printer status changes:
+printer.StatusChanged += StatusChanged;
+
+// and start monitoring for changes.
+printer.StartMonitoring();
+
+```
+
+## Step 2: Write a receipt to the printer
+```
+var e = new EPSON();
+printer.Write(
+  ByteSplicer.Combine(
+    e.CenterAlign(),
+    e.PrintImage(File.ReadAllBytes("images/pd-logo-300.png"), true),
+    e.PrintLine(),
+    e.SetBarcodeHeightInDots(360),
+    e.SetBarWidth(BarWidth.Default),
+    e.SetBarLabelPosition(BarLabelPrintPosition.None),
+    e.PrintBarcode(BarcodeType.ITF, "0123456789"),
+    e.PrintLine(),
+    e.PrintLine("B&H PHOTO & VIDEO"),
+    e.PrintLine("420 NINTH AVE."),
+    e.PrintLine("NEW YORK, NY 10001"),
+    e.PrintLine("(212) 502-6380 - (800)947-9975"),
+    e.SetStyles(PrintStyle.Underline),
+    e.PrintLine("www.bhphotovideo.com"),
+    e.SetStyles(PrintStyle.None),
+    e.PrintLine(),
+    e.LeftAlign(),
+    e.PrintLine("Order: 123456789        Date: 02/01/19"),
+    e.PrintLine(),
+    e.PrintLine(),
+    e.SetStyles(PrintStyle.FontB),
+    e.PrintLine("1   TRITON LOW-NOISE IN-LINE MICROPHONE PREAMP"),
+    e.PrintLine("    TRFETHEAD/FETHEAD                        89.95         89.95"),
+    e.PrintLine("----------------------------------------------------------------"),
+    e.RightAlign(),
+    e.PrintLine("SUBTOTAL         89.95"),
+    e.PrintLine("Total Order:         89.95"),
+    e.PrintLine("Total Payment:         89.95"),
+    e.PrintLine(),
+    e.LeftAlign(),
+    e.SetStyles(PrintStyle.Bold | PrintStyle.FontB),
+    e.PrintLine("SOLD TO:                        SHIP TO:"),
+    e.SetStyles(PrintStyle.FontB),
+    e.PrintLine("  FIRSTN LASTNAME                 FIRSTN LASTNAME"),
+    e.PrintLine("  123 FAKE ST.                    123 FAKE ST."),
+    e.PrintLine("  DECATUR, IL 12345               DECATUR, IL 12345"),
+    e.PrintLine("  (123)456-7890                   (123)456-7890"),
+    e.PrintLine("  CUST: 87654321"),
+    e.PrintLine(),
+    e.PrintLine()
+  )
+);
+```
+
 
 # Supported Platforms
 Desktop support (WiFI, Ethernet, Bluetooth, USB, Serial):
@@ -33,7 +123,6 @@ Cash Drawers are supported, as are Line Displays.
 
 ## Getting Started
 Check out the ESCPOS_NET.ConsoleTest for a comprehensive test suite that covers all implemented functions.
-
 
 This package is available on NuGet @ https://www.nuget.org/packages/ESCPOS_NET/
 
