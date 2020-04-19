@@ -1,4 +1,4 @@
-
+<img src="https://raw.githubusercontent.com/lukevp/ESC-POS-.NET/master/banner.jpg" />
 <h1 align="center">ESCPOS.NET - Easy to use, Cross-Platform, Fast and Efficient.</h1>
 <br />
 <p align="center">
