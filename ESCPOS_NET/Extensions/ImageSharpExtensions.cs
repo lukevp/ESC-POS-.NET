@@ -19,7 +19,7 @@ namespace SixLabors.ImageSharp
                     });
                 }
 
-                img.BinaryDiffuse(new Processing.Processors.Dithering.StuckiDiffuser(), threshold);
+                img.Grayscale().BinaryDiffuse(new Processing.Processors.Dithering.StuckiDiffuser(), threshold);
 
                 if (!rasterFormat)
                 {
