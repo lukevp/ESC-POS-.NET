@@ -9,13 +9,16 @@
     <Description>.NET Standard 2.0 Implementation of ESC/POS command generation and integration with thermal printers.
 Allows creating receipts with all common functionality supported.</Description>
     <Copyright>Copyright 2020 CandL Development, LLC.</Copyright>
-    <PackageLicenseUrl>https://licenses.nuget.org/MIT</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <RepositoryUrl>https://github.com/lukevp/ESC-POS-.NET</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>epson thermal receipt printing esc pos escpos escp</PackageTags>
-    <Version>1.0.0</Version>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <PackageTags>epson thermal receipt printing printer usb wifi bluetooth serial esc pos escpos escp esc/pos esc/pos.net esc_pos esc_pos_net esc_pos_usb esc_pos_usb_net</PackageTags>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/lukevp/ESC-POS-.NET</PackageProjectUrl>
+    <PackageReleaseNotes>Update to latest imagesharp and use more imagesharp extensions for resizing</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
