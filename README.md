@@ -1,4 +1,21 @@
-# ESCPOS .NET
+
+<h1 align="center">ESCPOS.NET - Easy to use, Cross-Platform, Fast and Efficient.</h1>
+<br />
+<p align="center">
+  <a href="https://raw.githubusercontent.com/lukevp/ESC-POS-.NET/master/LICENSE">
+    <img src="https://img.shields.io/github/license/lukevp/ESC-POS-.NET" />
+  </a>
+  <a href="https://github.com/lukevp/ESC-POS-.NET/issues">
+    <img src="https://img.shields.io/github/issues/lukevp/ESC-POS-.NET" /> 
+    <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/lukevp/ESC-POS-.NET">
+  </a>
+  <a href="https://www.nuget.org/packages/ESCPOS_NET/">
+    <img alt="Nuget" src="https://img.shields.io/nuget/dt/ESCPOS_NET?label=NuGet%20downloads">
+    </a>
+   <a href="https://github.com/lukevp/ESC-POS-.NET/graphs/contributors">
+    <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/lukevp/ESC-POS-.NET">
+    </a>
+</p>
 ESCPOS.NET is a super easy to use library that supports the most common functionality of the ESC/POS standard by Epson.  It is highly compatible, and runs on full framework .NET as well as .NET Core.
 
 It works with Serial, USB, Ethernet, and WiFi printers, and works great on Windows, Linux and OSX.
@@ -11,19 +28,21 @@ This library encompasses helper functions that assist in creating the binary com
 
 This means that Bluetooth, WiFi, Ethernet, USB, and Serial printers are all usable with just this software library and nothing else.
 
-# Super Easy to Use
+# Get Started
 
 ## Step 1: Create a Printer object
-Ethernet or WiFi: 
-```var printer = new NetworkPrinter(ipAddress: "192.168.1.50", port: 9200, reconnectOnTimeout: true);```
+```csharp
+// Ethernet or WiFi
+var printer = new NetworkPrinter(ipAddress: "192.168.1.50", port: 9000, reconnectOnTimeout: true);
 
-USB, Bluetooth, or Serial: 
-```var printer = new SerialPrinter(portName: "COM5", baudRate: 115200);```
+// USB, Bluetooth, or Serial
+var printer = new SerialPrinter(portName: "COM5", baudRate: 115200);
 
-File Output (or Linux USB): 
-```var printer = new FilePrinter(filePath: "/dev/usb/lp0");```
-## Step 1a (optional): Turn on Monitoring to get events (printing started/stopped, ran out of paper, etc.)
+// Linux output to USB / Serial file
+var printer = new FilePrinter(filePath: "/dev/usb/lp0");
 ```
+## Step 1a (optional): Monitor for Events - out of paper, cover open...
+```csharp
 // Define a callback method.
 static void StatusChanged(object sender, EventArgs ps)
 {
@@ -46,7 +65,7 @@ printer.StartMonitoring();
 ```
 
 ## Step 2: Write a receipt to the printer
-```
+```csharp
 var e = new EPSON();
 printer.Write(
   ByteSplicer.Combine(
@@ -121,7 +140,7 @@ Generic thermal printers that implement ESC/POS typically work, for example the 
 Cash Drawers are supported, as are Line Displays.
 
 
-## Getting Started
+## Further Documentation and Usage
 Check out the ESCPOS_NET.ConsoleTest for a comprehensive test suite that covers all implemented functions.
 
 This package is available on NuGet @ https://www.nuget.org/packages/ESCPOS_NET/
