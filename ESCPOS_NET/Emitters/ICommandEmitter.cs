@@ -30,6 +30,7 @@
         byte[] ReverseMode(bool activate);
         byte[] RightCharacterSpacing(int spaceCount);
         byte[] UpsideDownMode(bool activate);
+        byte[] CodePage(CodePage codePage);
 
         /* Action Commands */
         byte[] FullCut();

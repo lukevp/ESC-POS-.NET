@@ -10,5 +10,6 @@ namespace ESCPOS_NET.Emitters
         public byte[] CenterAlign() => new byte[] { Cmd.ESC, Chars.Alignment, (byte)Align.Center };
         public byte[] RightAlign() => new byte[] { Cmd.ESC, Chars.Alignment, (byte)Align.Right };
         public byte[] RightCharacterSpacing(int spaceCount) => new byte[] { Cmd.ESC, Chars.RightCharacterSpacing, (byte)spaceCount };
+        public byte[] CodePage(CodePage codePage) => new byte[] { Cmd.ESC, Chars.CodePage, (byte)codePage };
     }
 }
