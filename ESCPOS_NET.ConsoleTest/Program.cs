@@ -47,7 +47,7 @@ namespace ESCPOS_NET.ConsoleTest
                     {
                         baudRate = "115200";
                     }
-                    printer = new SerialPrinter(comPort, int.Parse(baudRate));
+                    printer = new SerialPrinter(portName: "COM5", baudRate: 115200);
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
@@ -57,7 +57,7 @@ namespace ESCPOS_NET.ConsoleTest
                     {
                         comPort = "/dev/usb/lp0";
                     }
-                    printer = new FilePrinter(comPort);
+                    printer = new FilePrinter(filePath: comPort);
                 }
             }
             else if (choice == 2)
@@ -74,7 +74,7 @@ namespace ESCPOS_NET.ConsoleTest
                 {
                     networkPort = "9000";
                 }
-                printer = new NetworkPrinter(ip, int.Parse(networkPort), true);
+                printer = new NetworkPrinter(ipAddress: ip, port: int.Parse(networkPort), reconnectOnTimeout: true);
             }
 
             bool monitor = false;
@@ -199,7 +199,7 @@ namespace ESCPOS_NET.ConsoleTest
         static void StatusChanged(object sender, EventArgs ps)
         {
             var status = (PrinterStatusEventArgs)ps;
-            Console.WriteLine($"Printer Online Status: {status.IsPrinterOnline}");
+            Console.WriteLine($"Printer Online Status: {status.IsCoverOpen}");
             Console.WriteLine(JsonConvert.SerializeObject(status));
         }
         private static bool _hasEnabledStatusMonitoring = false;
