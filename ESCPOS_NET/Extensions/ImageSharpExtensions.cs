@@ -15,11 +15,11 @@ namespace SixLabors.ImageSharp
                     img.Resize(new ResizeOptions
                     {
                         Mode = ResizeMode.Max,
-                        Size = new SixLabors.Primitives.Size(maxWidth ?? int.MaxValue, maxHeight ?? int.MaxValue),
+                        Size = new Size(maxWidth ?? int.MaxValue, maxHeight ?? int.MaxValue),
                     });
                 }
 
-                img.Grayscale().BinaryDiffuse(new Processing.Processors.Dithering.StuckiDiffuser(), threshold);
+                img.Grayscale().BinaryDither(KnownDitherings.Stucki);
 
                 if (!rasterFormat)
                 {

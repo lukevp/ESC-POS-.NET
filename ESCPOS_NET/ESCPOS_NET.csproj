@@ -22,7 +22,7 @@ Allows creating receipts with all common functionality supported.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-rc0001" />
     <PackageReference Include="System.IO.Ports" Version="4.6.0" />
   </ItemGroup>
 

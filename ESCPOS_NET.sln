@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2016
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESCPOS_NET", "ESCPOS_NET\ESCPOS_NET.csproj", "{BA181101-43A5-435E-8744-ACDA313D04D8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESCPOS_NET.ConsoleTest", "ESCPOS_NET.ConsoleTest\ESCPOS_NET.ConsoleTest.csproj", "{958464FE-6B30-4BA7-A4B1-D63ED2E23158}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{C1C6F2A5-E4BF-4C51-B445-1AF7904DE8E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{958464FE-6B30-4BA7-A4B1-D63ED2E23158}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{958464FE-6B30-4BA7-A4B1-D63ED2E23158}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{958464FE-6B30-4BA7-A4B1-D63ED2E23158}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1C6F2A5-E4BF-4C51-B445-1AF7904DE8E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1C6F2A5-E4BF-4C51-B445-1AF7904DE8E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1C6F2A5-E4BF-4C51-B445-1AF7904DE8E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1C6F2A5-E4BF-4C51-B445-1AF7904DE8E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
