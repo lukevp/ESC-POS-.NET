@@ -47,7 +47,7 @@ namespace ESCPOS_NET.ConsoleTest
                     {
                         baudRate = "115200";
                     }
-                    printer = new SerialPrinter(portName: "COM5", baudRate: 115200);
+                    printer = new SerialPrinter(portName: comPort, baudRate: 115200);
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
