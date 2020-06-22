@@ -1,12 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.29613.14
+VisualStudioVersion = 16.0.29326.143
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESCPOS_NET", "ESCPOS_NET\ESCPOS_NET.csproj", "{BA181101-43A5-435E-8744-ACDA313D04D8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESCPOS_NET.ConsoleTest", "ESCPOS_NET.ConsoleTest\ESCPOS_NET.ConsoleTest.csproj", "{958464FE-6B30-4BA7-A4B1-D63ED2E23158}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESCPOS_NET.ConsoleTest.FullFramework45", "ESCPOS_NET.ConsoleTest.FullFramework45\ESCPOS_NET.ConsoleTest.FullFramework45.csproj", "{06BFEF92-203D-4A18-9A8A-F0773F13181E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,6 +23,10 @@ Global
 		{958464FE-6B30-4BA7-A4B1-D63ED2E23158}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{958464FE-6B30-4BA7-A4B1-D63ED2E23158}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{958464FE-6B30-4BA7-A4B1-D63ED2E23158}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06BFEF92-203D-4A18-9A8A-F0773F13181E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06BFEF92-203D-4A18-9A8A-F0773F13181E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06BFEF92-203D-4A18-9A8A-F0773F13181E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06BFEF92-203D-4A18-9A8A-F0773F13181E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

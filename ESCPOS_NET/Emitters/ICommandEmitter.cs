@@ -54,6 +54,12 @@
         byte[] SetBarWidth(BarWidth width);
         byte[] SetBarLabelPosition(BarLabelPrintPosition position);
         byte[] SetBarLabelFontB(bool fontB);
+        byte[] Set2DCodeWidth(TwoDimensionalCodeType type, int width);
+        byte[] Set2DCodeHeight(TwoDimensionalCodeType type, int height);
+        byte[] Print2DCode(TwoDimensionalCodeType type, string codeData, int width, int height);
+        byte[] PrintQRCode(string codeData, int size);
+        byte[] Print2DCode(TwoDimensionalCodeType type, string codeData, int size);
+        byte[] Print2DCode(TwoDimensionalCodeType type, string codeData);
         /* 2D-Code Commands */
     }
 }
