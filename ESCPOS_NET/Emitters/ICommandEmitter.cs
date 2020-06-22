@@ -54,6 +54,7 @@
         byte[] SetBarWidth(BarWidth width);
         byte[] SetBarLabelPosition(BarLabelPrintPosition position);
         byte[] SetBarLabelFontB(bool fontB);
+
         /* 2D-Code Commands */
     }
 }
