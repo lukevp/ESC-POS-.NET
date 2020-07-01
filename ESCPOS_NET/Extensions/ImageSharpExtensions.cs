@@ -19,6 +19,7 @@ namespace SixLabors.ImageSharp
                     });
                 }
 
+                img.BackgroundColor(Color.White);
                 img.Grayscale().BinaryDither(KnownDitherings.Stucki);
 
                 if (!rasterFormat)
