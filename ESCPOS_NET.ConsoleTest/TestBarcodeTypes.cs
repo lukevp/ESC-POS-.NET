@@ -19,6 +19,10 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintBarcode(BarcodeType.CODE128, "ESC_POS_NET"),
             e.PrintLine(),
 
+            e.PrintLine("CODE128 Type C:"),
+            e.PrintBarcode(BarcodeType.CODE128, "12345678910", BarcodeCode.CODE_C),
+            e.PrintLine(),
+
             e.PrintLine("CODE39:"),
             e.PrintBarcode(BarcodeType.CODE39, "*ESC-POS-NET*"),
             e.PrintLine(),
