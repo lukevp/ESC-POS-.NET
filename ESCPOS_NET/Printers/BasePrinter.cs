@@ -103,7 +103,7 @@ namespace ESCPOS_NET
             }
         }
 
-        protected virtual void Flush(object sender, ElapsedEventArgs e)
+        public virtual void Flush(object sender, ElapsedEventArgs e)
         {
             BytesWrittenSinceLastFlush = 0;
             FlushTimer.Stop();
