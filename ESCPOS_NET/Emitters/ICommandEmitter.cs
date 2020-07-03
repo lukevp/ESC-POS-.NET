@@ -50,6 +50,7 @@
 
         /* Barcode Commands */
         byte[] PrintBarcode(BarcodeType type, string barcode, BarcodeCode code = BarcodeCode.CODE_B);
+        byte[] Print2DCode(TwoDimensionCodeType type, string data, Size2DCode size = Size2DCode.NORMAL, CorrectionLevel2DCode correction = CorrectionLevel2DCode.PERCENT_7);
         byte[] SetBarcodeHeightInDots(int height);
         byte[] SetBarWidth(BarWidth width);
         byte[] SetBarLabelPosition(BarLabelPrintPosition position);
