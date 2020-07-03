@@ -44,7 +44,7 @@ namespace ESCPOS_NET.DataValidation
                     throw new ArgumentException($"Code '{data}' contained invalid characters not in: {constraints.ValidChars}.");
                 }
             }
-            else if (!data.All(x => constraints.ValidChars.Contains(x)))
+            else if (constraints.ValidChars != null && !data.All(x => constraints.ValidChars.Contains(x)))
             {
                 throw new ArgumentException($"Code '{data}' contained invalid characters not in: {constraints.ValidChars}.");
             }
@@ -57,13 +57,22 @@ namespace ESCPOS_NET.DataValidation
 
     public static class DataValidator
     {
-        private static BarcodeDataValidator singleton = null;
+        private static BarcodeDataValidator singletonBarcode = null;
+        private static TwoDimensionCodeDataValidator singleton2DCode = null;
         public static void ValidateBarcode(BarcodeType type, string data)
         {
-            if (singleton is null)
-                singleton = new BarcodeDataValidator();
+            if (singletonBarcode is null)
+                singletonBarcode = new BarcodeDataValidator();
 
-            singleton.Validate(type, data);
+            singletonBarcode.Validate(type, data);
+        }
+
+        public static void Validate2DCode(TwoDimensionCodeType type, string data)
+        {
+            if (singleton2DCode is null)
+                singleton2DCode = new TwoDimensionCodeDataValidator();
+
+            singleton2DCode.Validate(type, data);
         }
 
         private class BarcodeDataValidator : BaseDataValidator<BarcodeType>
@@ -121,6 +130,23 @@ namespace ESCPOS_NET.DataValidation
                         break;
                 }
             }
+        }
+
+        private class TwoDimensionCodeDataValidator : BaseDataValidator<TwoDimensionCodeType>
+        {
+            public TwoDimensionCodeDataValidator()
+            {
+                _constraints = new Dictionary<TwoDimensionCodeType, DataConstraint>()
+                {
+                    { TwoDimensionCodeType.PDF417, new DataConstraint() { MinLength = 0, MaxLength = 255 } },
+                    { TwoDimensionCodeType.QRCODE_MODEL1, new DataConstraint() { MinLength = 0, MaxLength = 254 } },
+                    { TwoDimensionCodeType.QRCODE_MODEL2, new DataConstraint() { MinLength = 0, MaxLength = 254 } },
+                    { TwoDimensionCodeType.QRCODE_MICRO, new DataConstraint() { MinLength = 0, MaxLength = 254 } }
+                };
+            }
+
+            //TO-DO: Research specific validations for QRCode & PDF417
+            protected override void RunSpecificValidations(TwoDimensionCodeType type, string barcode) { }
         }
     }
 
