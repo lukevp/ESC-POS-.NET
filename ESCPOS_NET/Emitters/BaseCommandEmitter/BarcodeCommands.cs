@@ -29,14 +29,14 @@ namespace ESCPOS_NET.Emitters
                         if (b[i] < '0' || b[i] > '9')
                             throw new ArgumentException($"{nameof(barcode)} must contain numerals only");
 
-                    byte[] ob = new byte[b.Length / 2]; 
-                    for (int i = 0, 
+                    byte[] ob = new byte[b.Length / 2];
+                    for (int i = 0,
                              obc = 0; i < b.Length; i += 2)
                         ob[obc++] = (byte)(((b[i] - '0') * 10) + (b[i + 1] - '0'));
 
                     barcode = Encoding.ASCII.GetString(ob);
                 }
-                #endregion
+                #endregion Issue #48
                 barcode = barcode.Replace("{", "{{");
                 barcode = $"{(char)0x7B}{(char)code}" + barcode;
             }
@@ -46,7 +46,7 @@ namespace ESCPOS_NET.Emitters
             return command.ToArray();
         }
 
-        public byte[] Print2DCode(TwoDimensionCodeType type, string data, Size2DCode size, CorrectionLevel2DCode correction)
+        public byte[] Print2DCode(TwoDimensionCodeType type, string data, Size2DCode size = Size2DCode.NORMAL, CorrectionLevel2DCode correction = CorrectionLevel2DCode.PERCENT_7)
         {
             DataValidator.Validate2DCode(type, data);
             List<byte> command = new List<byte>();

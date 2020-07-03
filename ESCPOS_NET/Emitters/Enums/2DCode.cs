@@ -23,9 +23,9 @@ namespace ESCPOS_NET.Emitters
 
     public enum CorrectionLevel2DCode
     {
-        Percent7 = 48,
-        Percent15,
-        Percent25,
-        Percent30
+        PERCENT_7 = 48,
+        PERCENT_15,
+        PERCENT_25,
+        PERCENT_30
     }
 }
