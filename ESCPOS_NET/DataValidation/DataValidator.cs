@@ -103,22 +103,13 @@ namespace ESCPOS_NET.DataValidation
                 else if (type == BarcodeType.CODE128 && code == BarcodeCode.CODE_C)
                 {
                     if (barcode.Length % 2 != 0)
-                    { 
+                    {
                         throw new ArgumentException($"{nameof(barcode)} length must be divisible by 2");
                     }
 
                     if (!barcode.All(x => x <= '9' && x >= '0'))
                     {
                         throw new ArgumentException($"Barcode {barcode} contained invalid characters not in: {constraints.ValidChars}.");
-                    }
-
-                    byte[] b = Encoding.ASCII.GetBytes(barcode);
-                    for (int i = 0; i < b.Length; i++)
-                    {
-                        if (b[i] < '0' || b[i] > '9')
-                        {
-                            throw new ArgumentException($"{nameof(barcode)} must contain numerals only");
-                        }
                     }
                 }
             }
