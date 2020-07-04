@@ -109,7 +109,7 @@ namespace ESCPOS_NET.DataValidation
 
                     if (!barcode.All(x => x <= '9' && x >= '0'))
                     {
-                        throw new ArgumentException($"Barcode {barcode} contained invalid characters not in: {constraints.ValidChars}.");
+                        throw new ArgumentException($"Barcode {barcode} is invalid.  CODE128 CODE_C barcodes only support numeric characters.");
                     }
                 }
             }
