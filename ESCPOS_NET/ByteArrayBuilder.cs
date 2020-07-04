@@ -7,18 +7,18 @@ using System.Linq;
 namespace ESCPOS_NET.Utilities
     {
     /// <summary>
-    /// Provides similar functionality to a StringBuilder, but for bytes
+    /// Provides similar functionality to a StringBuilder, but for bytes.
     /// </summary>
     /// <remarks>
     /// To fill the builder, construct a new, empty builder, and call the
-    /// appropriate Append method overloads. 
-    /// To read data from the builder, either use Rewind on an existing 
+    /// appropriate Append method overloads.
+    /// To read data from the builder, either use Rewind on an existing
     /// builder, or construct a new builder by passing it the byte array
-    /// from a previous builder - which you can get with the ToArray 
+    /// from a previous builder - which you can get with the ToArray
     /// method.
     /// </remarks>
     /// <example>
-    ///      
+    ///
     ///    ByteArrayBuilder bab = new ByteArrayBuilder();
     ///    string[] lines = File.ReadAllLines(@"D:\Temp\myText.txt");
     ///    bab.Append(lines.Length);
@@ -27,7 +27,7 @@ namespace ESCPOS_NET.Utilities
     ///        bab.Append(s);
     ///        }
     ///    byte[] data = bab.ToArray();
-    ///  ...       
+    ///  ...
     ///    ByteArrayBuilder babOut = new ByteArrayBuilder(data);
     ///    int count = bab.GetInt();
     ///    string[] linesOut = new string[count];
@@ -35,16 +35,17 @@ namespace ESCPOS_NET.Utilities
     ///        {
     ///        linesOut[lineNo](babOut.GetString());
     ///        }
+    ///     .
     /// </example>
     public class ByteArrayBuilder : IDisposable
     {
         /// <summary>
-        /// True in a byte form of the Line
+        /// True in a byte form of the Line.
         /// </summary>
         private const byte StreamTrue = (byte)1;
 
         /// <summary>
-        /// False in the byte form of a line
+        /// False in the byte form of a line.
         /// </summary>
         private const byte StreamFalse = (byte)0;
 
@@ -54,7 +55,7 @@ namespace ESCPOS_NET.Utilities
         private MemoryStream store = new MemoryStream();
 
         /// <summary>
-        /// Bytes in the store.
+        /// Gets bytes in the store.
         /// </summary>
         public int Length => (int)store.Length;
 
@@ -72,9 +73,9 @@ namespace ESCPOS_NET.Utilities
         }
 
         /// <summary>
-        /// Adds an IEnumerable of bytes to an array
+        /// Adds an IEnumerable of bytes to an array.
         /// </summary>
-        /// <param name="b">Value to append to existing builder data</param>
+        /// <param name="b">Value to append to existing builder data.</param>
         /// </param>
         public ByteArrayBuilder Append(IEnumerable<byte> b)
         {
@@ -83,6 +84,7 @@ namespace ESCPOS_NET.Utilities
                 AddBytes((byte[])b);
                 return this;
             }
+
             AddBytes(b.ToArray());
             return this;
         }
@@ -164,11 +166,12 @@ namespace ESCPOS_NET.Utilities
                     throw new ApplicationException("Buffer did not contain " + length + " bytes");
                 }
             }
+
             return data;
         }
 
         /// <summary>
-        /// Dispose of this builder and it's resources
+        /// Dispose of this builder and its resources.
         /// </summary>
         public void Dispose()
         {

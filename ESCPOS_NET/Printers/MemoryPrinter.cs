@@ -7,7 +7,8 @@ namespace ESCPOS_NET
         private MemoryStream _ms;
 
         // TODO: default values to their default values in ctor.
-        public MemoryPrinter() : base()
+        public MemoryPrinter() 
+            : base()
         {
             _ms = new MemoryStream();
             Writer = new BinaryWriter(_ms);
