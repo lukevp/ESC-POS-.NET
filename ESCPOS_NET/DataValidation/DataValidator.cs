@@ -1,7 +1,8 @@
-﻿using ESCPOS_NET.Emitters;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using ESCPOS_NET.Emitters;
 
 namespace ESCPOS_NET.DataValidation
 {
@@ -25,7 +26,7 @@ namespace ESCPOS_NET.DataValidation
             { BarcodeType.GS1_DATABAR_EXPANDED, new DataConstraint() { MinLength = 2, MaxLength = 255, ValidChars = "0123456789ABCDabcd !\"%$'()*+,-./:;<=>?_{" } },
         };
 
-        public static void ValidateBarcode(BarcodeType type, string barcode)
+        public static void ValidateBarcode(BarcodeType type, BarcodeCode code, string barcode)
         {
             if (barcode == null)
             {
@@ -54,7 +55,6 @@ namespace ESCPOS_NET.DataValidation
                 }
 
                 // Check if barcode contains invalid characters.
-
                 if (constraints.ValidChars == "7BIT-ASCII")
                 {
                     if (!barcode.All(x => x <= 127 && x >= 0))
@@ -94,9 +94,22 @@ namespace ESCPOS_NET.DataValidation
                     {
                         throw new ArgumentException($"CODABAR_NW_7 Barcode {barcode} must start and end with an ABCD character.");
                     }
+
                     if (barcode.Skip(1).Take(barcode.Length - 2).Any(x => "ABCD".Contains(x)))
                     {
                         throw new ArgumentException($"CODABAR_NW_7 Barcode {barcode} must not include ABCD characters in the body of the barcode.");
+                    }
+                }
+                else if (type == BarcodeType.CODE128 && code == BarcodeCode.CODE_C)
+                {
+                    if (barcode.Length % 2 != 0)
+                    {
+                        throw new ArgumentException($"{nameof(barcode)} length must be divisible by 2");
+                    }
+
+                    if (!barcode.All(x => x <= '9' && x >= '0'))
+                    {
+                        throw new ArgumentException($"Barcode {barcode} is invalid.  CODE128 CODE_C barcodes only support numeric characters.");
                     }
                 }
             }

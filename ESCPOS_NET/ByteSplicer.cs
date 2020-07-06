@@ -16,6 +16,7 @@ namespace ESCPOS_NET.Utilities
 
                 builder.Append((byte[])byteArray);
             }
+
             return builder.ToArray();
         }
     }

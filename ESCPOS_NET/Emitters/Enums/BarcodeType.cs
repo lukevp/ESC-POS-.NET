@@ -2,6 +2,7 @@
 {
     public enum BarcodeType // All from Function B
     {
+#pragma warning disable SA1025 // Code should not contain multiple whitespace in a row
         UPC_A                       = 0x41,
         UPC_E                       = 0x42,
         JAN13_EAN13                 = 0x43,
@@ -15,6 +16,7 @@
         GS1_DATABAR_OMNIDIRECTIONAL = 0x4B,
         GS1_DATABAR_TRUNCATED       = 0x4C,
         GS1_DATABAR_LIMITED         = 0x4D,
-        GS1_DATABAR_EXPANDED        = 0x4E
+        GS1_DATABAR_EXPANDED        = 0x4E,
+#pragma warning restore SA1025 // Code should not contain multiple whitespace in a row
     }
 }
