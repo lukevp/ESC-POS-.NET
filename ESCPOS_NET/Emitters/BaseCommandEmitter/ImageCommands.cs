@@ -1,6 +1,5 @@
-using ESCPOS_NET.Utilities;
 using ESCPOS_NET.Emitters.BaseCommandValues;
-
+using ESCPOS_NET.Utilities;
 using SixLabors.ImageSharp;
 
 namespace ESCPOS_NET.Emitters
@@ -17,6 +16,7 @@ namespace ESCPOS_NET.Emitters
                 commandLength >>= 8;
                 i++;
             }
+
             if (i >= 3)
             {
                 return new byte[] { Cmd.GS, Images.ImageCmd8, Images.ImageCmdL, lengths[0], lengths[1], lengths[2], lengths[3] };
@@ -92,6 +92,7 @@ namespace ESCPOS_NET.Emitters
             {
                 response.Append(GetImageHeader(imageCommandBytes.Length));
             }
+
             response.Append(imageCommandBytes);
             return response.ToArray();
         }

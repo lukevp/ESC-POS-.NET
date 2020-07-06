@@ -11,18 +11,28 @@ namespace ESCPOS_NET
 {
     public abstract partial class BasePrinter : IDisposable
     {
-    	private bool disposed = false;
+        private bool disposed = false;
+
         private volatile bool _isMonitoring;
+
         private CancellationTokenSource _cancellationTokenSource;
+
         private readonly int _maxBytesPerWrite = 15000; // max byte chunks to write at once.
-        
+
         public PrinterStatusEventArgs Status { get; private set; } = null;
+
         public event EventHandler StatusChanged;
+
         protected BinaryWriter Writer { get; set; }
+
         protected BinaryReader Reader { get; set; }
+
         protected System.Timers.Timer FlushTimer { get; set; }
+
         protected ConcurrentQueue<byte> ReadBuffer { get; set; } = new ConcurrentQueue<byte>();
+
         protected int BytesWrittenSinceLastFlush { get; set; } = 0;
+
         protected virtual bool IsConnected => false;
 
         protected BasePrinter()
@@ -94,9 +104,11 @@ namespace ESCPOS_NET
                     hasFlushed = true;
                     Flush(null, null);
                 }
+
                 bytePointer += count;
                 bytesLeft -= count;
             }
+
             if (!hasFlushed)
             {
                 FlushTimer.Start();
@@ -128,8 +140,8 @@ namespace ESCPOS_NET
             if (_isMonitoring)
             {
                 Console.WriteLine(nameof(StopMonitoring));
-				_isMonitoring = false;
-				ReadBuffer = new ConcurrentQueue<byte>();
+                _isMonitoring = false;
+                ReadBuffer = new ConcurrentQueue<byte>();
 
                 if (_cancellationTokenSource != null)
                 {
@@ -218,7 +230,7 @@ namespace ESCPOS_NET
                     DidRecoverableErrorOccur = bytes[1].IsBitSet(6),
                     IsPaperLow = bytes[2].IsBitSet(0) && bytes[2].IsBitSet(1),
                     IsPaperOut = bytes[2].IsBitSet(2) && bytes[2].IsBitSet(3),
-                    DeviceConnectionTimeout = timeout
+                    DeviceConnectionTimeout = timeout,
                 };
             }
 
@@ -255,15 +267,16 @@ namespace ESCPOS_NET
                 {
                     FlushTimer.Elapsed -= Flush;
                 }
-               
+
                 FlushTimer?.Dispose();
                 Reader?.Close();
                 Reader?.Dispose();
                 Writer?.Close();
                 Writer?.Dispose();
-                
+
                 OverridableDispose();
             }
+
             disposed = true;
         }
     }

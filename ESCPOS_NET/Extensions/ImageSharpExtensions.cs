@@ -50,7 +50,7 @@ namespace SixLabors.ImageSharp
                         continue;
                     }
 
-                    result[rowStartPosition + x / 8] |= (byte)(0x01 << (7 - (x % 8)));
+                    result[rowStartPosition + (x / 8)] |= (byte)(0x01 << (7 - (x % 8)));
                 }
             }
 

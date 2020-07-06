@@ -13,30 +13,23 @@ namespace ESCPOS_NET.Emitters
         /* Barcode Commands */
         public byte[] PrintBarcode(BarcodeType type, string barcode, BarcodeCode code = BarcodeCode.CODE_B)
         {
-            DataValidator.ValidateBarcode(type, barcode);
+            DataValidator.ValidateBarcode(type, code, barcode);
 
             // For CODE128, prepend the first 2 characters as 0x7B and the CODE type, and escape 0x7B characters.
             if (type == BarcodeType.CODE128)
             {
-                #region Issue #48
                 if (code == BarcodeCode.CODE_C)
                 {
-                    if (barcode.Length % 2 != 0)
-                        throw new ArgumentException($"{nameof(barcode)} length must be divisible by 2");
-
                     byte[] b = Encoding.ASCII.GetBytes(barcode);
-                    for (int i = 0; i < b.Length; i++)
-                        if (b[i] < '0' || b[i] > '9')
-                            throw new ArgumentException($"{nameof(barcode)} must contain numerals only");
-
                     byte[] ob = new byte[b.Length / 2];
-                    for (int i = 0,
-                             obc = 0; i < b.Length; i += 2)
+                    for (int i = 0, obc = 0; i < b.Length; i += 2)
+                    {
                         ob[obc++] = (byte)(((b[i] - '0') * 10) + (b[i + 1] - '0'));
+                    }
 
                     barcode = Encoding.ASCII.GetString(ob);
                 }
-                #endregion Issue #48
+
                 barcode = barcode.Replace("{", "{{");
                 barcode = $"{(char)0x7B}{(char)code}" + barcode;
             }
@@ -59,13 +52,13 @@ namespace ESCPOS_NET.Emitters
                     command.AddRange(initial, Barcodes.SetPDF417DotSize, (byte)size);
                     command.AddRange(initial, Barcodes.SetPDF417CorrectionLevel, (byte)correction);
 
-                    //k = (pL + pH * 256) - 3 --> But pH is always 0.
+                    // k = (pL + pH * 256) - 3 --> But pH is always 0.
                     int k = data.Length;
                     int l = k + 3;
                     command.AddRange(initial, (byte)l, Barcodes.StorePDF417Data);
                     command.AddRange(data.ToCharArray().Select(x => (byte)x));
 
-                    //Prints stored PDF417
+                    // Prints stored PDF417
                     command.AddRange(initial, Barcodes.PrintPDF417);
                     break;
 
@@ -81,7 +74,7 @@ namespace ESCPOS_NET.Emitters
                     command.AddRange(initial, (byte)pL, (byte)pH, Barcodes.StoreQRCodeData);
                     command.AddRange(data.ToCharArray().Select(x => (byte)x));
 
-                    //Prints stored QRCode
+                    // Prints stored QRCode
                     command.AddRange(initial, Barcodes.PrintQRCode);
                     break;
 
@@ -93,8 +86,11 @@ namespace ESCPOS_NET.Emitters
         }
 
         public byte[] SetBarcodeHeightInDots(int height) => new byte[] { Cmd.GS, Barcodes.SetBarcodeHeightInDots, (byte)height };
+
         public byte[] SetBarWidth(BarWidth width) => new byte[] { Cmd.GS, Barcodes.SetBarWidth, (byte)width };
+
         public byte[] SetBarLabelPosition(BarLabelPrintPosition position) => new byte[] { Cmd.GS, Barcodes.SetBarLabelPosition, (byte)position };
+
         public byte[] SetBarLabelFontB(bool fontB) => new byte[] { Cmd.GS, Barcodes.SetBarLabelFont, (byte)(fontB ? 1 : 0) };
     }
 }

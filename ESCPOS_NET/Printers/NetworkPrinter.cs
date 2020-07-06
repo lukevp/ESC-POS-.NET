@@ -16,21 +16,24 @@ namespace ESCPOS_NET
 
         protected override bool IsConnected => !((_socket.Poll(1000, SelectMode.SelectRead) && (_socket.Available == 0)) || !_socket.Connected);
 
-        public NetworkPrinter(IPEndPoint endPoint, bool reconnectOnTimeout) : base()
+        public NetworkPrinter(IPEndPoint endPoint, bool reconnectOnTimeout) 
+            : base()
         {
             _reconnectOnTimeout = reconnectOnTimeout;
             _endPoint = endPoint;
             Connect();
         }
 
-        public NetworkPrinter(IPAddress ipAddress, int port, bool reconnectOnTimeout) : base()
+        public NetworkPrinter(IPAddress ipAddress, int port, bool reconnectOnTimeout) 
+            : base()
         {
             _reconnectOnTimeout = reconnectOnTimeout;
             _endPoint = new IPEndPoint(ipAddress, port);
             Connect();
         }
 
-        public NetworkPrinter(string ipAddress, int port, bool reconnectOnTimeout) : base()
+        public NetworkPrinter(string ipAddress, int port, bool reconnectOnTimeout) 
+            : base()
         {
             _reconnectOnTimeout = reconnectOnTimeout;
             _endPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);

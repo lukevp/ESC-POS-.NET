@@ -23,6 +23,10 @@ Allows creating receipts with all common functionality supported.</Description>
 
   <ItemGroup>
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-rc0001" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="System.IO.Ports" Version="4.6.0" />
   </ItemGroup>
 

@@ -8,7 +8,8 @@ namespace ESCPOS_NET
     {
         private SerialPort _serialPort;
 
-        public SerialPrinter(string portName, int baudRate) : base()
+        public SerialPrinter(string portName, int baudRate) 
+            : base()
         {
             _serialPort = new SerialPort(portName, baudRate);
             _serialPort.Open();
