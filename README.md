@@ -148,7 +148,14 @@ This package is available on NuGet @ https://www.nuget.org/packages/ESCPOS_NET/
 Please comment / DM / open issues and let me know how the library is working for you!
 
 ## Contributors
-Thanks to all of our contributors working to make this the best .NET thermal printer library out there! @lukevp, @juliogamasso, @naaeef, @netgg93, @igorocampos, @kodejack
+Thanks to all of our contributors working to make this the best .NET thermal printer library out there!! 
+
+* [@lukevp](https://github.com/lukevp)
+* [@juliogamasso](https://github.com/juliogamasso)
+* [@naaeef](https://github.com/naaeef)
+* [@netgg93](https://github.com/netgg93)
+* [@igorocampos](https://github.com/igorocampos)
+* [@kodejack](https://github.com/kodejack)
 
 # USB Usage Guide
 
