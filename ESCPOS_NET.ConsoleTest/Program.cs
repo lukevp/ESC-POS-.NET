@@ -92,6 +92,7 @@ namespace ESCPOS_NET.ConsoleTest
                 "Line Spacing",
                 "Barcode Styles",
                 "Barcode Types",
+                "2D Codes",
                 "Text Styles",
                 "Full Receipt",
                 "Images",
@@ -151,18 +152,21 @@ namespace ESCPOS_NET.ConsoleTest
                         printer.Write(Tests.BarcodeTypes(e));
                         break;
                     case 5:
-                        printer.Write(Tests.TextStyles(e));
+                        printer.Write(Tests.TwoDimensionCodes(e));
                         break;
                     case 6:
-                        printer.Write(Tests.Receipt(e));
+                        printer.Write(Tests.TextStyles(e));
                         break;
                     case 7:
-                        printer.Write(Tests.Images(e, false));
+                        printer.Write(Tests.Receipt(e));
                         break;
                     case 8:
-                        printer.Write(Tests.Images(e, true));
+                        printer.Write(Tests.Images(e, false));
                         break;
                     case 9:
+                        printer.Write(Tests.Images(e, true));
+                        break;
+                    case 10:
                         try
                         {
                             printer.Write(Tests.TestLargeByteArrays(e));
@@ -172,10 +176,10 @@ namespace ESCPOS_NET.ConsoleTest
                             Console.WriteLine($"Aborting print due to test failure. Exception: {e?.Message}, Stack Trace: {e?.GetBaseException()?.StackTrace}");
                         }
                         break;
-                    case 10:
+                    case 11:
                         printer.Write(Tests.CashDrawerOpenPin2(e));
                         break;
-                    case 11:
+                    case 12:
                         printer.Write(Tests.CashDrawerOpenPin5(e));
                         break;
                     default:
