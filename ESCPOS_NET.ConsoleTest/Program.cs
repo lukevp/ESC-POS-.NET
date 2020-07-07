@@ -86,28 +86,26 @@ namespace ESCPOS_NET.ConsoleTest
             }
             
             e = new EPSON();
-            List<string> testCases = new List<string>()
+            List<(Option opt, string str)> testCases = new List<(Option, string)>()
             {
-                "Printing",
-                "Line Spacing",
-                "Barcode Styles",
-                "Barcode Types",
-                "2D Codes",
-                "Text Styles",
-                "Full Receipt",
-                "Images",
-                "Legacy Images",
-                "Large Byte Arrays",
-                "Cash Drawer Pin2",
-                "Cash Drawer Pin5"
+                (Option.Printing, "Printing"),
+                (Option.LineSpacing, "Line Spacing"),
+                (Option.BarcodeStyles, "Barcode Styles"),
+                (Option.BarcodeTypes, "Barcode Types"),
+                (Option.TwoDimensionCodes, "2D Codes"),
+                (Option.TextStyles, "Text Styles"),
+                (Option.FullReceipt, "Full Receipt"),
+                (Option.Images, "Images"),
+                (Option.LegacyImages, "Legacy Images"),
+                (Option.LargeByteArrays, "Large Byte Arrays"),
+                (Option.CashDrawerPin2, "Cash Drawer Pin2"),
+                (Option.CashDrawerPin2, "Cash Drawer Pin5")
             };
             while (true)
             {
-                int i = 0;
                 foreach (var item in testCases)
                 {
-                    i += 1;
-                    Console.WriteLine($"{i} : {item}");
+                    Console.WriteLine($"{(int)item.opt} : {item.str}");
                 }
                 Console.WriteLine("99 : Exit");
                 Console.Write("Execute Test: ");
@@ -137,36 +135,37 @@ namespace ESCPOS_NET.ConsoleTest
                 Setup(monitor);
                 printer?.Write(e.PrintLine($"== [ Start {testCases[choice - 1]} ] =="));
 
-                switch (choice)
+                var enumChoice = (Option)choice;
+                switch (enumChoice)
                 {
-                    case 1:
+                    case Option.Printing:
                         printer.Write(Tests.Printing(e));
                         break;
-                    case 2:
+                    case Option.LineSpacing:
                         printer.Write(Tests.LineSpacing(e));
                         break;
-                    case 3:
+                    case Option.BarcodeStyles:
                         printer.Write(Tests.BarcodeStyles(e));
                         break;
-                    case 4:
+                    case Option.BarcodeTypes:
                         printer.Write(Tests.BarcodeTypes(e));
                         break;
-                    case 5:
+                    case Option.TwoDimensionCodes:
                         printer.Write(Tests.TwoDimensionCodes(e));
                         break;
-                    case 6:
+                    case Option.TextStyles:
                         printer.Write(Tests.TextStyles(e));
                         break;
-                    case 7:
+                    case Option.FullReceipt:
                         printer.Write(Tests.Receipt(e));
                         break;
-                    case 8:
+                    case Option.Images:
                         printer.Write(Tests.Images(e, false));
                         break;
-                    case 9:
+                    case Option.LegacyImages:
                         printer.Write(Tests.Images(e, true));
                         break;
-                    case 10:
+                    case Option.LargeByteArrays:
                         try
                         {
                             printer.Write(Tests.TestLargeByteArrays(e));
@@ -176,10 +175,10 @@ namespace ESCPOS_NET.ConsoleTest
                             Console.WriteLine($"Aborting print due to test failure. Exception: {e?.Message}, Stack Trace: {e?.GetBaseException()?.StackTrace}");
                         }
                         break;
-                    case 11:
+                    case Option.CashDrawerPin2:
                         printer.Write(Tests.CashDrawerOpenPin2(e));
                         break;
-                    case 12:
+                    case Option.CashDrawerPin5:
                         printer.Write(Tests.CashDrawerOpenPin5(e));
                         break;
                     default:
@@ -198,6 +197,22 @@ namespace ESCPOS_NET.ConsoleTest
                 // TODO: also make an automatic runner that runs all tests (command line).
                 //Thread.Sleep(1000);
             }
+        }
+
+        public enum Option
+        {
+            Printing = 1,
+            LineSpacing,
+            BarcodeStyles,
+            BarcodeTypes,
+            TwoDimensionCodes,
+            TextStyles,
+            FullReceipt,
+            Images,
+            LegacyImages,
+            LargeByteArrays,
+            CashDrawerPin2,
+            CashDrawerPin5
         }
 
         static void StatusChanged(object sender, EventArgs ps)
