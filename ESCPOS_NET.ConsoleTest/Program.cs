@@ -86,46 +86,42 @@ namespace ESCPOS_NET.ConsoleTest
             }
             
             e = new EPSON();
-            List<string> testCases = new List<string>()
+            var testCases = new Dictionary<Option, string>()
             {
-                "Printing",
-                "Line Spacing",
-                "Barcode Styles",
-                "Barcode Types",
-                "Text Styles",
-                "Full Receipt",
-                "Images",
-                "Legacy Images",
-                "Large Byte Arrays",
-                "Cash Drawer Pin2",
-                "Cash Drawer Pin5"
+                { Option.Printing, "Printing" },
+                { Option.LineSpacing, "Line Spacing" },
+                { Option.BarcodeStyles, "Barcode Styles" },
+                { Option.BarcodeTypes, "Barcode Types" },
+                { Option.TwoDimensionCodes, "2D Codes" },
+                { Option.TextStyles, "Text Styles" },
+                { Option.FullReceipt, "Full Receipt" },
+                { Option.Images, "Images" },
+                { Option.LegacyImages, "Legacy Images" },
+                { Option.LargeByteArrays, "Large Byte Arrays" },
+                { Option.CashDrawerPin2, "Cash Drawer Pin2" },
+                { Option.CashDrawerPin2, "Cash Drawer Pin5" },
+                { Option.Exit, "Exit" }
+
             };
             while (true)
             {
-                int i = 0;
                 foreach (var item in testCases)
                 {
-                    i += 1;
-                    Console.WriteLine($"{i} : {item}");
+                    Console.WriteLine($"{(int)item.Key} : {item.Value}");
                 }
-                Console.WriteLine("99 : Exit");
                 Console.Write("Execute Test: ");
 
-                try
-                {
-                    choice = Convert.ToInt32(Console.ReadLine());
-                    if (choice != 99 && (choice < 1 || choice > testCases.Count))
-                    {
-                        throw new InvalidOperationException();
-                    }
-                }
-                catch
+                if (!Int32.TryParse(Console.ReadLine(), out choice) || !Enum.IsDefined(typeof(Option), choice))
                 {
                     Console.WriteLine("Invalid entry. Please try again.");
                     continue;
                 }
 
-                if (choice == 99) return;
+                var enumChoice = (Option)choice;
+                if (enumChoice == Option.Exit)
+                {
+                    return;
+                }
 
                 Console.Clear();
 
@@ -134,35 +130,39 @@ namespace ESCPOS_NET.ConsoleTest
                     printer.StartMonitoring();
                 }
                 Setup(monitor);
-                printer?.Write(e.PrintLine($"== [ Start {testCases[choice - 1]} ] =="));
 
-                switch (choice)
+                printer?.Write(e.PrintLine($"== [ Start {testCases[enumChoice]} ] =="));
+
+                switch (enumChoice)
                 {
-                    case 1:
+                    case Option.Printing:
                         printer.Write(Tests.Printing(e));
                         break;
-                    case 2:
+                    case Option.LineSpacing:
                         printer.Write(Tests.LineSpacing(e));
                         break;
-                    case 3:
+                    case Option.BarcodeStyles:
                         printer.Write(Tests.BarcodeStyles(e));
                         break;
-                    case 4:
+                    case Option.BarcodeTypes:
                         printer.Write(Tests.BarcodeTypes(e));
                         break;
-                    case 5:
+                    case Option.TwoDimensionCodes:
+                        printer.Write(Tests.TwoDimensionCodes(e));
+                        break;
+                    case Option.TextStyles:
                         printer.Write(Tests.TextStyles(e));
                         break;
-                    case 6:
+                    case Option.FullReceipt:
                         printer.Write(Tests.Receipt(e));
                         break;
-                    case 7:
+                    case Option.Images:
                         printer.Write(Tests.Images(e, false));
                         break;
-                    case 8:
+                    case Option.LegacyImages:
                         printer.Write(Tests.Images(e, true));
                         break;
-                    case 9:
+                    case Option.LargeByteArrays:
                         try
                         {
                             printer.Write(Tests.TestLargeByteArrays(e));
@@ -172,10 +172,10 @@ namespace ESCPOS_NET.ConsoleTest
                             Console.WriteLine($"Aborting print due to test failure. Exception: {e?.Message}, Stack Trace: {e?.GetBaseException()?.StackTrace}");
                         }
                         break;
-                    case 10:
+                    case Option.CashDrawerPin2:
                         printer.Write(Tests.CashDrawerOpenPin2(e));
                         break;
-                    case 11:
+                    case Option.CashDrawerPin5:
                         printer.Write(Tests.CashDrawerOpenPin5(e));
                         break;
                     default:
@@ -184,7 +184,7 @@ namespace ESCPOS_NET.ConsoleTest
                 }
 
                 Setup(monitor);
-                printer?.Write(e.PrintLine($"== [ End {testCases[choice - 1]} ] =="));
+                printer?.Write(e.PrintLine($"== [ End {testCases[enumChoice]} ] =="));
                 printer?.Write(e.PartialCutAfterFeed(5));
 
                 // TODO: write a sanitation check.
@@ -194,6 +194,23 @@ namespace ESCPOS_NET.ConsoleTest
                 // TODO: also make an automatic runner that runs all tests (command line).
                 //Thread.Sleep(1000);
             }
+        }
+
+        public enum Option
+        {
+            Printing = 1,
+            LineSpacing,
+            BarcodeStyles,
+            BarcodeTypes,
+            TwoDimensionCodes,
+            TextStyles,
+            FullReceipt,
+            Images,
+            LegacyImages,
+            LargeByteArrays,
+            CashDrawerPin2,
+            CashDrawerPin5,
+            Exit = 99
         }
 
         static void StatusChanged(object sender, EventArgs ps)
