@@ -86,45 +86,42 @@ namespace ESCPOS_NET.ConsoleTest
             }
             
             e = new EPSON();
-            List<(Option opt, string str)> testCases = new List<(Option, string)>()
+            var testCases = new Dictionary<Option, string>()
             {
-                (Option.Printing, "Printing"),
-                (Option.LineSpacing, "Line Spacing"),
-                (Option.BarcodeStyles, "Barcode Styles"),
-                (Option.BarcodeTypes, "Barcode Types"),
-                (Option.TwoDimensionCodes, "2D Codes"),
-                (Option.TextStyles, "Text Styles"),
-                (Option.FullReceipt, "Full Receipt"),
-                (Option.Images, "Images"),
-                (Option.LegacyImages, "Legacy Images"),
-                (Option.LargeByteArrays, "Large Byte Arrays"),
-                (Option.CashDrawerPin2, "Cash Drawer Pin2"),
-                (Option.CashDrawerPin2, "Cash Drawer Pin5")
+                { Option.Printing, "Printing" },
+                { Option.LineSpacing, "Line Spacing" },
+                { Option.BarcodeStyles, "Barcode Styles" },
+                { Option.BarcodeTypes, "Barcode Types" },
+                { Option.TwoDimensionCodes, "2D Codes" },
+                { Option.TextStyles, "Text Styles" },
+                { Option.FullReceipt, "Full Receipt" },
+                { Option.Images, "Images" },
+                { Option.LegacyImages, "Legacy Images" },
+                { Option.LargeByteArrays, "Large Byte Arrays" },
+                { Option.CashDrawerPin2, "Cash Drawer Pin2" },
+                { Option.CashDrawerPin2, "Cash Drawer Pin5" },
+                { Option.Exit, "Exit" }
+
             };
             while (true)
             {
                 foreach (var item in testCases)
                 {
-                    Console.WriteLine($"{(int)item.opt} : {item.str}");
+                    Console.WriteLine($"{(int)item.Key} : {item.Value}");
                 }
-                Console.WriteLine("99 : Exit");
                 Console.Write("Execute Test: ");
 
-                try
-                {
-                    choice = Convert.ToInt32(Console.ReadLine());
-                    if (choice != 99 && (choice < 1 || choice > testCases.Count))
-                    {
-                        throw new InvalidOperationException();
-                    }
-                }
-                catch
+                if (!Int32.TryParse(Console.ReadLine(), out choice) || !Enum.IsDefined(typeof(Option), choice))
                 {
                     Console.WriteLine("Invalid entry. Please try again.");
                     continue;
                 }
 
-                if (choice == 99) return;
+                var enumChoice = (Option)choice;
+                if (enumChoice == Option.Exit)
+                {
+                    return;
+                }
 
                 Console.Clear();
 
@@ -133,9 +130,9 @@ namespace ESCPOS_NET.ConsoleTest
                     printer.StartMonitoring();
                 }
                 Setup(monitor);
-                printer?.Write(e.PrintLine($"== [ Start {testCases[choice - 1]} ] =="));
 
-                var enumChoice = (Option)choice;
+                printer?.Write(e.PrintLine($"== [ Start {testCases[enumChoice]} ] =="));
+
                 switch (enumChoice)
                 {
                     case Option.Printing:
@@ -187,7 +184,7 @@ namespace ESCPOS_NET.ConsoleTest
                 }
 
                 Setup(monitor);
-                printer?.Write(e.PrintLine($"== [ End {testCases[choice - 1]} ] =="));
+                printer?.Write(e.PrintLine($"== [ End {testCases[enumChoice]} ] =="));
                 printer?.Write(e.PartialCutAfterFeed(5));
 
                 // TODO: write a sanitation check.
@@ -212,7 +209,8 @@ namespace ESCPOS_NET.ConsoleTest
             LegacyImages,
             LargeByteArrays,
             CashDrawerPin2,
-            CashDrawerPin5
+            CashDrawerPin5,
+            Exit = 99
         }
 
         static void StatusChanged(object sender, EventArgs ps)
