@@ -2,12 +2,11 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Runtime.InteropServices;
 
 namespace ESCPOS_NET.ConsoleTest
 {
-    class Program
+    internal class Program
     {
         private static BasePrinter printer;
         private static ICommandEmitter e;
@@ -25,7 +24,11 @@ namespace ESCPOS_NET.ConsoleTest
             string networkPort;
             var response = Console.ReadLine();
             var valid = new List<string> { "1", "2" };
-            if (!valid.Contains(response)) response = "1";
+            if (!valid.Contains(response))
+            {
+                response = "1";
+            }
+
             int choice = int.Parse(response);
 
             if (choice == 1)
@@ -33,7 +36,7 @@ namespace ESCPOS_NET.ConsoleTest
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     while (!comPort.StartsWith("COM"))
-                    { 
+                    {
                         Console.Write("COM Port (eg. COM5): ");
                         comPort = Console.ReadLine();
                         if (string.IsNullOrWhiteSpace(comPort))
@@ -84,7 +87,7 @@ namespace ESCPOS_NET.ConsoleTest
             {
                 monitor = true;
             }
-            
+
             e = new EPSON();
             var testCases = new Dictionary<Option, string>()
             {
@@ -111,7 +114,7 @@ namespace ESCPOS_NET.ConsoleTest
                 }
                 Console.Write("Execute Test: ");
 
-                if (!Int32.TryParse(Console.ReadLine(), out choice) || !Enum.IsDefined(typeof(Option), choice))
+                if (!int.TryParse(Console.ReadLine(), out choice) || !Enum.IsDefined(typeof(Option), choice))
                 {
                     Console.WriteLine("Invalid entry. Please try again.");
                     continue;
@@ -126,7 +129,7 @@ namespace ESCPOS_NET.ConsoleTest
                 Console.Clear();
 
                 if (monitor)
-                { 
+                {
                     printer.StartMonitoring();
                 }
                 Setup(monitor);
@@ -213,7 +216,7 @@ namespace ESCPOS_NET.ConsoleTest
             Exit = 99
         }
 
-        static void StatusChanged(object sender, EventArgs ps)
+        private static void StatusChanged(object sender, EventArgs ps)
         {
             var status = (PrinterStatusEventArgs)ps;
             Console.WriteLine($"Printer Online Status: {status.IsCoverOpen}");
@@ -221,7 +224,7 @@ namespace ESCPOS_NET.ConsoleTest
         }
         private static bool _hasEnabledStatusMonitoring = false;
 
-        static void Setup(bool enableStatusBackMonitoring)
+        private static void Setup(bool enableStatusBackMonitoring)
         {
             if (printer != null)
             {

@@ -4,7 +4,7 @@ namespace ESCPOS_NET
 {
     public class MemoryPrinter : BasePrinter
     {
-        private MemoryStream _ms;
+        private readonly MemoryStream _ms;
 
         // TODO: default values to their default values in ctor.
         public MemoryPrinter()

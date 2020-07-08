@@ -6,7 +6,7 @@ namespace ESCPOS_NET
 {
     public class SerialPrinter : BasePrinter
     {
-        private SerialPort _serialPort;
+        private readonly SerialPort _serialPort;
 
         public SerialPrinter(string portName, int baudRate)
             : base()

@@ -44,7 +44,7 @@ namespace ESCPOS_NET
 
         protected virtual void Reconnect()
         {
-             // Implemented in the network printer
+            // Implemented in the network printer
         }
 
         public virtual void Read()

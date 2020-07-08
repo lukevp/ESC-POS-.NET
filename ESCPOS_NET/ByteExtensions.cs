@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ESCPOS_NET
+﻿namespace ESCPOS_NET
 {
     public static class ByteExtensions
     {
