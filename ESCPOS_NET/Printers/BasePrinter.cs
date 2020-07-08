@@ -73,7 +73,7 @@ namespace ESCPOS_NET
                 }
                 catch (IOException ex)
                 {
-                    // Thrown if the printer times out the socket connection 
+                    // Thrown if the printer times out the socket connection
                     // default is 90 seconds
                     Thread.Sleep(100);
                     _isMonitoring = false;
@@ -146,7 +146,7 @@ namespace ESCPOS_NET
                 if (_cancellationTokenSource != null)
                 {
                     _cancellationTokenSource.Cancel();
-                }                    
+                }
             }
         }
 
@@ -166,7 +166,7 @@ namespace ESCPOS_NET
                     if (!ReadBuffer.TryDequeue(out bytes[i]))
                     {
                         // Ran out of bytes unexpectedly.
-                        return; 
+                        return;
                     }
                 }
 
@@ -215,7 +215,7 @@ namespace ESCPOS_NET
             {
                 Status = new PrinterStatusEventArgs()
                 {
-                    // byte[0] == 20 cash drawer closed 
+                    // byte[0] == 20 cash drawer closed
                     // byte[0] == 16 cash drawer open
                     // Note some cash drawers do not close properly.
                     IsCashDrawerOpen = bytes[0].IsBitNotSet(2),
@@ -243,7 +243,7 @@ namespace ESCPOS_NET
         }
 
         public void Dispose()
-        {            
+        {
             Dispose(true);
             GC.SuppressFinalize(this);
         }

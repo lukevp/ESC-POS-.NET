@@ -9,7 +9,7 @@ namespace ESCPOS_NET.Emitters
         PDF417 = 0,
         QRCODE_MODEL1 = 49,
         QRCODE_MODEL2,
-        QRCODE_MICRO
+        QRCODE_MICRO,
     }
 
     public enum Size2DCode
@@ -18,7 +18,7 @@ namespace ESCPOS_NET.Emitters
         SMALL,
         NORMAL,
         LARGE,
-        EXTRA
+        EXTRA,
     }
 
     public enum CorrectionLevel2DCode
@@ -26,6 +26,6 @@ namespace ESCPOS_NET.Emitters
         PERCENT_7 = 48,
         PERCENT_15,
         PERCENT_25,
-        PERCENT_30
+        PERCENT_30,
     }
 }

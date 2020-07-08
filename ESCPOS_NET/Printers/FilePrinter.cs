@@ -8,7 +8,7 @@ namespace ESCPOS_NET
         private readonly FileStream _file;
 
         // TODO: default values to their default values in ctor.
-        public FilePrinter(string filePath) 
+        public FilePrinter(string filePath)
             : base()
         {
             _file = File.Open(filePath, FileMode.Open);

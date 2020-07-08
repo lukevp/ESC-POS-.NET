@@ -90,7 +90,7 @@ namespace ESCPOS_NET.Utilities
         }
 
         /// <summary>
-        /// Clear all content from the builder
+        /// Clear all content from the builder.
         /// </summary>
         public void Clear()
         {
@@ -100,7 +100,7 @@ namespace ESCPOS_NET.Utilities
         }
 
         /// <summary>
-        /// Rewind the builder ready to read data
+        /// Rewind the builder ready to read data.
         /// </summary>
         public void Rewind()
         {
@@ -115,16 +115,16 @@ namespace ESCPOS_NET.Utilities
         /// A builder does not store just objects - for some it stores additional
         /// information as well.
         /// </summary>
-        /// <param name="position">the position to seek</param>
+        /// <param name="position">the position to seek.</param>
         public void Seek(int position)
         {
             store.Seek((long)position, SeekOrigin.Begin);
         }
 
         /// <summary>
-        /// Returns the builder as an array of bytes
+        /// Returns the builder as an array of bytes.
         /// </summary>
-        /// <returns>An array</returns>
+        /// <returns>An array.</returns>
         public byte[] ToArray()
         {
             byte[] data = new byte[Length];
@@ -133,28 +133,28 @@ namespace ESCPOS_NET.Utilities
         }
 
         /// <summary>
-        /// Returns a text based (Base64) string version of the current content
+        /// Returns a text based (Base64) string version of the current content.
         /// </summary>
-        /// <returns>The converted string</returns>
+        /// <returns>The converted string.</returns>
         public override string ToString()
         {
             return Convert.ToBase64String(ToArray());
         }
 
         /// <summary>
-        /// Add a string of raw bytes to the store
+        /// Add a string of raw bytes to the store.
         /// </summary>
-        /// <param name="byteArray">the byte array</param>
+        /// <param name="byteArray">the byte array.</param>
         private void AddBytes(byte[] byteArray)
         {
             store.Write(byteArray, 0, byteArray.Length);
         }
 
         /// <summary>
-        /// Reads a specific number of bytes from the store
+        /// Reads a specific number of bytes from the store.
         /// </summary>
-        /// <param name="length">The length</param>
-        /// <returns>The byte array</returns>
+        /// <param name="length">The length.</param>
+        /// <returns>The byte array.</returns>
         private byte[] GetBytes(int length)
         {
             byte[] data = new byte[length];

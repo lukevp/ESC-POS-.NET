@@ -64,6 +64,7 @@ namespace ESCPOS_NET.DataValidation
     {
         private static BarcodeDataValidator singletonBarcode = null;
         private static TwoDimensionCodeDataValidator singleton2DCode = null;
+
         public static void ValidateBarcode(BarcodeType type, BarcodeCode code, string data)
         {
             if (singletonBarcode is null)
@@ -90,8 +91,8 @@ namespace ESCPOS_NET.DataValidation
             {
                 _constraints = new Dictionary<BarcodeType, DataConstraint>()
                 {
-                    { BarcodeType.UPC_A, new DataConstraint() { MinLength = 11, MaxLength = 12, ValidChars = "0123456789" }    },
-                    { BarcodeType.UPC_E, new DataConstraint() { ValidLengths = new List<int>() { 6, 7, 8, 11, 12 }, ValidChars = "0123456789" }},
+                    { BarcodeType.UPC_A, new DataConstraint() { MinLength = 11, MaxLength = 12, ValidChars = "0123456789" } },
+                    { BarcodeType.UPC_E, new DataConstraint() { ValidLengths = new List<int>() { 6, 7, 8, 11, 12 }, ValidChars = "0123456789" } },
                     { BarcodeType.JAN13_EAN13, new DataConstraint() { MinLength = 12, MaxLength = 13, ValidChars = "0123456789" } },
                     { BarcodeType.JAN8_EAN8, new DataConstraint() { MinLength = 7, MaxLength = 8, ValidChars = "0123456789" } },
                     { BarcodeType.CODE39, new DataConstraint() { MinLength = 1, MaxLength = 255, ValidChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./" } },
@@ -190,5 +191,4 @@ namespace ESCPOS_NET.DataValidation
             }
         }
     }
-
 }

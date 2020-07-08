@@ -17,12 +17,19 @@ namespace ESCPOS_NET.Extensions
             foreach (var item in items)
             {
                 if (item is T itemT)
+                {
                     list.Add(itemT);
+                }
                 else if (item is IEnumerable<T> arrayT)
+                {
                     list.AddRange(arrayT);
+                }
                 else
+                {
                     ignoredItems = true;
+                }
             }
+
             return !ignoredItems;
         }
     }
