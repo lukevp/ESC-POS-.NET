@@ -20,7 +20,7 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintLine(),
 
             e.PrintLine("CODE128 Type C:"),
-            e.PrintBarcode(BarcodeType.CODE128, "12345678910", BarcodeCode.CODE_C),
+            e.PrintBarcode(BarcodeType.CODE128, "123456789101", BarcodeCode.CODE_C),
             e.PrintLine(),
 
             e.PrintLine("CODE39:"),
@@ -28,7 +28,7 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintLine(),
             
             e.PrintLine("CODE93:"),
-            e.PrintBarcode(BarcodeType.CODE93, "ESC_POS_NET"),
+            e.PrintBarcode(BarcodeType.CODE93, "*ESC_POS_NET*"),
             e.PrintLine(),
 
             e.PrintLine("GS1_128:"),
