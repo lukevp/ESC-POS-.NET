@@ -195,8 +195,8 @@ namespace ESCPOS_NET
                     };
 
                     StatusChanged?.Invoke(this, Status);
-                    return;
                 }
+                return;
             }
 #if DEBUG
             var bytesToString = string.Empty;
