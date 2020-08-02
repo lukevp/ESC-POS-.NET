@@ -102,7 +102,7 @@ namespace ESCPOS_NET.ConsoleTest
                 { Option.LegacyImages, "Legacy Images" },
                 { Option.LargeByteArrays, "Large Byte Arrays" },
                 { Option.CashDrawerPin2, "Cash Drawer Pin2" },
-                { Option.CashDrawerPin2, "Cash Drawer Pin5" },
+                { Option.CashDrawerPin5, "Cash Drawer Pin5" },
                 { Option.Exit, "Exit" }
 
             };
