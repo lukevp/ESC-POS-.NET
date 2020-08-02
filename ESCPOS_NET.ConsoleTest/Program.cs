@@ -60,7 +60,7 @@ namespace ESCPOS_NET.ConsoleTest
                     {
                         comPort = "/dev/usb/lp0";
                     }
-                    printer = new FilePrinter(filePath: comPort);
+                    printer = new FilePrinter(filePath: comPort, false);
                 }
             }
             else if (choice == 2)
