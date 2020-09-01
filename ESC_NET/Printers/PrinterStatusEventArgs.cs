@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ESCPOS_NET
+namespace ESC_NET.Printers
 {
     public class PrinterStatusEventArgs : EventArgs
     {
@@ -20,7 +20,8 @@ namespace ESCPOS_NET
 
         public bool IsPaperOut { get; set; }
 
-        public bool IsInErrorState => DidRecoverableErrorOccur || DidUnrecoverableErrorOccur || DidAutocutterErrorOccur || DidRecoverableNonAutocutterErrorOccur;
+        public bool IsInErrorState => DidRecoverableErrorOccur || DidUnrecoverableErrorOccur ||
+                                      DidAutocutterErrorOccur || DidRecoverableNonAutocutterErrorOccur;
 
         public bool DidRecoverableErrorOccur { get; set; }
 

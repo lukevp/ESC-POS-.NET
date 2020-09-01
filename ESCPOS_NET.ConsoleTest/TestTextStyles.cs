@@ -1,13 +1,13 @@
 ﻿using ESCPOS_NET.Emitters;
-using ESCPOS_NET.Utilities;
+using ESCPOS_NET.Emitters.Enums;
 
 namespace ESCPOS_NET.ConsoleTest
 {
-
     public static partial class Tests
     {
-        public static byte[] TextStyles(ICommandEmitter e) =>
-            ByteSplicer.Combine(
+        public static byte[] TextStyles(ICommandEmitter e)
+        {
+            return ByteSplicer.Combine(
                 e.SetStyles(PrintStyle.None),
                 e.Print("Default: The quick brown fox jumped over the lazy dogs.\n"),
                 e.SetStyles(PrintStyle.FontB),
@@ -20,7 +20,8 @@ namespace ESCPOS_NET.ConsoleTest
                 e.Print("DoubleWidth: The quick brown fox jumped over the lazy dogs.\n"),
                 e.SetStyles(PrintStyle.DoubleHeight),
                 e.Print("DoubleHeight: The quick brown fox jumped over the lazy dogs.\n"),
-                e.SetStyles(PrintStyle.FontB | PrintStyle.DoubleHeight | PrintStyle.DoubleWidth | PrintStyle.Underline | PrintStyle.Bold),
+                e.SetStyles(PrintStyle.FontB | PrintStyle.DoubleHeight | PrintStyle.DoubleWidth | PrintStyle.Underline |
+                            PrintStyle.Bold),
                 e.Print("All Styles: The quick brown fox jumped over the lazy dogs.\n"),
                 e.SetStyles(PrintStyle.None),
                 e.ReverseMode(true),
@@ -28,7 +29,7 @@ namespace ESCPOS_NET.ConsoleTest
                 e.SetStyles(PrintStyle.FontB | PrintStyle.DoubleHeight | PrintStyle.DoubleWidth),
                 e.PrintLine("REVERSE MODE: The quick brown fox jumped over the lazy dogs."),
                 e.SetStyles(PrintStyle.None),
-                 e.ReverseMode(false),
+                e.ReverseMode(false),
                 e.SetStyles(PrintStyle.None),
                 e.RightCharacterSpacing(5),
                 e.PrintLine("Right space 5: The quick brown fox jumped over the lazy dogs."),
@@ -38,5 +39,6 @@ namespace ESCPOS_NET.ConsoleTest
                 e.PrintLine("Upside Down Mode: The quick brown fox jumped over the lazy dogs."),
                 e.UpsideDownMode(false)
             );
+        }
     }
 }

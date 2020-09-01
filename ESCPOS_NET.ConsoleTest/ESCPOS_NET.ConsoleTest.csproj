@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ESCPOS_NET\ESCPOS_NET.csproj" />
+    <ProjectReference Include="..\ESC_NET\ESC_NET.csproj" />
   </ItemGroup>
 
   <ItemGroup>

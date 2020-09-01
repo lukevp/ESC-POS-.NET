@@ -1,12 +1,13 @@
 ﻿using ESCPOS_NET.Emitters.BaseCommandValues;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace ESCPOS_NET.Emitters
+namespace ESCPOS_NET.Emitters.BaseCommandEmitter
 {
     public abstract partial class BaseCommandEmitter : ICommandEmitter
     {
         /* Display Commands */
-        public byte[] Clear() => new byte[] { Display.CLR };
+        public byte[] Clear()
+        {
+            return new[] {Display.CLR};
+        }
     }
 }

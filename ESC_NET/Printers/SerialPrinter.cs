@@ -2,14 +2,13 @@ using System.IO;
 using System.IO.Ports;
 using System.Threading.Tasks;
 
-namespace ESCPOS_NET
+namespace ESC_NET.Printers
 {
     public class SerialPrinter : BasePrinter
     {
         private readonly SerialPort _serialPort;
 
         public SerialPrinter(string portName, int baudRate)
-            : base()
         {
             _serialPort = new SerialPort(portName, baudRate);
             _serialPort.Open();
@@ -21,7 +20,8 @@ namespace ESCPOS_NET
         {
             _serialPort?.Close();
             _serialPort?.Dispose();
-            Task.Delay(250).Wait(); // Based on MSDN Documentation, should sleep after calling Close or some functionality will not be determinant.
+            Task.Delay(250)
+                .Wait(); // Based on MSDN Documentation, should sleep after calling Close or some functionality will not be determinant.
         }
     }
 }

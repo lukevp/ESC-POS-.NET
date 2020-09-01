@@ -1,9 +1,7 @@
-﻿using ESCPOS_NET.Emitters;
-using ESCPOS_NET.Utilities;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.Text;
+using ESC_NET.Printers;
+using ESCPOS_NET.Emitters;
 
 namespace ESCPOS_NET.ConsoleTest
 {
@@ -36,26 +34,27 @@ namespace ESCPOS_NET.ConsoleTest
                 kitten,
                 cube
             );
-            MemoryPrinter mp = new MemoryPrinter();
+            var mp = new MemoryPrinter();
             mp.Write(expectedResult);
             var response = mp.GetAllData();
-            bool hasErrors = false;
+            var hasErrors = false;
             if (expectedResult.Length != response.Length)
             {
-                Console.WriteLine($"Error: MemoryPrinter length mismatch - ${response.Length}, expected ${expectedResult.Length}");
+                Console.WriteLine(
+                    $"Error: MemoryPrinter length mismatch - ${response.Length}, expected ${expectedResult.Length}");
                 hasErrors = true;
             }
             else
             {
-                for (int i = 0; i < expectedResult.Length; i++)
-                {
+                for (var i = 0; i < expectedResult.Length; i++)
                     if (expectedResult[i] != response[i])
                     {
-                        Console.WriteLine($"Error: MemoryPrinter data mismatch - ${expectedResult[i]}, expected ${response[i]}, at location ${i}");
+                        Console.WriteLine(
+                            $"Error: MemoryPrinter data mismatch - ${expectedResult[i]}, expected ${response[i]}, at location ${i}");
                         hasErrors = true;
                     }
-                }
             }
+
             if (!hasErrors)
             {
                 Console.WriteLine("MemoryPrinter: ALL OK!");
@@ -66,29 +65,30 @@ namespace ESCPOS_NET.ConsoleTest
                 throw new ArgumentException();
             }
 
-            Random r = new Random();
+            var r = new Random();
             var filename = $"{r.NextDouble().ToString()}.tmp";
-            using (FilePrinter fp = new FilePrinter(filename, true))
-            { 
+            using (var fp = new FilePrinter(filename, true))
+            {
                 fp.Write(expectedResult);
             }
+
             response = File.ReadAllBytes(filename);
             hasErrors = false;
             if (expectedResult.Length != response.Length)
             {
-                Console.WriteLine($"Error: FilePrinter length mismatch - ${response.Length}, expected ${expectedResult.Length}");
+                Console.WriteLine(
+                    $"Error: FilePrinter length mismatch - ${response.Length}, expected ${expectedResult.Length}");
                 hasErrors = true;
             }
             else
             {
-                for (int i = 0; i < expectedResult.Length; i++)
-                {
+                for (var i = 0; i < expectedResult.Length; i++)
                     if (expectedResult[i] != response[i])
                     {
-                        Console.WriteLine($"Error: FilePrinter data mismatch - ${expectedResult[i]}, expected ${response[i]}, at location ${i}");
+                        Console.WriteLine(
+                            $"Error: FilePrinter data mismatch - ${expectedResult[i]}, expected ${response[i]}, at location ${i}");
                         hasErrors = true;
                     }
-                }
             }
 
             if (!hasErrors)

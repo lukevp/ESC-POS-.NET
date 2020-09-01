@@ -6,41 +6,47 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using Timer = System.Timers.Timer;
 
-namespace ESCPOS_NET
+namespace ESC_NET.Printers
 {
-    public abstract partial class BasePrinter : IDisposable
+    public abstract class BasePrinter : IDisposable
     {
-        private bool disposed = false;
-
-        private volatile bool _isMonitoring;
+        private readonly int _maxBytesPerWrite = 15000; // max byte chunks to write at once.
 
         private CancellationTokenSource _cancellationTokenSource;
 
-        private readonly int _maxBytesPerWrite = 15000; // max byte chunks to write at once.
+        private volatile bool _isMonitoring;
+        private bool disposed;
 
-        public PrinterStatusEventArgs Status { get; private set; } = null;
+        protected BasePrinter()
+        {
+            FlushTimer = new Timer(50);
+            FlushTimer.Elapsed += Flush;
+            FlushTimer.AutoReset = false;
+        }
 
-        public event EventHandler StatusChanged;
+        public PrinterStatusEventArgs Status { get; private set; }
 
         protected BinaryWriter Writer { get; set; }
 
         protected BinaryReader Reader { get; set; }
 
-        protected System.Timers.Timer FlushTimer { get; set; }
+        protected Timer FlushTimer { get; set; }
 
         protected ConcurrentQueue<byte> ReadBuffer { get; set; } = new ConcurrentQueue<byte>();
 
-        protected int BytesWrittenSinceLastFlush { get; set; } = 0;
+        protected int BytesWrittenSinceLastFlush { get; set; }
 
         protected virtual bool IsConnected => false;
 
-        protected BasePrinter()
+        public void Dispose()
         {
-            FlushTimer = new System.Timers.Timer(50);
-            FlushTimer.Elapsed += Flush;
-            FlushTimer.AutoReset = false;
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
+
+        public event EventHandler StatusChanged;
 
         protected virtual void Reconnect()
         {
@@ -50,13 +56,10 @@ namespace ESCPOS_NET
         public virtual void Read()
         {
             while (_isMonitoring)
-            {
                 try
                 {
                     if (_cancellationTokenSource != null && _cancellationTokenSource.IsCancellationRequested)
-                    {
                         _cancellationTokenSource.Token.ThrowIfCancellationRequested();
-                    }
 
                     // Sometimes the serial port lib will throw an exception and read past the end of the queue if a
                     // status changes while data is being written.  We just ignore these bytes.
@@ -85,17 +88,16 @@ namespace ESCPOS_NET
                     // Swallow the exception
                     Debug.WriteLine($"Read Exception: {ex.Message}");
                 }
-            }
         }
 
         public virtual void Write(byte[] bytes)
         {
-            int bytePointer = 0;
-            int bytesLeft = bytes.Length;
-            bool hasFlushed = false;
+            var bytePointer = 0;
+            var bytesLeft = bytes.Length;
+            var hasFlushed = false;
             while (bytesLeft > 0)
             {
-                int count = Math.Min(_maxBytesPerWrite, bytesLeft);
+                var count = Math.Min(_maxBytesPerWrite, bytesLeft);
                 Writer.Write(bytes, bytePointer, count);
                 BytesWrittenSinceLastFlush += count;
                 if (BytesWrittenSinceLastFlush >= 200)
@@ -109,10 +111,7 @@ namespace ESCPOS_NET
                 bytesLeft -= count;
             }
 
-            if (!hasFlushed)
-            {
-                FlushTimer.Start();
-            }
+            if (!hasFlushed) FlushTimer.Start();
         }
 
         protected virtual void Flush(object sender, ElapsedEventArgs e)
@@ -131,7 +130,8 @@ namespace ESCPOS_NET
 
                 _isMonitoring = true;
                 _cancellationTokenSource = new CancellationTokenSource();
-                Task.Factory.StartNew(Read, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+                Task.Factory.StartNew(Read, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning,
+                    TaskScheduler.Default).ConfigureAwait(false);
             }
         }
 
@@ -143,10 +143,7 @@ namespace ESCPOS_NET
                 _isMonitoring = false;
                 ReadBuffer = new ConcurrentQueue<byte>();
 
-                if (_cancellationTokenSource != null)
-                {
-                    _cancellationTokenSource.Cancel();
-                }
+                if (_cancellationTokenSource != null) _cancellationTokenSource.Cancel();
             }
         }
 
@@ -161,14 +158,10 @@ namespace ESCPOS_NET
             if (ReadBuffer.Count() % 4 == 0)
             {
                 var bytes = new byte[4];
-                for (int i = 0; i < 4; i++)
-                {
+                for (var i = 0; i < 4; i++)
                     if (!ReadBuffer.TryDequeue(out bytes[i]))
-                    {
                         // Ran out of bytes unexpectedly.
                         return;
-                    }
-                }
 
                 TryUpdatePrinterStatus(bytes, timeout);
 
@@ -181,21 +174,19 @@ namespace ESCPOS_NET
             if (timeout)
             {
                 // try to reconnect
-                if (!IsConnected)
-                {
-                    Reconnect();
-                }
+                if (!IsConnected) Reconnect();
 
                 // Test if re-connection worked
                 if (!IsConnected)
                 {
-                    Status = new PrinterStatusEventArgs()
+                    Status = new PrinterStatusEventArgs
                     {
-                        DeviceConnectionTimeout = true,
+                        DeviceConnectionTimeout = true
                     };
 
                     StatusChanged?.Invoke(this, Status);
                 }
+
                 return;
             }
 #if DEBUG
@@ -212,8 +203,7 @@ namespace ESCPOS_NET
 
             // Check header bits 0, 1 and 7 are 0, and 4 is 1
             if (bytes[0].IsBitNotSet(0) && bytes[0].IsBitNotSet(1) && bytes[0].IsBitSet(4) && bytes[0].IsBitNotSet(7))
-            {
-                Status = new PrinterStatusEventArgs()
+                Status = new PrinterStatusEventArgs
                 {
                     // byte[0] == 20 cash drawer closed
                     // byte[0] == 16 cash drawer open
@@ -230,9 +220,8 @@ namespace ESCPOS_NET
                     DidRecoverableErrorOccur = bytes[1].IsBitSet(6),
                     IsPaperLow = bytes[2].IsBitSet(0) && bytes[2].IsBitSet(1),
                     IsPaperOut = bytes[2].IsBitSet(2) && bytes[2].IsBitSet(3),
-                    DeviceConnectionTimeout = timeout,
+                    DeviceConnectionTimeout = timeout
                 };
-            }
 
             StatusChanged?.Invoke(this, Status);
         }
@@ -242,31 +231,20 @@ namespace ESCPOS_NET
             Dispose(false);
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void OverridableDispose() // This method should only be called by the Dispose method.  // It allows synchronous disposing of derived class dependencies with base class disposes.
+        protected virtual void
+            OverridableDispose() // This method should only be called by the Dispose method.  // It allows synchronous disposing of derived class dependencies with base class disposes.
         {
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed)
-            {
-                return;
-            }
+            if (disposed) return;
 
             if (disposing)
             {
                 _cancellationTokenSource?.Cancel();
                 FlushTimer?.Stop();
-                if (FlushTimer != null)
-                {
-                    FlushTimer.Elapsed -= Flush;
-                }
+                if (FlushTimer != null) FlushTimer.Elapsed -= Flush;
 
                 FlushTimer?.Dispose();
                 Reader?.Close();

@@ -1,6 +1,6 @@
 ﻿// TODO: Implement this class
 
-namespace ESCPOS_NET
+namespace ESC_NET.Printers
 {
     public class VirtualPrinter
     {

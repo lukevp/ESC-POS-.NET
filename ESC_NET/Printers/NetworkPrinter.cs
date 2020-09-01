@@ -1,23 +1,22 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace ESCPOS_NET
+namespace ESC_NET.Printers
 {
     public class NetworkPrinter : BasePrinter
     {
+        private readonly IPEndPoint _endPoint;
+
         // flag which allows an attempt to reconnect on timeout.
         private readonly bool _reconnectOnTimeout;
-        private readonly IPEndPoint _endPoint;
         private Socket _socket;
         private NetworkStream _sockStream;
 
-        protected override bool IsConnected => !((_socket.Poll(1000, SelectMode.SelectRead) && (_socket.Available == 0)) || !_socket.Connected);
-
         public NetworkPrinter(IPEndPoint endPoint, bool reconnectOnTimeout)
-            : base()
         {
             _reconnectOnTimeout = reconnectOnTimeout;
             _endPoint = endPoint;
@@ -25,7 +24,6 @@ namespace ESCPOS_NET
         }
 
         public NetworkPrinter(IPAddress ipAddress, int port, bool reconnectOnTimeout)
-            : base()
         {
             _reconnectOnTimeout = reconnectOnTimeout;
             _endPoint = new IPEndPoint(ipAddress, port);
@@ -33,12 +31,14 @@ namespace ESCPOS_NET
         }
 
         public NetworkPrinter(string ipAddress, int port, bool reconnectOnTimeout)
-            : base()
         {
             _reconnectOnTimeout = reconnectOnTimeout;
             _endPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
             Connect();
         }
+
+        protected override bool IsConnected =>
+            !(_socket.Poll(1000, SelectMode.SelectRead) && _socket.Available == 0 || !_socket.Connected);
 
         protected override void Reconnect()
         {
@@ -62,7 +62,7 @@ namespace ESCPOS_NET
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to reconnect: {ex.Message}");
+                Debug.WriteLine($"Failed to reconnect: {ex.Message}");
                 throw;
             }
         }

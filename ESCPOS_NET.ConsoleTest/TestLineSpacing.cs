@@ -1,13 +1,12 @@
 ﻿using ESCPOS_NET.Emitters;
-using ESCPOS_NET.Utilities;
-using System;
 
 namespace ESCPOS_NET.ConsoleTest
 {
     public static partial class Tests
     {
-        public static byte[] LineSpacing(ICommandEmitter e) =>
-            ByteSplicer.Combine(
+        public static byte[] LineSpacing(ICommandEmitter e)
+        {
+            return ByteSplicer.Combine(
                 e.SetLineSpacingInDots(200),
                 e.PrintLine("This is the default spacing."),
                 e.SetLineSpacingInDots(15),
@@ -16,5 +15,6 @@ namespace ESCPOS_NET.ConsoleTest
                 e.PrintLine("This has 15 dots of spacing above."),
                 e.PrintLine("This has the default spacing.")
             );
+        }
     }
 }

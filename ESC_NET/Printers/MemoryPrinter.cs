@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace ESCPOS_NET
+namespace ESC_NET.Printers
 {
     public class MemoryPrinter : BasePrinter
     {
@@ -8,7 +8,6 @@ namespace ESCPOS_NET
 
         // TODO: default values to their default values in ctor.
         public MemoryPrinter()
-            : base()
         {
             _ms = new MemoryStream();
             Writer = new BinaryWriter(_ms);

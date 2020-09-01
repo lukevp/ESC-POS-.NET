@@ -1,4 +1,4 @@
-﻿namespace ESCPOS_NET
+﻿namespace ESC_NET
 {
     public static class ByteExtensions
     {
