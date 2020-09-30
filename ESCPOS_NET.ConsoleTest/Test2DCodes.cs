@@ -25,7 +25,7 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintLine(),
 
             e.PrintLine("QRCODE MODEL 2:"),
-            e.Print2DCode(TwoDimensionCodeType.QRCODE_MODEL2, websiteString),
+            e.Print(websiteString),
             e.PrintLine(),
 
             e.PrintLine("QRCODE MICRO:"),
