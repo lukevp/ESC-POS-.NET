@@ -1,9 +1,7 @@
 ﻿using ESCPOS_NET.Emitters;
 using ESCPOS_NET.Utilities;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace ESCPOS_NET.ConsoleTest
 {
