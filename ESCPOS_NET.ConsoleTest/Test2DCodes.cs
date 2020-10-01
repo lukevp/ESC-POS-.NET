@@ -25,7 +25,7 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintLine(),
 
             e.PrintLine("QRCODE MODEL 2:"),
-            e.Print(websiteString),
+            e.PrintQRCode(websiteString),
             e.PrintLine(),
 
             e.PrintLine("QRCODE MICRO:"),
