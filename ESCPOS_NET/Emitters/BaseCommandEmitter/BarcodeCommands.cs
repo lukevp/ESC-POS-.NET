@@ -39,6 +39,16 @@ namespace ESCPOS_NET.Emitters
             return command.ToArray();
         }
 
+        public byte[] PrintQRCode(string data, TwoDimensionCodeType type = TwoDimensionCodeType.QRCODE_MODEL2, Size2DCode size = Size2DCode.NORMAL, CorrectionLevel2DCode correction = CorrectionLevel2DCode.PERCENT_7)
+        {
+            if (type == TwoDimensionCodeType.PDF417)
+            {
+                throw new ArgumentException($"{nameof(TwoDimensionCodeType.PDF417)} is not a valid QRCode type. Please use {nameof(Print2DCode)} method", nameof(type));
+            }
+
+            return Print2DCode(type, data, size, correction);
+        }
+
         public byte[] Print2DCode(TwoDimensionCodeType type, string data, Size2DCode size = Size2DCode.NORMAL, CorrectionLevel2DCode correction = CorrectionLevel2DCode.PERCENT_7)
         {
             DataValidator.Validate2DCode(type, data);
