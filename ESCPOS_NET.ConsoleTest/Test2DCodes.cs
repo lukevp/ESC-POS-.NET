@@ -29,7 +29,7 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintLine(),
 
             e.PrintLine("QRCODE MICRO:"),
-            e.Print2DCode(TwoDimensionCodeType.QRCODE_MICRO, websiteString),
+            e.Print2DCode(TwoDimensionCodeType.QRCODE_MICRO, "github.com/lukevp"),
             e.PrintLine(),
 
             e.PrintLine("QRCODE MODEL 1 (TINY):"),
