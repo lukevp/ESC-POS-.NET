@@ -6,8 +6,7 @@ namespace ESCPOS_NET.ConsoleTest
 
     public static partial class Tests
     {
-        public static byte[] BarcodeStyles(ICommandEmitter e) =>
-            ByteSplicer.Combine(
+        public static byte[][] BarcodeStyles(ICommandEmitter e) => new byte[][] {
             //TODO: test all widths and put bar in front in label
             e.PrintLine("Thinnest Width:"),
             e.SetBarcodeHeightInDots(300),
@@ -60,6 +59,6 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintLine("Font B Label Below:"),
             e.SetBarLabelFontB(true),
             e.PrintBarcode(BarcodeType.UPC_A, "012345678905")
-        );
+        };
     }
 }

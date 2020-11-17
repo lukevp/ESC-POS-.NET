@@ -6,8 +6,7 @@ namespace ESCPOS_NET.ConsoleTest
     public static partial class Tests
     {
         private const string websiteString = "https://github.com/lukevp/ESC-POS-.NET/";
-        public static byte[] TwoDimensionCodes(ICommandEmitter e) =>
-            ByteSplicer.Combine(
+        public static byte[][] TwoDimensionCodes(ICommandEmitter e) => new byte[][] {
             e.PrintLine("PDF417:"),
             e.Print2DCode(TwoDimensionCodeType.PDF417, websiteString),
             e.PrintLine(),
@@ -39,6 +38,6 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintLine("QRCODE MODEL 1 (LARGE):"),
             e.Print2DCode(TwoDimensionCodeType.QRCODE_MODEL1, websiteString, Size2DCode.LARGE),
             e.PrintLine()
-        );
+        };
     }
 }

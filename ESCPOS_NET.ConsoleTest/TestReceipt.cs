@@ -6,8 +6,7 @@ namespace ESCPOS_NET.ConsoleTest
 {
     public static partial class Tests
     {
-        public static byte[] Receipt(ICommandEmitter e) =>
-            ByteSplicer.Combine(
+        public static byte[][] Receipt(ICommandEmitter e) => new byte[][] {
             e.CenterAlign(),
             e.PrintImage(File.ReadAllBytes("images/pd-logo-300.png"), true),
             e.PrintLine(),
@@ -48,6 +47,6 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintLine("  CUST: 87654321"),
             e.PrintLine(),
             e.PrintLine()
-        );
+        };
     }
 }

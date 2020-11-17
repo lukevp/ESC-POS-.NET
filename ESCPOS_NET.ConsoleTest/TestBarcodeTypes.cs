@@ -6,8 +6,7 @@ namespace ESCPOS_NET.ConsoleTest
 
     public static partial class Tests
     {
-        public static byte[] BarcodeTypes(ICommandEmitter e) =>
-            ByteSplicer.Combine(
+        public static byte[][] BarcodeTypes(ICommandEmitter e) => new byte[][] {
             e.SetBarcodeHeightInDots(600),
             e.SetBarWidth(BarWidth.Thinnest),
             e.SetBarLabelPosition(BarLabelPrintPosition.Below),
@@ -26,7 +25,7 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintLine("CODE39:"),
             e.PrintBarcode(BarcodeType.CODE39, "*ESC-POS-NET*"),
             e.PrintLine(),
-            
+
             e.PrintLine("CODE93:"),
             e.PrintBarcode(BarcodeType.CODE93, "*ESC_POS_NET*"),
             e.PrintLine(),
@@ -70,7 +69,6 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintLine("UPC_E:"),
             e.PrintBarcode(BarcodeType.UPC_E, "425261"),
             e.PrintLine()
-
-        );
+        };
     }
 }
