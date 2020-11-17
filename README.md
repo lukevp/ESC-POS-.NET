@@ -165,7 +165,7 @@ On Linux and Mac, USB for Epson printers is exposed as a serial port directly by
 
 On Windows, you must install some type of virtual COM port driver for native USB support, and then map your printer to a specific port, or use a USB-Serial cable and use a serial printer.
 
-If you have an official Epson printer, the link to install it from Epson is here: https://download.epson-biz.com/modules/pos/index.php?page=single_soft&cid=6175&scat=36&pcat=3
+If you have an official Epson printer, the link to install it from Epson is here: https://download.epson-biz.com/modules/pos/index.php?page=single_soft&cid=6481&scat=36&pcat=5
 
 If you do not have an official Epson printer, you will have to find a compatible way to expose the USB interface as a virtual Serial port.
 
