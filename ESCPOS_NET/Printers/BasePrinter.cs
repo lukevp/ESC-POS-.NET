@@ -117,7 +117,7 @@ namespace ESCPOS_NET
 
             if (!hasFlushed)
             {
-                FlushTimer.Start();
+                FlushTimer?.Start();
             }
         }
 
