@@ -174,9 +174,9 @@ namespace ESCPOS_NET.DataValidation
                 _constraints = new Dictionary<TwoDimensionCodeType, DataConstraint>()
                 {
                     { TwoDimensionCodeType.PDF417, new DataConstraint() { MinLength = 0, MaxLength = 255 } },
-                    { TwoDimensionCodeType.QRCODE_MODEL1, new DataConstraint() { MinLength = 0, MaxLength = 254 } },
-                    { TwoDimensionCodeType.QRCODE_MODEL2, new DataConstraint() { MinLength = 0, MaxLength = 254 } },
-                    { TwoDimensionCodeType.QRCODE_MICRO, new DataConstraint() { MinLength = 0, MaxLength = 254 } },
+                    { TwoDimensionCodeType.QRCODE_MODEL1, new DataConstraint() { MinLength = 0, MaxLength = 707 } },
+                    { TwoDimensionCodeType.QRCODE_MODEL2, new DataConstraint() { MinLength = 0, MaxLength = 4296 } },
+                    { TwoDimensionCodeType.QRCODE_MICRO, new DataConstraint() { MinLength = 0, MaxLength = 21 } },
                 };
             }
 
