@@ -1,3 +1,4 @@
+using ESCPOS_NET.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -86,6 +87,11 @@ namespace ESCPOS_NET
                     Debug.WriteLine($"Read Exception: {ex.Message}");
                 }
             }
+        }
+
+        public virtual void Write(params byte[][] arrays)
+        {
+            Write(ByteSplicer.Combine(arrays));
         }
 
         public virtual void Write(byte[] bytes)
