@@ -8,5 +8,6 @@
         public static readonly byte RightCharacterSpacing = 0x20;
         public static readonly byte UpsideDownMode = 0x7B;
         public static readonly byte CodePage = 0x74;
+        public static readonly byte Color = 0x72;
     }
 }
