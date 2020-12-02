@@ -16,5 +16,7 @@ namespace ESCPOS_NET.Emitters
         public byte[] RightCharacterSpacing(int spaceCount) => new byte[] { Cmd.ESC, Chars.RightCharacterSpacing, (byte)spaceCount };
 
         public byte[] CodePage(CodePage codePage) => new byte[] { Cmd.ESC, Chars.CodePage, (byte)codePage };
+
+        public byte[] Color(Color color) => new byte[] { Cmd.ESC, Chars.Color, (byte)color };
     }
 }
