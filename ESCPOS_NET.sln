@@ -7,6 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESCPOS_NET", "ESCPOS_NET\ES
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESCPOS_NET.ConsoleTest", "ESCPOS_NET.ConsoleTest\ESCPOS_NET.ConsoleTest.csproj", "{958464FE-6B30-4BA7-A4B1-D63ED2E23158}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESCPOS_NET.UnitTest", "ESCPOS_NET.UnitTest\ESCPOS_NET.UnitTest.csproj", "{8A848879-9776-4EBC-8484-41B8EE65FD8D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,6 +23,10 @@ Global
 		{958464FE-6B30-4BA7-A4B1-D63ED2E23158}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{958464FE-6B30-4BA7-A4B1-D63ED2E23158}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{958464FE-6B30-4BA7-A4B1-D63ED2E23158}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A848879-9776-4EBC-8484-41B8EE65FD8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A848879-9776-4EBC-8484-41B8EE65FD8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A848879-9776-4EBC-8484-41B8EE65FD8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A848879-9776-4EBC-8484-41B8EE65FD8D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
