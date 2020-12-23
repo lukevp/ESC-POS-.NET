@@ -6,8 +6,7 @@ namespace ESCPOS_NET.ConsoleTest
 {
     public static partial class Tests
     {
-        public static byte[] Images(ICommandEmitter e, bool isLegacy) =>
-            ByteSplicer.Combine(
+        public static byte[][] Images(ICommandEmitter e, bool isLegacy) => new byte[][] {
             e.CenterAlign(),
             e.PrintLine("Test PNG images with widths 100 - 600 px,"),
             e.PrintLine("at native resolution"),
@@ -61,6 +60,7 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintLine("-- kitten.jpg --"),
             e.PrintImage(File.ReadAllBytes("images/kitten.jpg"), true, isLegacy, 500),
             e.PrintLine("-- portal companion cube.jpg --"),
-            e.PrintImage(File.ReadAllBytes("images/Portal_Companion_Cube.jpg"), true, isLegacy, 500));
+            e.PrintImage(File.ReadAllBytes("images/Portal_Companion_Cube.jpg"), true, isLegacy, 500)
+        };
     }
 }

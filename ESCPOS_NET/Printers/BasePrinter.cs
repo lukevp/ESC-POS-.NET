@@ -1,3 +1,4 @@
+using ESCPOS_NET.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -88,6 +89,11 @@ namespace ESCPOS_NET
             }
         }
 
+        public virtual void Write(params byte[][] arrays)
+        {
+            Write(ByteSplicer.Combine(arrays));
+        }
+
         public virtual void Write(byte[] bytes)
         {
             int bytePointer = 0;
@@ -111,7 +117,7 @@ namespace ESCPOS_NET
 
             if (!hasFlushed)
             {
-                FlushTimer.Start();
+                FlushTimer?.Start();
             }
         }
 
