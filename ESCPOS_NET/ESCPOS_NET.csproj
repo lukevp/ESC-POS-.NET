@@ -31,9 +31,4 @@ Allows creating receipts with all common functionality supported.</Description>
     <PackageReference Include="System.IO.Ports" Version="4.6.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="FiscalEmitters\BaseCommandEmitter\" />
-    <Folder Include="FiscalEmitters\BaseCommandValues\" />
-  </ItemGroup>
-
 </Project>
