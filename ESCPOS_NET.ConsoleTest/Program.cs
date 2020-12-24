@@ -1,4 +1,5 @@
 ﻿using ESCPOS_NET.Emitters;
+using Fiscal = ESCPOS_NET.FiscalEmitters;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,10 @@ namespace ESCPOS_NET.ConsoleTest
     {
         private static BasePrinter printer;
         private static ICommandEmitter e;
+        private static Fiscal.ICommandEmitter fe;
 
         static void Main(string[] args)
         {
-
             Console.WriteLine("ESCPOS_NET Test Application...");
             Console.WriteLine("1 ) Test Serial Port");
             Console.WriteLine("2 ) Test Network Printer");
@@ -88,29 +89,57 @@ namespace ESCPOS_NET.ConsoleTest
                 monitor = true;
             }
 
-            e = new EPSON();
-            var testCases = new Dictionary<Option, string>()
+            bool fiscal = false;
+            Console.Write("Is your printer a fiscal one? (y/n): ");
+            response = Console.ReadLine().Trim().ToLowerInvariant();
+            if (response.Length >= 1 && response[0] == 'y')
             {
-                { Option.Printing, "Printing" },
-                { Option.LineSpacing, "Line Spacing" },
-                { Option.BarcodeStyles, "Barcode Styles" },
-                { Option.BarcodeTypes, "Barcode Types" },
-                { Option.TwoDimensionCodes, "2D Codes" },
-                { Option.TextStyles, "Text Styles" },
-                { Option.FullReceipt, "Full Receipt" },
-                { Option.Images, "Images" },
-                { Option.LegacyImages, "Legacy Images" },
-                { Option.LargeByteArrays, "Large Byte Arrays" },
-                { Option.CashDrawerPin2, "Cash Drawer Pin2" },
-                { Option.CashDrawerPin5, "Cash Drawer Pin5" },
-                { Option.Exit, "Exit" }
+                fiscal = true;
+            }
+            monitor = fiscal && monitor;
 
-            };
+            Dictionary<int, string> testCases;
+
+            if (fiscal)
+            {
+                fe = new Fiscal.DATECS();
+                testCases = new Dictionary<int, string>()
+                {
+                    { (int)FiscalOption.PrintSale, "Print Sale" },
+                    { (int)FiscalOption.CancelSale, "Cancel Last Sale" },
+                    { (int)FiscalOption.XReport, "X-Report" },
+                    { (int)FiscalOption.ZReport, "Z-Report (Beware: will block your printer 'til EoD)" },
+                    { (int)FiscalOption.NonFiscalReceipt, "Non Fiscal Receipt" },
+                    { (int)FiscalOption.Exit, "Exit" }
+                };
+            }
+            else
+            {
+                e = new EPSON();
+                testCases = new Dictionary<int, string>()
+                {
+                    { (int)Option.Printing, "Printing" },
+                    { (int)Option.LineSpacing, "Line Spacing" },
+                    { (int)Option.BarcodeStyles, "Barcode Styles" },
+                    { (int)Option.BarcodeTypes, "Barcode Types" },
+                    { (int)Option.TwoDimensionCodes, "2D Codes" },
+                    { (int)Option.TextStyles, "Text Styles" },
+                    { (int)Option.FullReceipt, "Full Receipt" },
+                    { (int)Option.Images, "Images" },
+                    { (int)Option.LegacyImages, "Legacy Images" },
+                    { (int)Option.LargeByteArrays, "Large Byte Arrays" },
+                    { (int)Option.CashDrawerPin2, "Cash Drawer Pin2" },
+                    { (int)Option.CashDrawerPin5, "Cash Drawer Pin5" },
+                    { (int)Option.Exit, "Exit" }
+
+                };
+            }
+
             while (true)
             {
                 foreach (var item in testCases)
                 {
-                    Console.WriteLine($"{(int)item.Key} : {item.Value}");
+                    Console.WriteLine($"{item.Key} : {item.Value}");
                 }
                 Console.Write("Execute Test: ");
 
@@ -134,8 +163,15 @@ namespace ESCPOS_NET.ConsoleTest
                 }
                 Setup(monitor);
 
-                printer?.Write(e.PrintLine($"== [ Start {testCases[enumChoice]} ] =="));
+                #region fiscal
+                if (fiscal)
+                {
+                    continue;
+                }
+                #endregion fiscal
 
+                #region plain
+                printer?.Write(e.PrintLine($"== [ Start {testCases[(int)enumChoice]} ] =="));
                 switch (enumChoice)
                 {
                     case Option.Printing:
@@ -187,8 +223,10 @@ namespace ESCPOS_NET.ConsoleTest
                 }
 
                 Setup(monitor);
-                printer?.Write(e.PrintLine($"== [ End {testCases[enumChoice]} ] =="));
+                printer?.Write(e.PrintLine($"== [ End {testCases[(int)enumChoice]} ] =="));
                 printer?.Write(e.PartialCutAfterFeed(5));
+
+                #endregion plain
 
                 // TODO: write a sanitation check.
                 // TODO: make DPI to inch conversion function
@@ -213,6 +251,16 @@ namespace ESCPOS_NET.ConsoleTest
             LargeByteArrays,
             CashDrawerPin2,
             CashDrawerPin5,
+            Exit = 99
+        }
+
+        public enum FiscalOption
+        {
+            PrintSale = 1,
+            CancelSale,
+            XReport,
+            ZReport,
+            NonFiscalReceipt,
             Exit = 99
         }
 
@@ -265,7 +313,7 @@ namespace ESCPOS_NET.ConsoleTest
                 e.PrintBarcode(BarcodeType.UPC_A, "012345678905")
                 );
             /*
-             * 
+             *
                 e.PrintBarcode(BarcodeType.CODE128, "10945500020119184400014"),
                 /*
             e.PrintBarcode(BarcodeType., "041220096138"),
@@ -284,11 +332,9 @@ namespace ESCPOS_NET.ConsoleTest
         GS1_DATABAR_LIMITED         = 0x4D,
         GS1_DATABAR_EXPANDED        = 0x4E
 
-
             */
         /*
     }
-
 
     static void TestHEBReceipt()
     {
