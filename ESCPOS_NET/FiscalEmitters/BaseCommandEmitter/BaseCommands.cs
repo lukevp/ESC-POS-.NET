@@ -30,10 +30,12 @@ namespace ESCPOS_NET.FiscalEmitters
             set { seq = value < 255 ? value : H20; }
         }
 
-        public byte[] CmdWrapper(byte cmdCode, IEnumerable<byte> data)
+        protected IDataValidator DataValidator { get; set; }
+
+        protected virtual byte[] CmdWrapper(byte cmdCode, IEnumerable<byte> data)
             => CmdWrapper(cmdCode, data.ToArray());
 
-        public byte[] CmdWrapper(byte cmdCode, byte[] data)
+        protected virtual byte[] CmdWrapper(byte cmdCode, byte[] data)
         {
             // <Preamble><LEN><SEQ><CMD><DATA><Post-amble><BCC><Terminator>
             var midbytes = ByteSplicer.Combine(new byte[] { (byte)(FIXED_LEN + data.Length + H20), (byte)Seq++, cmdCode }, data, new byte[] { Cmd.Postamble });

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace ESCPOS_NET.Extensions
 {
@@ -31,6 +33,31 @@ namespace ESCPOS_NET.Extensions
             }
 
             return !ignoredItems;
+        }
+
+        public static IEnumerable<byte> ToBytes(this string str)
+            => str.ToCharArray().Select(x => (byte)x);
+
+        public static string Truncate(this string str, int len)
+            => string.IsNullOrEmpty(str) || str.Length <= len ? str : str.Substring(0, len);
+
+        public static string RemoveAll(this string str, params char[] chars)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                return str;
+            }
+
+            var sb = new StringBuilder();
+            foreach (var c in str)
+            {
+                if (!chars.Contains(c))
+                {
+                    sb.Append(c);
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }

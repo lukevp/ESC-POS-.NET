@@ -7,7 +7,7 @@ namespace ESCPOS_NET.FiscalEmitters
 {
     public abstract partial class BaseCommandEmitter : ICommandEmitter
     {
-        public byte[] PrintNonFiscalReceipt(string text)
+        public virtual byte[] PrintNonFiscalReceipt(string text)
         {
             var open = CmdWrapper(NonFiscal.OpenReceipt, Cmd.Empty);
             var close = CmdWrapper(NonFiscal.CloseReceipt, Cmd.Empty);
