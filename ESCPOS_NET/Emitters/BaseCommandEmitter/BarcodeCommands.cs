@@ -14,7 +14,11 @@ namespace ESCPOS_NET.Emitters
         public virtual byte[] PrintBarcode(BarcodeType type, string barcode, BarcodeCode code = BarcodeCode.CODE_B)
         {
             DataValidator.ValidateBarcode(type, code, barcode);
+            return BarcodeBytes(type, barcode, code);
+        }
 
+        protected virtual byte[] BarcodeBytes(BarcodeType type, string barcode, BarcodeCode code)
+        {
             // For CODE128, prepend the first 2 characters as 0x7B and the CODE type, and escape 0x7B characters.
             if (type == BarcodeType.CODE128)
             {
@@ -52,6 +56,11 @@ namespace ESCPOS_NET.Emitters
         public virtual byte[] Print2DCode(TwoDimensionCodeType type, string data, Size2DCode size = Size2DCode.NORMAL, CorrectionLevel2DCode correction = CorrectionLevel2DCode.PERCENT_7)
         {
             DataValidator.Validate2DCode(type, data);
+            return TwoDimensionCodeBytes(type, data, size, correction);
+        }
+
+        protected virtual byte[] TwoDimensionCodeBytes(TwoDimensionCodeType type, string data, Size2DCode size, CorrectionLevel2DCode correction)
+        {
             List<byte> command = new List<byte>();
             byte[] initial = { Cmd.GS, Barcodes.Set2DCode, Barcodes.PrintBarcode };
             switch (type)
