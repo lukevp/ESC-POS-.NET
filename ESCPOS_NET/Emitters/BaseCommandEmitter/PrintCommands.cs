@@ -6,7 +6,7 @@ namespace ESCPOS_NET.Emitters
     public abstract partial class BaseCommandEmitter : ICommandEmitter
     {
         /* Printing Commands */
-        public byte[] Print(string data)
+        public virtual byte[] Print(string data)
         {
             // Fix OSX or Windows-style newlines
             data = data.Replace("\r\n", "\n");
@@ -16,7 +16,7 @@ namespace ESCPOS_NET.Emitters
             return data.ToCharArray().Select(x => (byte)x).ToArray();
         }
 
-        public byte[] PrintLine(string line)
+        public virtual byte[] PrintLine(string line)
         {
             if (line == null)
             {
@@ -26,14 +26,14 @@ namespace ESCPOS_NET.Emitters
             return Print(line.Replace("\r", string.Empty).Replace("\n", string.Empty) + "\n");
         }
 
-        public byte[] FeedLines(int lineCount) => new byte[] { Cmd.ESC, Whitespace.FeedLines, (byte)lineCount };
+        public virtual byte[] FeedLines(int lineCount) => new byte[] { Cmd.ESC, Whitespace.FeedLines, (byte)lineCount };
 
-        public byte[] FeedLinesReverse(int lineCount) => new byte[] { Cmd.ESC, Whitespace.FeedLinesReverse, (byte)lineCount };
+        public virtual byte[] FeedLinesReverse(int lineCount) => new byte[] { Cmd.ESC, Whitespace.FeedLinesReverse, (byte)lineCount };
 
-        public byte[] FeedDots(int dotCount) => new byte[] { Cmd.ESC, Whitespace.FeedDots, (byte)dotCount };
+        public virtual byte[] FeedDots(int dotCount) => new byte[] { Cmd.ESC, Whitespace.FeedDots, (byte)dotCount };
 
-        public byte[] ReverseMode(bool enable) => new byte[] { Cmd.GS, Chars.ReversePrintMode, enable ? (byte)0x01 : (byte)0x00 };
+        public virtual byte[] ReverseMode(bool enable) => new byte[] { Cmd.GS, Chars.ReversePrintMode, enable ? (byte)0x01 : (byte)0x00 };
 
-        public byte[] UpsideDownMode(bool enable) => new byte[] { Cmd.ESC, Chars.UpsideDownMode, enable ? (byte)0x01 : (byte)0x00 };
+        public virtual byte[] UpsideDownMode(bool enable) => new byte[] { Cmd.ESC, Chars.UpsideDownMode, enable ? (byte)0x01 : (byte)0x00 };
     }
 }
