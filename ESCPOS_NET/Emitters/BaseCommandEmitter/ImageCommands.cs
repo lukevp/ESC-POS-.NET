@@ -1,10 +1,9 @@
-using ESCPOS_NET.Emitters.BaseCommandValues;
 using ESCPOS_NET.Utilities;
 using SixLabors.ImageSharp;
 
 namespace ESCPOS_NET.Emitters
 {
-    public abstract partial class BaseCommandEmitter : ICommandEmitter
+    public abstract partial class BaseCommandEmitter<TCommandValues> : ICommandEmitter
     {
         private byte[] GetImageHeader(int commandLength)
         {
@@ -19,11 +18,11 @@ namespace ESCPOS_NET.Emitters
 
             if (i >= 3)
             {
-                return new byte[] { Cmd.GS, Images.ImageCmd8, Images.ImageCmdL, lengths[0], lengths[1], lengths[2], lengths[3] };
+                return new byte[] { Values.GS, Values.ImageCmd8, Values.ImageCmdL, lengths[0], lengths[1], lengths[2], lengths[3] };
             }
             else
             {
-                return new byte[] { Cmd.GS, Images.ImageCmdParen, Images.ImageCmdL, lengths[0], lengths[1] };
+                return new byte[] { Values.GS, Values.ImageCmdParen, Values.ImageCmdL, lengths[0], lengths[1] };
             }
         }
 
@@ -74,7 +73,7 @@ namespace ESCPOS_NET.Emitters
                 var byteWidth = (width + 7 & -8) / 8;
                 byte widthL = (byte)byteWidth;
                 byte widthH = (byte)(byteWidth >> 8);
-                imageCommand.Append(new byte[] { Cmd.GS, Images.ImageCmdLegacy, 0x30, 0x00, widthL, widthH, heightL, heightH });
+                imageCommand.Append(new byte[] { Values.GS, Values.ImageCmdLegacy, 0x30, 0x00, widthL, widthH, heightL, heightH });
             }
             else
             {

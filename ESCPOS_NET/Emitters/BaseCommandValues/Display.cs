@@ -1,7 +1,7 @@
-﻿namespace ESCPOS_NET.Emitters.BaseCommandValues
+﻿namespace ESCPOS_NET.Emitters
 {
-    public static class Display
+    public partial class BaseCommandValues : ICommandValues
     {
-        public static readonly byte CLR = 0x0C;
+        public virtual byte CLR => 0x0C;
     }
 }

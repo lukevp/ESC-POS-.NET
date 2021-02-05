@@ -1,12 +1,12 @@
-﻿namespace ESCPOS_NET.Emitters.BaseCommandValues
+﻿namespace ESCPOS_NET.Emitters
 {
-    public static class Chars
+    public partial class BaseCommandValues : ICommandValues
     {
-        public static readonly byte StyleMode = 0x21;
-        public static readonly byte Alignment = 0x61;
-        public static readonly byte ReversePrintMode = 0x42;
-        public static readonly byte RightCharacterSpacing = 0x20;
-        public static readonly byte UpsideDownMode = 0x7B;
-        public static readonly byte CodePage = 0x74;
+        public virtual byte StyleMode => 0x21;
+        public virtual byte Alignment => 0x61;
+        public virtual byte ReversePrintMode => 0x42;
+        public virtual byte RightCharacterSpacing => 0x20;
+        public virtual byte UpsideDownMode => 0x7B;
+        public virtual byte CodePage => 0x74;
     }
 }

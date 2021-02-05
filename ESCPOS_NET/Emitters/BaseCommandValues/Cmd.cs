@@ -1,8 +1,8 @@
-﻿namespace ESCPOS_NET.Emitters.BaseCommandValues
+﻿namespace ESCPOS_NET.Emitters
 {
-    public static class Cmd
+    public partial class BaseCommandValues : ICommandValues
     {
-        public static readonly byte ESC = 0x1B;
-        public static readonly byte GS = 0x1D;
+        public virtual byte ESC => 0x1B;
+        public virtual byte GS => 0x1D;
     }
 }

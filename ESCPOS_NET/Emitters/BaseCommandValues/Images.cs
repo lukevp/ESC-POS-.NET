@@ -1,10 +1,10 @@
-﻿namespace ESCPOS_NET.Emitters.BaseCommandValues
+﻿namespace ESCPOS_NET.Emitters
 {
-    public static class Images
+    public partial class BaseCommandValues : ICommandValues
     {
-        public static readonly byte ImageCmdParen = 0x28;
-        public static readonly byte ImageCmdLegacy = 0x76;
-        public static readonly byte ImageCmd8 = 0x38;
-        public static readonly byte ImageCmdL = 0x4C;
+        public virtual byte ImageCmdParen => 0x28;
+        public virtual byte ImageCmdLegacy => 0x76;
+        public virtual byte ImageCmd8 => 0x38;
+        public virtual byte ImageCmdL => 0x4C;
     }
 }

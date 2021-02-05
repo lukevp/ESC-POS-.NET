@@ -1,14 +1,12 @@
-﻿using ESCPOS_NET.Emitters.BaseCommandValues;
-
-namespace ESCPOS_NET.Emitters
+﻿namespace ESCPOS_NET.Emitters
 {
-    public abstract partial class BaseCommandEmitter : ICommandEmitter
+    public abstract partial class BaseCommandEmitter<TCommandValues> : ICommandEmitter
     {
         /* Operational Commands */
-        public virtual byte[] Initialize() => new byte[] { Cmd.ESC, Ops.Initialize };
+        public virtual byte[] Initialize() => new byte[] { Values.ESC, Values.Initialize };
 
-        public virtual byte[] Enable() => new byte[] { Cmd.ESC, Ops.EnableDisable, 1 };
+        public virtual byte[] Enable() => new byte[] { Values.ESC, Values.EnableDisable, 1 };
 
-        public virtual byte[] Disable() => new byte[] { Cmd.ESC, Ops.EnableDisable, 0 };
+        public virtual byte[] Disable() => new byte[] { Values.ESC, Values.EnableDisable, 0 };
     }
 }
