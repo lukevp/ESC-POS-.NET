@@ -1,11 +1,9 @@
-﻿using ESCPOS_NET.Emitters.BaseCommandValues;
-
-namespace ESCPOS_NET.Emitters
+﻿namespace ESCPOS_NET.Emitters
 {
-    public abstract partial class BaseCommandEmitter : ICommandEmitter
+    public abstract partial class BaseCommandEmitter<TCommandValues> : ICommandEmitter
     {
-        public virtual byte[] ResetLineSpacing() => new byte[] { Cmd.ESC, Whitespace.ResetLineSpacing };
+        public virtual byte[] ResetLineSpacing() => new byte[] { Values.ESC, Values.ResetLineSpacing };
 
-        public virtual byte[] SetLineSpacingInDots(int dots) => new byte[] { Cmd.ESC, Whitespace.LineSpacingInDots, (byte)dots };
+        public virtual byte[] SetLineSpacingInDots(int dots) => new byte[] { Values.ESC, Values.LineSpacingInDots, (byte)dots };
     }
 }

@@ -1,13 +1,13 @@
-﻿namespace ESCPOS_NET.Emitters.BaseCommandValues
+﻿namespace ESCPOS_NET.Emitters
 {
-    public static class Whitespace
+    public partial class BaseCommandValues : ICommandValues
     {
         // TODO: tabs?
-        public static readonly byte Linefeed = 0x0A;
-        public static readonly byte FeedLines = 0x64;
-        public static readonly byte FeedLinesReverse = 0x65;
-        public static readonly byte FeedDots = 0x4A;
-        public static readonly byte ResetLineSpacing = 0x32;
-        public static readonly byte LineSpacingInDots = 0x33;
+        public virtual byte Linefeed => 0x0A;
+        public virtual byte FeedLines => 0x64;
+        public virtual byte FeedLinesReverse => 0x65;
+        public virtual byte FeedDots => 0x4A;
+        public virtual byte ResetLineSpacing => 0x32;
+        public virtual byte LineSpacingInDots => 0x33;
     }
 }

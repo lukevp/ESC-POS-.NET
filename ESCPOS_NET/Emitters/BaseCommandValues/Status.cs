@@ -1,8 +1,8 @@
-﻿namespace ESCPOS_NET.Emitters.BaseCommandValues
+﻿namespace ESCPOS_NET.Emitters
 {
-    public static class Status
+    public partial class BaseCommandValues : ICommandValues
     {
-        public static readonly byte AutomaticStatusBack = 0x61;
-        public static readonly byte AutomaticInkStatusBack = 0x6A;
+        public virtual byte AutomaticStatusBack => 0x61;
+        public virtual byte AutomaticInkStatusBack => 0x6A;
     }
 }

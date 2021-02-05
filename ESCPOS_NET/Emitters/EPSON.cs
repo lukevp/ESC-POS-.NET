@@ -1,6 +1,6 @@
 ﻿namespace ESCPOS_NET.Emitters
 {
-    public class EPSON : BaseCommandEmitter
+    public class EPSON : BaseCommandEmitter<BaseCommandValues>
     {
     }
 }

@@ -1,10 +1,10 @@
-﻿namespace ESCPOS_NET.Emitters.BaseCommandValues
+﻿namespace ESCPOS_NET.Emitters
 {
-    public static class Functions
+    public partial class BaseCommandValues : ICommandValues
     {
-        public static readonly byte PaperCutFullCut = 0x00;
-        public static readonly byte PaperCutFullCutWithFeed = 0x41;
-        public static readonly byte PaperCutPartialCut = 0x01;
-        public static readonly byte PaperCutPartialCutWithFeed = 0x42;
+        public virtual byte PaperCutFullCut => 0x00;
+        public virtual byte PaperCutFullCutWithFeed => 0x41;
+        public virtual byte PaperCutPartialCut => 0x01;
+        public virtual byte PaperCutPartialCutWithFeed => 0x42;
     }
 }

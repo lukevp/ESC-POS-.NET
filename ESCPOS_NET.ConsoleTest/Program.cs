@@ -9,12 +9,33 @@ namespace ESCPOS_NET.ConsoleTest
     internal class Program
     {
         private static BasePrinter printer;
-        private static ICommandEmitter e;
+        private static ICommandEmitter emitter;
 
         static void Main(string[] args)
         {
 
             Console.WriteLine("ESCPOS_NET Test Application...");
+
+            Console.WriteLine($"{(int)PrinterTypeOption.EPSON} {PrinterTypeOption.EPSON} Printer");
+            Console.WriteLine($"{(int)PrinterTypeOption.CUSTOM} {PrinterTypeOption.CUSTOM} Printer");
+            Console.Write("Choice: ");
+            var response = Console.ReadLine();
+            var valid = new List<string> { ((int)PrinterTypeOption.EPSON).ToString(), ((int)PrinterTypeOption.CUSTOM).ToString() };
+            if (!valid.Contains(response))
+            {
+                response = ((int)PrinterTypeOption.EPSON).ToString();
+            }
+            int choice = int.Parse(response);
+            switch((PrinterTypeOption)choice)
+            {
+                case PrinterTypeOption.EPSON:
+                    emitter = new EPSON();
+                    break;
+                case PrinterTypeOption.CUSTOM:
+                    emitter = new CUSTOM();
+                    break;
+            }
+
             Console.WriteLine("1 ) Test Serial Port");
             Console.WriteLine("2 ) Test Network Printer");
             Console.Write("Choice: ");
@@ -22,14 +43,14 @@ namespace ESCPOS_NET.ConsoleTest
             string baudRate;
             string ip;
             string networkPort;
-            var response = Console.ReadLine();
-            var valid = new List<string> { "1", "2" };
+            response = Console.ReadLine();
+            valid = new List<string> { "1", "2" };
             if (!valid.Contains(response))
             {
                 response = "1";
             }
 
-            int choice = int.Parse(response);
+            choice = int.Parse(response);
 
             if (choice == 1)
             {
@@ -88,7 +109,6 @@ namespace ESCPOS_NET.ConsoleTest
                 monitor = true;
             }
 
-            e = new EPSON();
             var testCases = new Dictionary<Option, string>()
             {
                 { Option.Printing, "Printing" },
@@ -134,41 +154,41 @@ namespace ESCPOS_NET.ConsoleTest
                 }
                 Setup(monitor);
 
-                printer?.Write(e.PrintLine($"== [ Start {testCases[enumChoice]} ] =="));
+                printer?.Write(emitter.PrintLine($"== [ Start {testCases[enumChoice]} ] =="));
 
                 switch (enumChoice)
                 {
                     case Option.Printing:
-                        printer.Write(Tests.Printing(e));
+                        printer.Write(Tests.Printing(emitter));
                         break;
                     case Option.LineSpacing:
-                        printer.Write(Tests.LineSpacing(e));
+                        printer.Write(Tests.LineSpacing(emitter));
                         break;
                     case Option.BarcodeStyles:
-                        printer.Write(Tests.BarcodeStyles(e));
+                        printer.Write(Tests.BarcodeStyles(emitter));
                         break;
                     case Option.BarcodeTypes:
-                        printer.Write(Tests.BarcodeTypes(e));
+                        printer.Write(Tests.BarcodeTypes(emitter));
                         break;
                     case Option.TwoDimensionCodes:
-                        printer.Write(Tests.TwoDimensionCodes(e));
+                        printer.Write(Tests.TwoDimensionCodes(emitter));
                         break;
                     case Option.TextStyles:
-                        printer.Write(Tests.TextStyles(e));
+                        printer.Write(Tests.TextStyles(emitter));
                         break;
                     case Option.FullReceipt:
-                        printer.Write(Tests.Receipt(e));
+                        printer.Write(Tests.Receipt(emitter));
                         break;
                     case Option.Images:
-                        printer.Write(Tests.Images(e, false));
+                        printer.Write(Tests.Images(emitter, false));
                         break;
                     case Option.LegacyImages:
-                        printer.Write(Tests.Images(e, true));
+                        printer.Write(Tests.Images(emitter, true));
                         break;
                     case Option.LargeByteArrays:
                         try
                         {
-                            printer.Write(Tests.TestLargeByteArrays(e));
+                            printer.Write(Tests.TestLargeByteArrays(emitter));
                         }
                         catch (Exception e)
                         {
@@ -176,10 +196,10 @@ namespace ESCPOS_NET.ConsoleTest
                         }
                         break;
                     case Option.CashDrawerPin2:
-                        printer.Write(Tests.CashDrawerOpenPin2(e));
+                        printer.Write(Tests.CashDrawerOpenPin2(emitter));
                         break;
                     case Option.CashDrawerPin5:
-                        printer.Write(Tests.CashDrawerOpenPin5(e));
+                        printer.Write(Tests.CashDrawerOpenPin5(emitter));
                         break;
                     default:
                         Console.WriteLine("Invalid entry.");
@@ -187,8 +207,8 @@ namespace ESCPOS_NET.ConsoleTest
                 }
 
                 Setup(monitor);
-                printer?.Write(e.PrintLine($"== [ End {testCases[enumChoice]} ] =="));
-                printer?.Write(e.PartialCutAfterFeed(5));
+                printer?.Write(emitter.PrintLine($"== [ End {testCases[enumChoice]} ] =="));
+                printer?.Write(emitter.PartialCutAfterFeed(5));
 
                 // TODO: write a sanitation check.
                 // TODO: make DPI to inch conversion function
@@ -197,6 +217,12 @@ namespace ESCPOS_NET.ConsoleTest
                 // TODO: also make an automatic runner that runs all tests (command line).
                 //Thread.Sleep(1000);
             }
+        }
+
+        public enum PrinterTypeOption
+        {
+            EPSON = 1,
+            CUSTOM = 2,
         }
 
         public enum Option
@@ -234,11 +260,11 @@ namespace ESCPOS_NET.ConsoleTest
                     printer.StatusChanged += StatusChanged;
                     _hasEnabledStatusMonitoring = true;
                 }
-                printer?.Write(e.Initialize());
-                printer?.Write(e.Enable());
+                printer?.Write(emitter.Initialize());
+                printer?.Write(emitter.Enable());
                 if (enableStatusBackMonitoring)
                 {
-                    printer.Write(e.EnableAutomaticStatusBack());
+                    printer.Write(emitter.EnableAutomaticStatusBack());
                 }
             }
         }
