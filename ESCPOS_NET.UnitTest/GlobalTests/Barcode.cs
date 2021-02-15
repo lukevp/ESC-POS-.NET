@@ -14,6 +14,10 @@ namespace ESCPOS_NET.UnitTest.GlobalTests
         [InlineData("EPSON", TwoDimensionCodeType.QRCODE_MODEL2)]
         [InlineData("EPSON", TwoDimensionCodeType.QRCODE_MICRO)]
         [InlineData("EPSON", null)]
+        [InlineData("CUSTOM", TwoDimensionCodeType.QRCODE_MODEL1)]
+        [InlineData("CUSTOM", TwoDimensionCodeType.QRCODE_MODEL2)]
+        [InlineData("CUSTOM", TwoDimensionCodeType.QRCODE_MICRO)]
+        [InlineData("CUSTOM", null)]
         public void PrintQRCode_Success(string emitter, TwoDimensionCodeType? codeType)
         {
             var type = Assembly.LoadFrom("ESCPOS_NET").GetType($"ESCPOS_NET.Emitters.{emitter}", true);
@@ -30,6 +34,7 @@ namespace ESCPOS_NET.UnitTest.GlobalTests
 
         [Theory]
         [InlineData("EPSON", TwoDimensionCodeType.PDF417)]
+        [InlineData("CUSTOM", TwoDimensionCodeType.PDF417)]
         public void PrintQRCode_Failure(string emitter, TwoDimensionCodeType codeType)
         {
             var type = Assembly.LoadFrom("ESCPOS_NET").GetType($"ESCPOS_NET.Emitters.{emitter}", true);
