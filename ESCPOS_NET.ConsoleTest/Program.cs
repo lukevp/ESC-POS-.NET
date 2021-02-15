@@ -3,6 +3,8 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Linq;
+
 
 namespace ESCPOS_NET.ConsoleTest
 {
@@ -98,6 +100,7 @@ namespace ESCPOS_NET.ConsoleTest
                 { Option.TwoDimensionCodes, "2D Codes" },
                 { Option.TextStyles, "Text Styles" },
                 { Option.FullReceipt, "Full Receipt" },
+                { Option.CodePages, "Code Pages (Euro, Katakana, Etc)" },
                 { Option.Images, "Images" },
                 { Option.LegacyImages, "Legacy Images" },
                 { Option.LargeByteArrays, "Large Byte Arrays" },
@@ -159,6 +162,34 @@ namespace ESCPOS_NET.ConsoleTest
                     case Option.FullReceipt:
                         printer.Write(Tests.Receipt(e));
                         break;
+                    case Option.CodePages:
+                        var codePage = CodePage.PC437_USA_STANDARD_EUROPE_DEFAULT;
+                        Console.WriteLine("To run this test, you must select the index of a code page to print.");
+                        Console.WriteLine("The default CodePage is typically CodePage 0 (USA/International).");
+                        Console.WriteLine("Press enter to see the list of Code Pages.");
+                        Console.ReadLine();
+                        List<object> codePages = new List<object>();
+                        foreach (var value in Enum.GetValues(typeof(CodePage)))
+                        {
+                            codePages.Add(value);
+                        }
+                        for(int i = 0; i < codePages.Count; i++)
+                        {
+                            Console.WriteLine(i.ToString() + ": " + codePages[i] + "  (Page " + ((int)codePages[i]) + ")");
+                        }
+                        Console.Write("Index for test Code Page (NOT Page #): ");
+                        var page = Console.ReadLine();
+                        try
+                        {
+                            codePage = (CodePage)codePages[int.Parse(page)];
+                        }
+                        catch
+                        {
+                            Console.WriteLine("Invalid code page selected, defaulting to CodePage 0.");
+                        }
+
+                        printer.Write(Tests.CodePages(e, codePage));
+                        break;
                     case Option.Images:
                         printer.Write(Tests.Images(e, false));
                         break;
@@ -190,12 +221,7 @@ namespace ESCPOS_NET.ConsoleTest
                 printer?.Write(e.PrintLine($"== [ End {testCases[enumChoice]} ] =="));
                 printer?.Write(e.PartialCutAfterFeed(5));
 
-                // TODO: write a sanitation check.
-                // TODO: make DPI to inch conversion function
-                // TODO: full cuts and reverse feeding not implemented on epson...  should throw exception?
-                // TODO: make an input loop that lets you execute each test separately.
                 // TODO: also make an automatic runner that runs all tests (command line).
-                //Thread.Sleep(1000);
             }
         }
 
@@ -208,6 +234,7 @@ namespace ESCPOS_NET.ConsoleTest
             TwoDimensionCodes,
             TextStyles,
             FullReceipt,
+            CodePages,
             Images,
             LegacyImages,
             LargeByteArrays,
@@ -242,100 +269,5 @@ namespace ESCPOS_NET.ConsoleTest
                 }
             }
         }
-
-        /*
-        static void TestCutter()
-        {
-            sp.Write(e.PrintLine("Performing Full Cut (no feed)."));
-            sp.Write(e.FullCut());
-            sp.Write(e.PrintLine("Performing Partial Cut (no feed)."));
-            sp.Write(e.PartialCut());
-            sp.Write(e.PrintLine("Performing Full Cut (1000 dot feed)."));
-            sp.Write(e.FullCutAfterFeed(1000));
-            sp.Write(e.PrintLine("Performing Partial Cut (1000 dot feed)."));
-            sp.Write(e.PartialCutAfterFeed(1000));
-        }
-
-        static void TestBarcodeTypes()
-        {
-            sp.Write(
-              e.PrintLine("UPC_A: 012345678905 "),
-                e.SetBarLabelFontB(false),
-                e.SetBarLabelPosition(BarLabelPrintPosition.Below),
-                e.PrintBarcode(BarcodeType.UPC_A, "012345678905")
-                );
-            /*
-             * 
-                e.PrintBarcode(BarcodeType.CODE128, "10945500020119184400014"),
-                /*
-            e.PrintBarcode(BarcodeType., "041220096138"),
-             *         UPC_A                       = 0x41,
-        UPC_E                       = 0x42,
-        JAN13_EAN13                 = 0x43,
-        JAN8_EAN8                   = 0x44,
-        CODE39                      = 0x45,
-        ITF                         = 0x46,
-        CODABAR_NW_7                = 0x47,
-        CODE93                      = 0x48,
-        CODE128                     = 0x49,
-        GS1_128                     = 0x4A,
-        GS1_DATABAR_OMNIDIRECTIONAL = 0x4B,
-        GS1_DATABAR_TRUNCATED       = 0x4C,
-        GS1_DATABAR_LIMITED         = 0x4D,
-        GS1_DATABAR_EXPANDED        = 0x4E
-
-
-            */
-        /*
-    }
-
-
-    static void TestHEBReceipt()
-    {
-        sp.Write(
-            //e.FeedDots(2000),
-            // TODO: logo
-            e.CenterAlign(),
-            //e.PrintLine("BHONEYWELLv"),
-            //e.SetBarcodeHeightInDots(360),
-            //e.SetBarWidth(BarWidth.Regular),
-            //e.SetBarLabelPosition(BarLabelPrintPosition.None),
-            e.PrintBarcode(BarcodeType.JAN13_EAN13, "041220096138"),
-            /*
-            e.PrintLine(""),
-            e.PrintLine("B&H PHOTO & VIDEO"),
-            e.PrintLine("420 NINTH AVE."),
-            e.PrintLine("NEW YORK, NY 10001"),
-            e.PrintLine("(212) 502-6380 - (800)947-9975"),
-            e.SetStyles(PrintStyle.Underline),
-            e.PrintLine("www.bhphotovideo.com"),
-            e.SetStyles(PrintStyle.None),
-            e.PrintLine(""),
-            e.LeftAlign,
-            e.PrintLine("Order: 123456789        Date: 02/01/19"),
-            e.PrintLine(""),
-            e.PrintLine(""),
-            e.SetStyles(PrintStyle.FontB),
-            e.PrintLine("1   TRITON LOW-NOISE IN-LINE MICROPHONE PREAMP"),
-            e.PrintLine("    TRFETHEAD/FETHEAD                        89.95         89.95"),
-            e.PrintLine("----------------------------------------------------------------"),
-            e.RightAlign,
-            e.PrintLine("SUBTOTAL         89.95"),
-            e.PrintLine("Total Order:         89.95"),
-            e.PrintLine("Total Payment:              "),
-            e.PrintLine(""),
-            e.LeftAlign,
-            e.SetStyles(PrintStyle.Bold | PrintStyle.FontB),
-            e.PrintLine("SOLD TO:                        SHIP TO:"),
-            e.SetStyles(PrintStyle.FontB),
-            e.PrintLine("  LUKE PAIREEPINART               LUKE PAIREEPINART"),
-            e.PrintLine("  123 FAKE ST.                    123 FAKE ST."),
-            e.PrintLine("  DECATUR, IL 12345               DECATUR, IL 12345"),
-            e.PrintLine("  (123)456-7890                   (123)456-7890"),
-            e.PrintLine("  CUST: 87654321"),*//*
-        e.FullCutAfterFeed(1000)
-        );
-    }
-   */
     }
 }
