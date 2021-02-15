@@ -1,13 +1,18 @@
 namespace ESCPOS_NET.Emitters
 {
+    #pragma warning disable SA1602 // Enumeration items should be documented
+    #pragma warning disable SA1600 // Elements should be documented
     public enum CodePage
     {
-        PC437_USA             = 0,
+        PC437_USA_STANDARD_EUROPE_DEFAULT = 0,
         KATAKANA              = 1,
         PC850_MULTILINGUAL    = 2,
         PC860_PORTUGUESE      = 3,
         PC863_CANADIAN_FRENCH = 4,
         PC865_NORDIC          = 5,
+        HIRAGANA              = 6,
+        ONE_PASS_KANJI        = 7,
+        ONE_PASS_KANJI2       = 8,
         PC851_GREEK           = 11,
         PC853_TURKISH         = 12,
         PC857_TURKISH         = 13,
@@ -16,10 +21,13 @@ namespace ESCPOS_NET.Emitters
         WPC1252               = 16,
         PC866_CYRILLIC2       = 17,
         PC852_LATIN2          = 18,
-        SLOVENIA              = 18,
         PC858_EURO            = 19,
         KU42_THAI             = 20,
         TIS11_THAI            = 21,
+        TIS13_THAI            = 22,
+        TIS14_THAI            = 23,
+        TIS16_THAI            = 24,
+        TIS17_THAI            = 25,
         TIS18_THAI            = 26,
         TCVN3_VIETNAMESE_L    = 30,
         TCVN3_VIETNAMESE_U    = 31,
@@ -32,7 +40,7 @@ namespace ESCPOS_NET.Emitters
         PC869_GREEK           = 38,
         ISO8859_2_LATIN2      = 39,
         ISO8859_15_LATIN9     = 40,
-        PC1098_FARCI          = 41,
+        PC1098_FARSI          = 41,
         PC1118_LITHUANIAN     = 42,
         PC1119_LITHUANIAN     = 43,
         PC1125_UKRANIAN       = 44,
@@ -45,8 +53,16 @@ namespace ESCPOS_NET.Emitters
         WPC1257_BALTIC_RIM    = 51,
         WPC1258_VIETNAMESE    = 52,
         KZ1048_KAZAKHSTAN     = 53,
-        JAPAN                 = 0x08,
-        CHINA                 = 0x0F,
-        HK_TW                 = 0x00,
+        DEVANAGARI            = 66,
+        BENGALI               = 67,
+        TAMIL                 = 68,
+        TELUGU                = 69,
+        ASSAMESE              = 70,
+        ORIYA                 = 71,
+        KANNADA               = 72,
+        MALAYALAM             = 73,
+        GUJARATI              = 74,
+        PUNJABI               = 75,
+        MARATHI               = 82,
     }
 }
