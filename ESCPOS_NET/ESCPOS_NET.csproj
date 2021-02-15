@@ -8,14 +8,14 @@
     <Authors>Luke Paireepinart</Authors>
     <Description>.NET Standard 2.0 Implementation of ESC/POS command generation and integration with thermal printers.
 Allows creating receipts with all common functionality supported.</Description>
-    <Copyright>Copyright 2020 CandL Development, LLC.</Copyright>
+    <Copyright>Copyright 2021 CandL Development, LLC.</Copyright>
     <PackageLicenseUrl></PackageLicenseUrl>
     <RepositoryUrl>https://github.com/lukevp/ESC-POS-.NET</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>epson thermal receipt printing printer usb wifi bluetooth serial esc pos escpos escp esc/pos esc/pos.net esc_pos esc_pos_net esc_pos_usb esc_pos_usb_net</PackageTags>
-    <Version>1.4.0</Version>
-    <AssemblyVersion>1.4.0.0</AssemblyVersion>
-    <FileVersion>1.4.0.0</FileVersion>
+    <Version>1.6.0</Version>
+    <AssemblyVersion>1.6.0.0</AssemblyVersion>
+    <FileVersion>1.6.0.0</FileVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/lukevp/ESC-POS-.NET</PackageProjectUrl>
     <PackageReleaseNotes>- Add CODE-128 Code C support
