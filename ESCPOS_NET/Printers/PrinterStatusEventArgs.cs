@@ -30,6 +30,6 @@ namespace ESCPOS_NET
 
         public bool DidRecoverableNonAutocutterErrorOccur { get; set; }
 
-        public bool DeviceConnectionTimeout { get; set; }
+        public bool DeviceIsConnected { get; set; }
     }
 }

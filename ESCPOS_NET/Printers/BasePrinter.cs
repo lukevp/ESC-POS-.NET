@@ -16,7 +16,8 @@ namespace ESCPOS_NET
 
         private volatile bool _isMonitoring;
 
-        private CancellationTokenSource _cancellationTokenSource;
+        private CancellationTokenSource _readCancellationTokenSource;
+        private CancellationTokenSource _connectivityCancellationTokenSource;
 
         private readonly int _maxBytesPerWrite = 15000; // max byte chunks to write at once.
 
@@ -28,9 +29,9 @@ namespace ESCPOS_NET
 
         protected BinaryReader Reader { get; set; }
 
-        protected System.Timers.Timer FlushTimer { get; set; }
-
         protected ConcurrentQueue<byte> ReadBuffer { get; set; } = new ConcurrentQueue<byte>();
+
+        protected ConcurrentQueue<byte> WriteBuffer { get; set; } = new ConcurrentQueue<byte>();
 
         protected int BytesWrittenSinceLastFlush { get; set; } = 0;
 
@@ -38,9 +39,8 @@ namespace ESCPOS_NET
 
         protected BasePrinter()
         {
-            FlushTimer = new System.Timers.Timer(50);
-            FlushTimer.Elapsed += Flush;
-            FlushTimer.AutoReset = false;
+            _connectivityCancellationTokenSource = new CancellationTokenSource();
+            Task.Factory.StartNew(MonitorConnectivity, _connectivityCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
         }
 
         protected virtual void Reconnect()
@@ -54,21 +54,21 @@ namespace ESCPOS_NET
             {
                 try
                 {
-                    if (_cancellationTokenSource != null && _cancellationTokenSource.IsCancellationRequested)
+                    if (_readCancellationTokenSource != null && _readCancellationTokenSource.IsCancellationRequested)
                     {
-                        _cancellationTokenSource.Token.ThrowIfCancellationRequested();
+                        _readCancellationTokenSource.Token.ThrowIfCancellationRequested();
                     }
 
                     // Sometimes the serial port lib will throw an exception and read past the end of the queue if a
                     // status changes while data is being written.  We just ignore these bytes.
                     var b = Reader.ReadByte();
                     ReadBuffer.Enqueue(b);
-                    DataAvailable(false);
+                    DataAvailable();
                 }
                 catch (OperationCanceledException ex)
                 {
-                    _cancellationTokenSource.Dispose();
-                    _cancellationTokenSource = null;
+                    _readCancellationTokenSource.Dispose();
+                    _readCancellationTokenSource = null;
                     _isMonitoring = false;
                     Debug.WriteLine($"Read Cancelled Exception: {ex.Message}");
                 }
@@ -76,9 +76,6 @@ namespace ESCPOS_NET
                 {
                     // Thrown if the printer times out the socket connection
                     // default is 90 seconds
-                    Thread.Sleep(100);
-                    _isMonitoring = false;
-                    DataAvailable(true);
                     Debug.WriteLine($"Read Exception: {ex.Message}");
                 }
                 catch (Exception ex)
@@ -96,13 +93,35 @@ namespace ESCPOS_NET
 
         public virtual void Write(byte[] bytes)
         {
+            if (!IsConnected)
+            {
+                Reconnect();
+            }
+
+            if (!IsConnected)
+            {
+                throw new IOException("Unrecoverable connectivity error writing to printer.");
+            }
+
             int bytePointer = 0;
             int bytesLeft = bytes.Length;
             bool hasFlushed = false;
             while (bytesLeft > 0)
             {
                 int count = Math.Min(_maxBytesPerWrite, bytesLeft);
-                Writer.Write(bytes, bytePointer, count);
+                try
+                {
+                    Writer.Write(bytes, bytePointer, count);
+                }
+                catch (IOException)
+                {
+                    Reconnect();
+                    if (!IsConnected)
+                    {
+                        throw new IOException("Unrecoverable connectivity error writing to printer.");
+                    }
+                    Writer.Write(bytes, bytePointer, count);
+                }
                 BytesWrittenSinceLastFlush += count;
                 if (BytesWrittenSinceLastFlush >= 200)
                 {
@@ -117,14 +136,13 @@ namespace ESCPOS_NET
 
             if (!hasFlushed)
             {
-                FlushTimer?.Start();
+                Task.Run(async () => { await Task.Delay(50); Flush(null, null); });
             }
         }
 
         protected virtual void Flush(object sender, ElapsedEventArgs e)
         {
             BytesWrittenSinceLastFlush = 0;
-            FlushTimer.Stop();
             Writer.Flush();
         }
 
@@ -136,8 +154,34 @@ namespace ESCPOS_NET
                 ReadBuffer = new ConcurrentQueue<byte>();
 
                 _isMonitoring = true;
-                _cancellationTokenSource = new CancellationTokenSource();
-                Task.Factory.StartNew(Read, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+                _readCancellationTokenSource = new CancellationTokenSource();
+                Task.Factory.StartNew(Read, _readCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+            }
+        }
+
+        public bool lastConnectionStatus = false;
+        public async virtual void MonitorConnectivity()
+        {
+            while (_connectivityCancellationTokenSource != null && !_connectivityCancellationTokenSource.IsCancellationRequested)
+            {
+                var connectedStatus = IsConnected;
+                if (connectedStatus != lastConnectionStatus)
+                {
+                    lastConnectionStatus = connectedStatus;
+                    Status = new PrinterStatusEventArgs()
+                    {
+                        DeviceIsConnected = lastConnectionStatus,
+                    };
+
+                    StatusChanged?.Invoke(this, Status);
+                    if (connectedStatus == false)
+                    {
+                        await Task.Delay(3000);
+                        Reconnect();
+                    }
+                }
+
+                await Task.Delay(50);
             }
         }
 
@@ -149,21 +193,15 @@ namespace ESCPOS_NET
                 _isMonitoring = false;
                 ReadBuffer = new ConcurrentQueue<byte>();
 
-                if (_cancellationTokenSource != null)
+                if (_readCancellationTokenSource != null)
                 {
-                    _cancellationTokenSource.Cancel();
+                    _readCancellationTokenSource.Cancel();
                 }
             }
         }
 
-        public virtual void DataAvailable(bool timeout)
+        public virtual void DataAvailable()
         {
-            if (timeout)
-            {
-                TryUpdatePrinterStatus(null, timeout);
-                return;
-            }
-
             if (ReadBuffer.Count() % 4 == 0)
             {
                 var bytes = new byte[4];
@@ -176,34 +214,15 @@ namespace ESCPOS_NET
                     }
                 }
 
-                TryUpdatePrinterStatus(bytes, timeout);
+                TryUpdatePrinterStatus(bytes);
 
                 // TODO: call other update handlers.
             }
         }
 
-        private void TryUpdatePrinterStatus(byte[] bytes, bool timeout)
+        private void TryUpdatePrinterStatus(byte[] bytes)
         {
-            if (timeout)
-            {
-                // try to reconnect
-                if (!IsConnected)
-                {
-                    Reconnect();
-                }
 
-                // Test if re-connection worked
-                if (!IsConnected)
-                {
-                    Status = new PrinterStatusEventArgs()
-                    {
-                        DeviceConnectionTimeout = true,
-                    };
-
-                    StatusChanged?.Invoke(this, Status);
-                }
-                return;
-            }
 #if DEBUG
             var bytesToString = string.Empty;
             var index = 0;
@@ -215,7 +234,6 @@ namespace ESCPOS_NET
 
             Debug.WriteLine($"TryUpdatePrinterStatus: \n{bytesToString}");
 #endif
-
             // Check header bits 0, 1 and 7 are 0, and 4 is 1
             if (bytes[0].IsBitNotSet(0) && bytes[0].IsBitNotSet(1) && bytes[0].IsBitSet(4) && bytes[0].IsBitNotSet(7))
             {
@@ -236,7 +254,6 @@ namespace ESCPOS_NET
                     DidRecoverableErrorOccur = bytes[1].IsBitSet(6),
                     IsPaperLow = bytes[2].IsBitSet(0) && bytes[2].IsBitSet(1),
                     IsPaperOut = bytes[2].IsBitSet(2) && bytes[2].IsBitSet(3),
-                    DeviceConnectionTimeout = timeout,
                 };
             }
 
@@ -267,14 +284,8 @@ namespace ESCPOS_NET
 
             if (disposing)
             {
-                _cancellationTokenSource?.Cancel();
-                FlushTimer?.Stop();
-                if (FlushTimer != null)
-                {
-                    FlushTimer.Elapsed -= Flush;
-                }
-
-                FlushTimer?.Dispose();
+                _readCancellationTokenSource?.Cancel();
+                
                 Reader?.Close();
                 Reader?.Dispose();
                 Writer?.Close();

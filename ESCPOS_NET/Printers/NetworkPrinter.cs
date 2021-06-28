@@ -6,59 +6,102 @@ using System.Text;
 
 namespace ESCPOS_NET
 {
+    public class NetworkPrinterSettings
+    {
+        public IPEndPoint EndPoint;
+        public bool ReconnectOnTimeout;
+        public uint? ReceiveTimeoutMs;
+        public uint? SendTimeoutMs;
+        public uint? ConnectTimeoutMs;
+        public uint? ReconnectTimeoutMs;
+        public uint? MaxReconnectAttempts;
+    }
     public class NetworkPrinter : BasePrinter
     {
-        // flag which allows an attempt to reconnect on timeout.
-        private readonly bool _reconnectOnTimeout;
-        private readonly IPEndPoint _endPoint;
+        private readonly NetworkPrinterSettings _settings;
         private Socket _socket;
         private NetworkStream _sockStream;
+        private int reconnectAttempts = 0;
+        private volatile bool _isConnecting = false;
 
-        protected override bool IsConnected => !((_socket.Poll(1000, SelectMode.SelectRead) && (_socket.Available == 0)) || !_socket.Connected);
+        protected override bool IsConnected
+        {
+            get
+            {
+                if (_socket == null) return false;
+                if (_isConnecting) return false;
+                if (!_socket.Connected) return false;
+
+                try
+                {
+                    return !(_socket.Poll(1, SelectMode.SelectRead) && _socket.Available == 0);
+                }
+                catch (SocketException) { return false; }
+                return true;
+            }
+        }
+
+        public NetworkPrinter(NetworkPrinterSettings settings) : base()
+        {
+            _settings = settings;
+            Connect();
+        }
 
         public NetworkPrinter(IPEndPoint endPoint, bool reconnectOnTimeout)
             : base()
         {
-            _reconnectOnTimeout = reconnectOnTimeout;
-            _endPoint = endPoint;
+            _settings = new NetworkPrinterSettings()
+            {
+                EndPoint = endPoint,
+                ReconnectOnTimeout = reconnectOnTimeout,
+            };
             Connect();
         }
 
         public NetworkPrinter(IPAddress ipAddress, int port, bool reconnectOnTimeout)
             : base()
         {
-            _reconnectOnTimeout = reconnectOnTimeout;
-            _endPoint = new IPEndPoint(ipAddress, port);
+            var endPoint = new IPEndPoint(ipAddress, port);
+            _settings = new NetworkPrinterSettings()
+            {
+                EndPoint = endPoint,
+                ReconnectOnTimeout = reconnectOnTimeout,
+            };
             Connect();
         }
 
         public NetworkPrinter(string ipAddress, int port, bool reconnectOnTimeout)
             : base()
         {
-            _reconnectOnTimeout = reconnectOnTimeout;
-            _endPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
+            var endPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
+            _settings = new NetworkPrinterSettings()
+            {
+                EndPoint = endPoint,
+                ReconnectOnTimeout = reconnectOnTimeout,
+            };
             Connect();
         }
 
         protected override void Reconnect()
         {
+            if (!_settings.ReconnectOnTimeout)
+            {
+                return;
+            }
+
+            reconnectAttempts += 1;
+            StopMonitoring();
+            Writer?.Flush();
+            Writer?.Close();
+            Reader?.Close();
+
+            _sockStream?.Close();
+            _socket?.Close();
+
             try
             {
-                if (_reconnectOnTimeout)
-                {
-                    Console.WriteLine("Trying to reconnect...");
-                    StopMonitoring();
-                    Writer?.Flush();
-                    Writer?.Close();
-                    Reader?.Close();
-
-                    _sockStream?.Close();
-                    _socket?.Close();
-
-                    Connect();
-                    Console.WriteLine("Reconnected!");
-                    StartMonitoring();
-                }
+                Console.WriteLine("Attempting Reconnect...");
+                Connect();
             }
             catch (Exception ex)
             {
@@ -69,13 +112,47 @@ namespace ESCPOS_NET
 
         private void Connect()
         {
-            _socket = new Socket(_endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            _socket.Connect(_endPoint);
-            _sockStream = new NetworkStream(_socket);
 
-            // Need to review the paramaters set here
-            Writer = new BinaryWriter(_sockStream, new UTF8Encoding(), true);
-            Reader = new BinaryReader(_sockStream, new UTF8Encoding(), true);
+            // Allow cooperative threads to check volatile bool to see if we are currently processing the socket
+            // and it's not readable (for example, the IsConnected property).
+            if (_isConnecting) return;
+            _isConnecting = true;
+
+            StopMonitoring();
+
+            _socket = new Socket(_settings.EndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _socket.SendTimeout = (int)(_settings.SendTimeoutMs ?? 3000);
+            _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+
+
+            var socketArgs = new SocketAsyncEventArgs();
+
+            IAsyncResult result = _socket.BeginConnect(_settings.EndPoint, null, null);
+
+            bool success = result.AsyncWaitHandle.WaitOne((int)(_settings.ConnectTimeoutMs ?? 10000), true);
+
+            if (_socket.Connected)
+            {
+                _socket.EndConnect(result);
+                _sockStream = new NetworkStream(_socket);
+
+                // Need to review the paramaters set here
+                Writer = new BinaryWriter(_sockStream, new UTF8Encoding(), true);
+                Reader = new BinaryReader(_sockStream, new UTF8Encoding(), true);
+                Console.WriteLine("Connected!");
+                reconnectAttempts = 0;
+                _isConnecting = false;
+                StartMonitoring();
+            }
+            else
+            {
+                _socket.Close();
+                if (_settings.ReconnectOnTimeout && (_settings.MaxReconnectAttempts == null && reconnectAttempts < 100) || reconnectAttempts < _settings.MaxReconnectAttempts)
+                {
+                    _isConnecting = false;
+                    Reconnect();
+                }
+            }
         }
 
         protected override void OverridableDispose()
