@@ -246,7 +246,8 @@ namespace ESCPOS_NET.ConsoleTest
         private static void StatusChanged(object sender, EventArgs ps)
         {
             var status = (PrinterStatusEventArgs)ps;
-            Console.WriteLine($"Printer Online Status: {status.IsCoverOpen}");
+            if (status == null) { Console.WriteLine("Status was null - unable to read status from printer."); return; }
+            Console.WriteLine($"Printer Online Status: {status.DeviceIsConnected}");
             Console.WriteLine(JsonConvert.SerializeObject(status));
         }
         private static bool _hasEnabledStatusMonitoring = false;
