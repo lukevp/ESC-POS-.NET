@@ -136,7 +136,7 @@ namespace ESCPOS_NET
                 _socket.EndConnect(result);
                 _sockStream = new NetworkStream(_socket);
 
-                // Need to review the paramaters set here
+                // Need to review the parameters set here
                 Writer = new BinaryWriter(_sockStream, new UTF8Encoding(), true);
                 Reader = new BinaryReader(_sockStream, new UTF8Encoding(), true);
                 Console.WriteLine("Connected!");
