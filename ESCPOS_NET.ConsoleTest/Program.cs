@@ -4,7 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Linq;
-
+using Microsoft.Extensions.Logging;
+using System.Threading;
 
 namespace ESCPOS_NET.ConsoleTest
 {
@@ -16,7 +17,19 @@ namespace ESCPOS_NET.ConsoleTest
         static void Main(string[] args)
         {
 
-            Console.WriteLine("ESCPOS_NET Test Application...");
+            Console.WriteLine("Welcome to the ESCPOS_NET Test Application!");
+            Console.Write("Would you like to see all debug messages? (y/n): ");
+            var response = Console.ReadLine().Trim().ToLowerInvariant();
+            var logLevel = LogLevel.Information;
+            if (response.Length >= 1 && response[0] == 'y')
+            {
+                Console.WriteLine("Debugging enabled!");
+                logLevel = LogLevel.Trace;
+            }
+            var factory = LoggerFactory.Create(b => b.AddConsole().SetMinimumLevel(logLevel));
+            var logger = factory.CreateLogger<Program>();
+            ESCPOS_NET.Logging.Logger = logger;
+
             Console.WriteLine("1 ) Test Serial Port");
             Console.WriteLine("2 ) Test Network Printer");
             Console.Write("Choice: ");
@@ -24,7 +37,7 @@ namespace ESCPOS_NET.ConsoleTest
             string baudRate;
             string ip;
             string networkPort;
-            var response = Console.ReadLine();
+            response = Console.ReadLine();
             var valid = new List<string> { "1", "2" };
             if (!valid.Contains(response))
             {
@@ -39,20 +52,20 @@ namespace ESCPOS_NET.ConsoleTest
                 {
                     while (!comPort.StartsWith("COM"))
                     {
-                        Console.Write("COM Port (eg. COM5): ");
+                        Console.Write("COM Port (enter for default COM5): ");
                         comPort = Console.ReadLine();
                         if (string.IsNullOrWhiteSpace(comPort))
                         {
                             comPort = "COM5";
                         }
                     }
-                    Console.Write("Baud Rate (eg. 115200): ");
+                    Console.Write("Baud Rate (enter for default 115200): ");
                     baudRate = Console.ReadLine();
                     if (string.IsNullOrWhiteSpace(baudRate))
                     {
                         baudRate = "115200";
                     }
-                    printer = new SerialPrinter(portName: comPort, baudRate: int.Parse(baudRate));
+                    printer = new SerialPrinter(portName: comPort, baudRate: 115200);
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
@@ -72,17 +85,19 @@ namespace ESCPOS_NET.ConsoleTest
                 if (string.IsNullOrWhiteSpace(ip))
                 {
                     ip = "192.168.1.240";
+                    ip = "192.168.254.202";
                 }
-                Console.Write("TCP Port (eg. 9000): ");
+                Console.Write("TCP Port (enter for default 9100): ");
                 networkPort = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(networkPort))
                 {
-                    networkPort = "9000";
+                    networkPort = "9100";
                 }
                 printer = new NetworkPrinter(ipAddress: ip, port: int.Parse(networkPort), reconnectOnTimeout: true);
             }
 
             bool monitor = false;
+            Thread.Sleep(500);
             Console.Write("Turn on Live Status Back Monitoring? (y/n): ");
             response = Console.ReadLine().Trim().ToLowerInvariant();
             if (response.Length >= 1 && response[0] == 'y')
@@ -93,7 +108,8 @@ namespace ESCPOS_NET.ConsoleTest
             e = new EPSON();
             var testCases = new Dictionary<Option, string>()
             {
-                { Option.Printing, "Printing" },
+                { Option.SingleLinePrinting, "Single Line Printing" },
+                { Option.MultiLinePrinting, "Multi-line Printing" },
                 { Option.LineSpacing, "Line Spacing" },
                 { Option.BarcodeStyles, "Barcode Styles" },
                 { Option.BarcodeTypes, "Barcode Types" },
@@ -141,8 +157,11 @@ namespace ESCPOS_NET.ConsoleTest
 
                 switch (enumChoice)
                 {
-                    case Option.Printing:
-                        printer.Write(Tests.Printing(e));
+                    case Option.SingleLinePrinting:
+                        printer.Write(Tests.SingleLinePrinting(e));
+                        break;
+                    case Option.MultiLinePrinting:
+                        printer.Write(Tests.MultiLinePrinting(e));
                         break;
                     case Option.LineSpacing:
                         printer.Write(Tests.LineSpacing(e));
@@ -161,34 +180,6 @@ namespace ESCPOS_NET.ConsoleTest
                         break;
                     case Option.FullReceipt:
                         printer.Write(Tests.Receipt(e));
-                        break;
-                    case Option.CodePages:
-                        var codePage = CodePage.PC437_USA_STANDARD_EUROPE_DEFAULT;
-                        Console.WriteLine("To run this test, you must select the index of a code page to print.");
-                        Console.WriteLine("The default CodePage is typically CodePage 0 (USA/International).");
-                        Console.WriteLine("Press enter to see the list of Code Pages.");
-                        Console.ReadLine();
-                        List<object> codePages = new List<object>();
-                        foreach (var value in Enum.GetValues(typeof(CodePage)))
-                        {
-                            codePages.Add(value);
-                        }
-                        for(int i = 0; i < codePages.Count; i++)
-                        {
-                            Console.WriteLine(i.ToString() + ": " + codePages[i] + "  (Page " + ((int)codePages[i]) + ")");
-                        }
-                        Console.Write("Index for test Code Page (NOT Page #): ");
-                        var page = Console.ReadLine();
-                        try
-                        {
-                            codePage = (CodePage)codePages[int.Parse(page)];
-                        }
-                        catch
-                        {
-                            Console.WriteLine("Invalid code page selected, defaulting to CodePage 0.");
-                        }
-
-                        printer.Write(Tests.CodePages(e, codePage));
                         break;
                     case Option.Images:
                         printer.Write(Tests.Images(e, false));
@@ -227,7 +218,8 @@ namespace ESCPOS_NET.ConsoleTest
 
         public enum Option
         {
-            Printing = 1,
+            SingleLinePrinting = 1,
+            MultiLinePrinting,
             LineSpacing,
             BarcodeStyles,
             BarcodeTypes,
