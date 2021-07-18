@@ -84,7 +84,6 @@ namespace ESCPOS_NET.ConsoleTest
                 ip = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(ip))
                 {
-                    ip = "192.168.1.240";
                     ip = "192.168.254.202";
                 }
                 Console.Write("TCP Port (enter for default 9100): ");
