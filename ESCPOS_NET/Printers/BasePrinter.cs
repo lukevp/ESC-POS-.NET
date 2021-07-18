@@ -71,7 +71,7 @@ namespace ESCPOS_NET
                 var acquiredMutex = InstanceReadLockMutex.WaitOne(5000);
                 if (!acquiredMutex)
                 {
-                    Logging.Logger.LogError($"[{PrinterName}] Read was unable to acquire mutex...");
+                    Logging.Logger?.LogError($"[{PrinterName}] Read was unable to acquire mutex...");
                     continue;
                 }
 
@@ -98,21 +98,21 @@ namespace ESCPOS_NET
                     }
                     catch
                     {
-                        Logging.Logger.LogDebug($"[{PrinterName}] Swallowing OperationCanceledException... secondary issue during dispose of cancellation token.");
+                        Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing OperationCanceledException... secondary issue during dispose of cancellation token.");
                     }
-                    Logging.Logger.LogDebug($"[{PrinterName}] Swallowing OperationCanceledException... this is used to turn off status monitoring.");
+                    Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing OperationCanceledException... this is used to turn off status monitoring.");
 
                 }
                 catch (IOException ex)
                 {
                     // Thrown if the printer times out the socket connection
                     // default is 90 seconds
-                    Logging.Logger.LogDebug($"[{PrinterName}] Swallowing IOException... sometimes happens with network printers. Should get reconnected automatically.");
+                    Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing IOException... sometimes happens with network printers. Should get reconnected automatically.");
                 }
                 catch (Exception ex)
                 {
                     // Swallow the exception
-                    Logging.Logger.LogDebug($"[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
+                    Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
                 }
                 InstanceReadLockMutex.ReleaseMutex();
             }
@@ -127,13 +127,13 @@ namespace ESCPOS_NET
         {
             if (!IsConnected)
             {
-                Logging.Logger.LogInformation($"[{PrinterName}] Attempted to write but printer isn't connected. Attempting to reconnect...");
+                Logging.Logger?.LogInformation($"[{PrinterName}] Attempted to write but printer isn't connected. Attempting to reconnect...");
                 Reconnect();
             }
 
             if (!IsConnected)
             {
-                Logging.Logger.LogError($"[{PrinterName}] Unrecoverable connectivity error writing to printer.");
+                Logging.Logger?.LogError($"[{PrinterName}] Unrecoverable connectivity error writing to printer.");
                 throw new IOException("Unrecoverable connectivity error writing to printer.");
             }
 
@@ -145,7 +145,7 @@ namespace ESCPOS_NET
                 var acquiredMutex = InstanceWriteLockMutex.WaitOne(5000);
                 if (!acquiredMutex)
                 {
-                    Logging.Logger.LogError($"[{PrinterName}] Write was unable to acquire mutex...");
+                    Logging.Logger?.LogError($"[{PrinterName}] Write was unable to acquire mutex...");
                     continue;
                 }
 
@@ -159,7 +159,7 @@ namespace ESCPOS_NET
                     Reconnect();
                     if (!IsConnected)
                     {
-                        Logging.Logger.LogError(e, $"[{PrinterName}] Unrecoverable connectivity error writing to printer.");
+                        Logging.Logger?.LogError(e, $"[{PrinterName}] Unrecoverable connectivity error writing to printer.");
                         throw new IOException("Unrecoverable connectivity error writing to printer.");
                     }
                     Writer.Write(bytes, bytePointer, count);
@@ -193,7 +193,7 @@ namespace ESCPOS_NET
             }
             catch (Exception ex)
             {
-                Logging.Logger.LogError(ex, $"[{PrinterName}] Flush threw exception.");
+                Logging.Logger?.LogError(ex, $"[{PrinterName}] Flush threw exception.");
             }
         }
 
@@ -202,7 +202,7 @@ namespace ESCPOS_NET
             if (!_isMonitoring)
             {
                 _isMonitoring = true;
-                Logging.Logger.LogDebug($"[{PrinterName}] Started Monitoring.");
+                Logging.Logger?.LogDebug($"[{PrinterName}] Started Monitoring.");
                 ReadBuffer = new ConcurrentQueue<byte>();
 
                 _readCancellationTokenSource = new CancellationTokenSource();
@@ -219,7 +219,7 @@ namespace ESCPOS_NET
                 if (connectedStatus != lastConnectionStatus)
                 {
 
-                    Logging.Logger.LogDebug($"[{PrinterName}] MonitorConnectivity detected connection status change. Connected: {connectedStatus}.");
+                    Logging.Logger?.LogDebug($"[{PrinterName}] MonitorConnectivity detected connection status change. Connected: {connectedStatus}.");
                     lastConnectionStatus = connectedStatus;
                     Status = new PrinterStatusEventArgs()
                     {
@@ -237,13 +237,13 @@ namespace ESCPOS_NET
                     {
                         //  grab mutexes and check if the system is still connected.
 
-                        Logging.Logger.LogDebug($"[{PrinterName}] MonitorConnectivity polling printer for status.");
+                        Logging.Logger?.LogDebug($"[{PrinterName}] MonitorConnectivity polling printer for status.");
 
                         var acquiredWriteMutex = InstanceWriteLockMutex.WaitOne(3000);
                         var acquiredReadMutex = InstanceReadLockMutex.WaitOne(3000);
                         if (!acquiredWriteMutex || !acquiredReadMutex)
                         {
-                            Logging.Logger.LogError($"[{PrinterName}] Unable to acquire mutexes to poll for status.");
+                            Logging.Logger?.LogError($"[{PrinterName}] Unable to acquire mutexes to poll for status.");
                         }
                         else
                         {
@@ -261,7 +261,7 @@ namespace ESCPOS_NET
                             catch
                             {
                                 connectedStatus = false;
-                                Logging.Logger.LogInformation($"[{PrinterName}] MonitorConnectivity: Detected connection failure.");
+                                Logging.Logger?.LogInformation($"[{PrinterName}] MonitorConnectivity: Detected connection failure.");
                                 Status = new PrinterStatusEventArgs()
                                 {
                                     DeviceIsConnected = false,
@@ -289,12 +289,12 @@ namespace ESCPOS_NET
                 {
                     try
                     {
-                        Logging.Logger.LogInformation($"[{PrinterName}] MonitorConnectivity: Reconnecting...");
+                        Logging.Logger?.LogInformation($"[{PrinterName}] MonitorConnectivity: Reconnecting...");
                         Reconnect();
                     }
                     catch (Exception e)
                     {
-                        Logging.Logger.LogError(e, $"[{PrinterName}] MonitorConnectivity: Unable to reconnect. Trying again...");
+                        Logging.Logger?.LogError(e, $"[{PrinterName}] MonitorConnectivity: Unable to reconnect. Trying again...");
                         lastConnectionStatus = null;
                     }
                     await Task.Delay(3000);
@@ -306,14 +306,14 @@ namespace ESCPOS_NET
         {
             if (_isMonitoring)
             {
-                Logging.Logger.LogDebug($"[{PrinterName}] Stopping Monitoring...");
+                Logging.Logger?.LogDebug($"[{PrinterName}] Stopping Monitoring...");
                 ReadBuffer = new ConcurrentQueue<byte>();
 
                 if (_readCancellationTokenSource != null)
                 {
                     _readCancellationTokenSource?.Cancel();
                 }
-                Logging.Logger.LogDebug($"[{PrinterName}] Stopped Monitoring.");
+                Logging.Logger?.LogDebug($"[{PrinterName}] Stopped Monitoring.");
                 _isMonitoring = false;
             }
         }
@@ -348,7 +348,7 @@ namespace ESCPOS_NET
                 index++;
             }
 
-            Logging.Logger.LogDebug($"[{PrinterName}] TryUpdatePrinterStatus: {bytesToString}");
+            Logging.Logger?.LogDebug($"[{PrinterName}] TryUpdatePrinterStatus: {bytesToString}");
 
             // Check header bits 0, 1 and 7 are 0, and 4 is 1
             if (bytes[0].IsBitNotSet(0) && bytes[0].IsBitNotSet(1) && bytes[0].IsBitSet(4) && bytes[0].IsBitNotSet(7))
@@ -375,7 +375,7 @@ namespace ESCPOS_NET
 
             if (StatusChanged != null)
             {
-                Logging.Logger.LogDebug($"[{PrinterName}] Invoking Status Changed Event Handler...");
+                Logging.Logger?.LogDebug($"[{PrinterName}] Invoking Status Changed Event Handler...");
                 StatusChanged?.Invoke(this, Status);
             }
         }
@@ -410,7 +410,7 @@ namespace ESCPOS_NET
                 }
                 catch (Exception e)
                 {
-                    Logging.Logger.LogDebug(e, $"[{PrinterName}] Dispose Issue during cancellation token cancellation call.");
+                    Logging.Logger?.LogDebug(e, $"[{PrinterName}] Dispose Issue during cancellation token cancellation call.");
                 }
                 try
                 {
@@ -418,7 +418,7 @@ namespace ESCPOS_NET
                 }
                 catch (Exception e)
                 {
-                    Logging.Logger.LogDebug(e, $"[{PrinterName}] Dispose Issue closing reader.");
+                    Logging.Logger?.LogDebug(e, $"[{PrinterName}] Dispose Issue closing reader.");
                 }
                 try
                 {
@@ -426,7 +426,7 @@ namespace ESCPOS_NET
                 }
                 catch (Exception e)
                 {
-                    Logging.Logger.LogDebug(e, $"[{PrinterName}] Dispose Issue disposing reader.");
+                    Logging.Logger?.LogDebug(e, $"[{PrinterName}] Dispose Issue disposing reader.");
                 }
                 try
                 {
@@ -434,7 +434,7 @@ namespace ESCPOS_NET
                 }
                 catch (Exception e)
                 {
-                    Logging.Logger.LogDebug(e, $"[{PrinterName}] Dispose Issue closing writer.");
+                    Logging.Logger?.LogDebug(e, $"[{PrinterName}] Dispose Issue closing writer.");
                 }
                 try
                 {
@@ -442,7 +442,7 @@ namespace ESCPOS_NET
                 }
                 catch (Exception e)
                 {
-                    Logging.Logger.LogDebug(e, $"[{PrinterName}] Dispose Issue disposing writer.");
+                    Logging.Logger?.LogDebug(e, $"[{PrinterName}] Dispose Issue disposing writer.");
                 }
                 try
                 {
@@ -450,7 +450,7 @@ namespace ESCPOS_NET
                 }
                 catch (Exception e)
                 {
-                    Logging.Logger.LogDebug(e, $"[{PrinterName}] Dispose Issue during overridable dispose.");
+                    Logging.Logger?.LogDebug(e, $"[{PrinterName}] Dispose Issue during overridable dispose.");
                 }
             }
 

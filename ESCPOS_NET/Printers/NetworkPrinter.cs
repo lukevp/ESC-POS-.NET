@@ -40,7 +40,7 @@ namespace ESCPOS_NET
                 }
                 catch (Exception e)
                 {
-                    Logging.Logger.LogDebug(e, "IsConnected returning false due to connection issue.");
+                    Logging.Logger?.LogDebug(e, "IsConnected returning false due to connection issue.");
                     return false;
                 }
             }
@@ -91,12 +91,12 @@ namespace ESCPOS_NET
         {
             if (!_settings.ReconnectOnTimeout)
             {
-                Logging.Logger.LogInformation($"[{PrinterName}] Reconnect: Settings have disabled reconnection, skipping reconnect attempt.");
+                Logging.Logger?.LogInformation($"[{PrinterName}] Reconnect: Settings have disabled reconnection, skipping reconnect attempt.");
                 return;
             }
 
             reconnectAttempts += 1;
-            Logging.Logger.LogTrace($"[{PrinterName}] Reconnect: Reconnection attempt {reconnectAttempts}.");
+            Logging.Logger?.LogTrace($"[{PrinterName}] Reconnect: Reconnection attempt {reconnectAttempts}.");
 
             try
             {
@@ -104,7 +104,7 @@ namespace ESCPOS_NET
             }
             catch (Exception e)
             {
-                Logging.Logger.LogDebug(e, $"[{PrinterName}] Reconnect: Issue stopping monitoring.");
+                Logging.Logger?.LogDebug(e, $"[{PrinterName}] Reconnect: Issue stopping monitoring.");
             }
             try
             {
@@ -112,7 +112,7 @@ namespace ESCPOS_NET
             }
             catch (Exception e)
             {
-                Logging.Logger.LogDebug(e, $"[{PrinterName}] Reconnect: Issue flushing writer.");
+                Logging.Logger?.LogDebug(e, $"[{PrinterName}] Reconnect: Issue flushing writer.");
             }
             try
             {
@@ -120,7 +120,7 @@ namespace ESCPOS_NET
             }
             catch (Exception e)
             {
-                Logging.Logger.LogDebug(e, $"[{PrinterName}] Reconnect: Issue closing writer.");
+                Logging.Logger?.LogDebug(e, $"[{PrinterName}] Reconnect: Issue closing writer.");
             }
             try
             {
@@ -128,7 +128,7 @@ namespace ESCPOS_NET
             }
             catch (Exception e)
             {
-                Logging.Logger.LogDebug(e, $"[{PrinterName}] Reconnect: Issue closing reader.");
+                Logging.Logger?.LogDebug(e, $"[{PrinterName}] Reconnect: Issue closing reader.");
             }
             try
             {
@@ -136,7 +136,7 @@ namespace ESCPOS_NET
             }
             catch (Exception e)
             {
-                Logging.Logger.LogDebug(e, $"[{PrinterName}] Reconnect: Issue closing socket stream.");
+                Logging.Logger?.LogDebug(e, $"[{PrinterName}] Reconnect: Issue closing socket stream.");
             }
             try
             {
@@ -144,16 +144,16 @@ namespace ESCPOS_NET
             }
             catch (Exception e)
             {
-                Logging.Logger.LogDebug(e, $"[{PrinterName}] Reconnect: Issue closing socket.");
+                Logging.Logger?.LogDebug(e, $"[{PrinterName}] Reconnect: Issue closing socket.");
             }
             try
             {
-                Logging.Logger.LogDebug($"[{PrinterName}] Reconnect: Attempting to reconnect...");
+                Logging.Logger?.LogDebug($"[{PrinterName}] Reconnect: Attempting to reconnect...");
                 Connect();
             }
             catch (Exception e)
             {
-                Logging.Logger.LogError(e, $"[{PrinterName}] Reconnect: Failed to reconnect.");
+                Logging.Logger?.LogError(e, $"[{PrinterName}] Reconnect: Failed to reconnect.");
                 throw;
             }
         }
@@ -189,7 +189,7 @@ namespace ESCPOS_NET
                 Writer = new BinaryWriter(_sockStream, new UTF8Encoding(), true);
                 Reader = new BinaryReader(_sockStream, new UTF8Encoding(), true);
 
-                Logging.Logger.LogDebug($"[{PrinterName}] Connect: Successfully connected.");
+                Logging.Logger?.LogDebug($"[{PrinterName}] Connect: Successfully connected.");
 
                 reconnectAttempts = 0;
                 _isConnecting = false;
