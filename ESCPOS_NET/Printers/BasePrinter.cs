@@ -227,22 +227,78 @@ namespace ESCPOS_NET
                     };
 
                     StatusChanged?.Invoke(this, Status);
-                    if (connectedStatus == false)
+
+                    await Task.Delay(500);
+                    continue;
+                }
+                else if (connectedStatus == true)
+                {
+                    if (!_isMonitoring) // Don't poll if status back is enabled.
                     {
-                        await Task.Delay(3000);
-                        try
-                        { 
-                            Reconnect();
-                        }
-                        catch (Exception e)
+                        //  grab mutexes and check if the system is still connected.
+
+                        Logging.Logger.LogDebug($"[{PrinterName}] MonitorConnectivity polling printer for status.");
+
+                        var acquiredWriteMutex = InstanceWriteLockMutex.WaitOne(3000);
+                        var acquiredReadMutex = InstanceReadLockMutex.WaitOne(3000);
+                        if (!acquiredWriteMutex || !acquiredReadMutex)
                         {
-                            Logging.Logger.LogError(e, $"[{PrinterId}] MonitorConnectivity was unable to reconnect. Trying again...");
-                            lastConnectionStatus = null;
+                            Logging.Logger.LogError($"[{PrinterName}] Unable to acquire mutexes to poll for status.");
                         }
+                        else
+                        {
+                            try
+                            {
+                                Writer.Write(new byte[] { Cmd.GS, ESCPOS_NET.Emitters.BaseCommandValues.Status.RequestStatus, 0x31 });
+                                Reader.ReadByte();
+                                Status = new PrinterStatusEventArgs()
+                                {
+                                    DeviceIsConnected = true,
+                                };
+
+                                StatusChanged?.Invoke(this, Status);
+                            }
+                            catch
+                            {
+                                connectedStatus = false;
+                                Logging.Logger.LogInformation($"[{PrinterName}] MonitorConnectivity: Detected connection failure.");
+                                Status = new PrinterStatusEventArgs()
+                                {
+                                    DeviceIsConnected = false,
+                                };
+
+                                StatusChanged?.Invoke(this, Status);
+                            }
+                        }
+
+                        if (acquiredWriteMutex)
+                        {
+                            InstanceWriteLockMutex.ReleaseMutex();
+                        }
+                        if (acquiredReadMutex)
+                        {
+                            InstanceReadLockMutex.ReleaseMutex();
+                        }
+
+                        // Wait a couple seconds (so we don't do this too often)
+                        await Task.Delay(3000);
                     }
                 }
 
-                await Task.Delay(50);
+                if (connectedStatus == false)
+                {
+                    try
+                    {
+                        Logging.Logger.LogInformation($"[{PrinterName}] MonitorConnectivity: Reconnecting...");
+                        Reconnect();
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.Logger.LogError(e, $"[{PrinterName}] MonitorConnectivity: Unable to reconnect. Trying again...");
+                        lastConnectionStatus = null;
+                    }
+                    await Task.Delay(3000);
+                }
             }
         }
 
