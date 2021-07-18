@@ -16,9 +16,10 @@ namespace ESCPOS_NET
     {
         private bool disposed = false;
 
-        private volatile bool _isMonitoring;
+        //private volatile bool _isMonitoring;
 
         private CancellationTokenSource _readCancellationTokenSource;
+        private CancellationTokenSource _writeCancellationTokenSource;
         private CancellationTokenSource _connectivityCancellationTokenSource;
 
         private readonly int _maxBytesPerWrite = 15000; // max byte chunks to write at once.
@@ -26,6 +27,10 @@ namespace ESCPOS_NET
         public PrinterStatusEventArgs Status { get; private set; } = null;
 
         public event EventHandler StatusChanged;
+        public event EventHandler Disconnected;
+        public event EventHandler Connected;
+        public event EventHandler WriteFailed;
+        public event EventHandler Idle;
 
         protected BinaryWriter Writer { get; set; }
 
@@ -33,8 +38,8 @@ namespace ESCPOS_NET
 
         // This mutex is used to ensure writes/reads that are done at the application level do not overlap with
         // automated status polling.
-        protected static Mutex InstanceReadLockMutex = new Mutex();
-        protected static Mutex InstanceWriteLockMutex = new Mutex();
+        //protected static Mutex InstanceReadLockMutex = new Mutex();
+        //protected static Mutex InstanceWriteLockMutex = new Mutex();
 
         protected ConcurrentQueue<byte> ReadBuffer { get; set; } = new ConcurrentQueue<byte>();
 
@@ -49,59 +54,46 @@ namespace ESCPOS_NET
         protected BasePrinter()
         {
             PrinterName = Guid.NewGuid().ToString();
-            _connectivityCancellationTokenSource = new CancellationTokenSource();
-            Task.Factory.StartNew(MonitorConnectivity, _connectivityCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+            Init();
         }
         protected BasePrinter(string printerName)
         {
             PrinterName = printerName;
+            Init();
+        }
+        private void Init()
+        {
             _connectivityCancellationTokenSource = new CancellationTokenSource();
-            Task.Factory.StartNew(MonitorConnectivity, _connectivityCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+            _readCancellationTokenSource = new CancellationTokenSource();
+            _writeCancellationTokenSource = new CancellationTokenSource();
+            Logging.Logger?.LogDebug("{PrinterName}]:[{Function}] Initializing Task Threads...", PrinterName, nameof(Init));
+            Task.Factory.StartNew(MonitorPrinterStatusLongRunningTask, _connectivityCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+            Task.Factory.StartNew(WriteLongRunningTask, _writeCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+            Task.Factory.StartNew(ReadLongRunningTask, _readCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+            // TODO: read and status monitoring probably won't work for fileprinter, should let printer types disable this feature.
+            Logging.Logger?.LogDebug("[{PrinterName}]:[{Function}] Task Threads started", PrinterName, nameof(Init));
         }
 
         protected virtual void Reconnect()
         {
             // Implemented in the network printer
         }
-
-        protected virtual void Read()
+        protected virtual void WriteLongRunningTask()
         {
-            while (_isMonitoring)
+            while (true)
             {
-                var acquiredMutex = InstanceReadLockMutex.WaitOne(5000);
-                if (!acquiredMutex)
+                if (_writeCancellationTokenSource != null && _writeCancellationTokenSource.IsCancellationRequested)
                 {
-                    Logging.Logger?.LogError($"[{PrinterName}] Read was unable to acquire mutex...");
-                    continue;
+                    Logging.Logger?.LogDebug("[{PrinterName}]:[{Function}] Write Long-Running Task Cancellation was requested.", PrinterName, nameof(WriteLongRunningTask));
+                    break;
                 }
-
                 try
                 {
-                    if (_readCancellationTokenSource != null && _readCancellationTokenSource.IsCancellationRequested)
+                    var didDequeue = WriteBuffer.TryDequeue(out var nextBytes);
+                    if (didDequeue && nextBytes?.Length > 0)
                     {
-                        _readCancellationTokenSource.Token.ThrowIfCancellationRequested();
+                        WriteToBinaryWriter(nextBytes);
                     }
-
-                    // Sometimes the serial port lib will throw an exception and read past the end of the queue if a
-                    // status changes while data is being written.  We just ignore these bytes.
-                    var b = Reader.ReadByte();
-                    ReadBuffer.Enqueue(b);
-                    DataAvailable();
-                }
-                catch (OperationCanceledException ex)
-                {
-                    try
-                    {
-                        _readCancellationTokenSource.Dispose();
-                        _readCancellationTokenSource = null;
-                        _isMonitoring = false;
-                    }
-                    catch
-                    {
-                        Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing OperationCanceledException... secondary issue during dispose of cancellation token.");
-                    }
-                    Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing OperationCanceledException... this is used to turn off status monitoring.");
-
                 }
                 catch (IOException ex)
                 {
@@ -114,7 +106,57 @@ namespace ESCPOS_NET
                     // Swallow the exception
                     Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
                 }
-                InstanceReadLockMutex.ReleaseMutex();
+            }
+        }
+
+        protected virtual void ReadLongRunningTask()
+        {
+            while (true)
+            {
+                if (_readCancellationTokenSource != null && _readCancellationTokenSource.IsCancellationRequested)
+                {
+                    Logging.Logger?.LogDebug("[{PrinterName}]:[{Function}] Read Long-Running Task Cancellation was requested.", PrinterName, nameof(ReadLongRunningTask));
+                    break;
+                }
+
+                if (Reader == null) continue;
+
+                try
+                {
+                    // Sometimes the serial port lib will throw an exception and read past the end of the queue if a
+                    // status changes while data is being written.  We just ignore these bytes.
+                    var b = Reader.ReadByte();
+                    ReadBuffer.Enqueue(b);
+                    DataAvailable();
+                }
+                //catch (OperationCanceledException ex)
+                //{
+                //    try
+                //    {
+                //        _readCancellationTokenSource.Dispose();
+                //        _readCancellationTokenSource = null;
+                //        //_isMonitoring = false;
+                //    }
+                //    catch
+                //    {
+                //        Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing OperationCanceledException... secondary issue during dispose of cancellation token.");
+                //    }
+                //    Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing OperationCanceledException... this is used to turn off status monitoring.");
+
+                //}
+                catch (IOException ex)
+                {
+                    // Thrown if the printer times out the socket connection
+                    // default is 90 seconds
+                    Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing IOException... sometimes happens with network printers. Should get reconnected automatically.");
+                    //TODO: reconnect socket here.
+                    Reconnect();
+                }
+                catch (Exception ex)
+                {
+                    // Swallow the exception
+                    Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
+                }
             }
         }
 
@@ -125,7 +167,11 @@ namespace ESCPOS_NET
 
         public virtual void Write(byte[] bytes)
         {
+            WriteBuffer.Enqueue(bytes);
+        }
 
+        protected virtual void WriteToBinaryWriter(byte[] bytes)
+        {
 
             if (!IsConnected)
             {
@@ -144,12 +190,6 @@ namespace ESCPOS_NET
             bool hasFlushed = false;
             while (bytesLeft > 0)
             {
-                var acquiredMutex = InstanceWriteLockMutex.WaitOne(5000);
-                if (!acquiredMutex)
-                {
-                    Logging.Logger?.LogError($"[{PrinterName}] Write was unable to acquire mutex...");
-                    continue;
-                }
 
                 int count = Math.Min(_maxBytesPerWrite, bytesLeft);
                 try
@@ -182,7 +222,6 @@ namespace ESCPOS_NET
             {
                 Task.Run(async () => { await Task.Delay(50); Flush(null, null); });
             }
-            InstanceWriteLockMutex.ReleaseMutex();
         }
 
         protected virtual void Flush(object sender, ElapsedEventArgs e)
@@ -199,28 +238,28 @@ namespace ESCPOS_NET
             }
         }
 
-        public virtual void StartMonitoring()
-        {
-            if (!_isMonitoring)
-            {
-                _isMonitoring = true;
-                Logging.Logger?.LogDebug($"[{PrinterName}] Started Monitoring.");
-                ReadBuffer = new ConcurrentQueue<byte>();
+        //public virtual void StartMonitoring()
+        //{
+        //    if (!_isMonitoring)
+        //    {
+        //        _isMonitoring = true;
+        //        Logging.Logger?.LogDebug($"[{PrinterName}] Started Monitoring.");
+        //        ReadBuffer = new ConcurrentQueue<byte>();
 
-                _readCancellationTokenSource = new CancellationTokenSource();
-                Task.Factory.StartNew(Read, _readCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
-            }
-        }
+        //        _readCancellationTokenSource = new CancellationTokenSource();
+        //        Task.Factory.StartNew(Read, _readCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+        //    }
+        //}
 
         public bool? lastConnectionStatus = false;
-        public async virtual void MonitorConnectivity()
+        public async virtual void MonitorPrinterStatusLongRunningTask()
         {
             while (_connectivityCancellationTokenSource != null && !_connectivityCancellationTokenSource.IsCancellationRequested)
             {
                 var connectedStatus = IsConnected;
                 if (connectedStatus != lastConnectionStatus)
                 {
-
+                    // TODO: rename log messages and use structured logs.
                     Logging.Logger?.LogDebug($"[{PrinterName}] MonitorConnectivity detected connection status change. Connected: {connectedStatus}.");
                     lastConnectionStatus = connectedStatus;
                     Status = new PrinterStatusEventArgs()
@@ -235,56 +274,41 @@ namespace ESCPOS_NET
                 }
                 else if (connectedStatus == true)
                 {
-                    if (!_isMonitoring) // Don't poll if status back is enabled.
+
+                    Logging.Logger?.LogDebug($"[{PrinterName}] MonitorConnectivity polling printer for status.");
+                    // Enqueue a status request.
+                    WriteBuffer.Enqueue(new byte[] { Cmd.GS, ESCPOS_NET.Emitters.BaseCommandValues.Status.RequestStatus, 0x31 });
+                    // TODO: write status request
+                    // TODO: track last read/write time.  If no read or write has happened in a while, fire idle event
+                    // TODO: if no read has happened in x amount of time, fire disconnected event and try to reconnect.
+
+                    try
                     {
-                        //  grab mutexes and check if the system is still connected.
+                        //Writer.Write(new byte[] { Cmd.GS, ESCPOS_NET.Emitters.BaseCommandValues.Status.RequestStatus, 0x31 });
+                        //Reader.ReadByte();
+                        //Status = new PrinterStatusEventArgs()
+                        //{
+                        //    DeviceIsConnected = true,
+                        //};
 
-                        Logging.Logger?.LogDebug($"[{PrinterName}] MonitorConnectivity polling printer for status.");
+                        //StatusChanged?.Invoke(this, Status);
+                    }
+                    catch
+                    {
+                        //connectedStatus = false;
+                        //Logging.Logger?.LogInformation($"[{PrinterName}] MonitorConnectivity: Detected connection failure.");
+                        //Status = new PrinterStatusEventArgs()
+                        //{
+                        //    DeviceIsConnected = false,
+                        //};
 
-                        var acquiredWriteMutex = InstanceWriteLockMutex.WaitOne(3000);
-                        var acquiredReadMutex = InstanceReadLockMutex.WaitOne(3000);
-                        if (!acquiredWriteMutex || !acquiredReadMutex)
-                        {
-                            Logging.Logger?.LogError($"[{PrinterName}] Unable to acquire mutexes to poll for status.");
-                        }
-                        else
-                        {
-                            try
-                            {
-                                Writer.Write(new byte[] { Cmd.GS, ESCPOS_NET.Emitters.BaseCommandValues.Status.RequestStatus, 0x31 });
-                                Reader.ReadByte();
-                                Status = new PrinterStatusEventArgs()
-                                {
-                                    DeviceIsConnected = true,
-                                };
-
-                                StatusChanged?.Invoke(this, Status);
-                            }
-                            catch
-                            {
-                                connectedStatus = false;
-                                Logging.Logger?.LogInformation($"[{PrinterName}] MonitorConnectivity: Detected connection failure.");
-                                Status = new PrinterStatusEventArgs()
-                                {
-                                    DeviceIsConnected = false,
-                                };
-
-                                StatusChanged?.Invoke(this, Status);
-                            }
-                        }
-
-                        if (acquiredWriteMutex)
-                        {
-                            InstanceWriteLockMutex.ReleaseMutex();
-                        }
-                        if (acquiredReadMutex)
-                        {
-                            InstanceReadLockMutex.ReleaseMutex();
-                        }
+                        //StatusChanged?.Invoke(this, Status);
+                        //}
 
                         // Wait a couple seconds (so we don't do this too often)
-                        await Task.Delay(3000);
                     }
+
+                    await Task.Delay(500);
                 }
 
                 if (connectedStatus == false)
@@ -304,21 +328,21 @@ namespace ESCPOS_NET
             }
         }
 
-        public virtual void StopMonitoring()
-        {
-            if (_isMonitoring)
-            {
-                Logging.Logger?.LogDebug($"[{PrinterName}] Stopping Monitoring...");
-                ReadBuffer = new ConcurrentQueue<byte>();
+        //public virtual void StopMonitoring()
+        //{
+        //    if (_isMonitoring)
+        //    {
+        //        Logging.Logger?.LogDebug($"[{PrinterName}] Stopping Monitoring...");
+        //        ReadBuffer = new ConcurrentQueue<byte>();
 
-                if (_readCancellationTokenSource != null)
-                {
-                    _readCancellationTokenSource?.Cancel();
-                }
-                Logging.Logger?.LogDebug($"[{PrinterName}] Stopped Monitoring.");
-                _isMonitoring = false;
-            }
-        }
+        //        if (_readCancellationTokenSource != null)
+        //        {
+        //            _readCancellationTokenSource?.Cancel();
+        //        }
+        //        Logging.Logger?.LogDebug($"[{PrinterName}] Stopped Monitoring.");
+        //        _isMonitoring = false;
+        //    }
+        //}
 
         public virtual void DataAvailable()
         {
@@ -457,6 +481,11 @@ namespace ESCPOS_NET
             }
 
             disposed = true;
+        }
+
+        public PrinterStatusEventArgs GetStatus()
+        {
+            throw new NotImplementedException();
         }
     }
 }

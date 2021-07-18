@@ -97,15 +97,7 @@ namespace ESCPOS_NET
 
             reconnectAttempts += 1;
             Logging.Logger?.LogTrace($"[{PrinterName}] Reconnect: Reconnection attempt {reconnectAttempts}.");
-
-            try
-            {
-                StopMonitoring();
-            }
-            catch (Exception e)
-            {
-                Logging.Logger?.LogDebug(e, $"[{PrinterName}] Reconnect: Issue stopping monitoring.");
-            }
+            // TODO: implement simple TCP
             try
             {
                 Writer?.Flush();
@@ -166,7 +158,6 @@ namespace ESCPOS_NET
             if (_isConnecting) return;
             _isConnecting = true;
 
-            StopMonitoring();
 
             _socket = new Socket(_settings.EndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _socket.SendTimeout = (int)(_settings.SendTimeoutMs ?? 3000);
