@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -36,8 +37,11 @@ namespace ESCPOS_NET
                 {
                     return !(_socket.Poll(1, SelectMode.SelectRead) && _socket.Available == 0);
                 }
-                catch (SocketException) { return false; }
-                return true;
+                catch (Exception e)
+                {
+                    Logging.Logger.LogDebug(e, "IsConnected returning false due to connection issue.");
+                    return false;
+                }
             }
         }
 
@@ -86,26 +90,69 @@ namespace ESCPOS_NET
         {
             if (!_settings.ReconnectOnTimeout)
             {
+                Logging.Logger.LogInformation($"[{PrinterId}] Reconnect: Settings have disabled reconnection, skipping reconnect attempt.");
                 return;
             }
 
             reconnectAttempts += 1;
-            StopMonitoring();
-            Writer?.Flush();
-            Writer?.Close();
-            Reader?.Close();
-
-            _sockStream?.Close();
-            _socket?.Close();
+            Logging.Logger.LogTrace($"[{PrinterId}] Reconnect: Reconnection attempt {reconnectAttempts}.");
 
             try
             {
-                Console.WriteLine("Attempting Reconnect...");
+                StopMonitoring();
+            }
+            catch (Exception e)
+            {
+                Logging.Logger.LogDebug(e, $"[{PrinterId}] Reconnect: Issue stopping monitoring.");
+            }
+            try
+            {
+                Writer?.Flush();
+            }
+            catch (Exception e)
+            {
+                Logging.Logger.LogDebug(e, $"[{PrinterId}] Reconnect: Issue flushing writer.");
+            }
+            try
+            {
+                Writer?.Close();
+            }
+            catch (Exception e)
+            {
+                Logging.Logger.LogDebug(e, $"[{PrinterId}] Reconnect: Issue closing writer.");
+            }
+            try
+            {
+                Reader?.Close();
+            }
+            catch (Exception e)
+            {
+                Logging.Logger.LogDebug(e, $"[{PrinterId}] Reconnect: Issue closing reader.");
+            }
+            try
+            {
+                _sockStream?.Close();
+            }
+            catch (Exception e)
+            {
+                Logging.Logger.LogDebug(e, $"[{PrinterId}] Reconnect: Issue closing socket stream.");
+            }
+            try
+            {
+                _socket?.Close();
+            }
+            catch (Exception e)
+            {
+                Logging.Logger.LogDebug(e, $"[{PrinterId}] Reconnect: Issue closing socket.");
+            }
+            try
+            {
+                Logging.Logger.LogDebug($"[{PrinterId}] Reconnect: Attempting to reconnect...");
                 Connect();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to reconnect: {ex.Message}");
+                Logging.Logger.LogError(e, $"[{PrinterId}] Reconnect: Failed to reconnect.");
                 throw;
             }
         }
@@ -139,7 +186,9 @@ namespace ESCPOS_NET
                 // Need to review the parameters set here
                 Writer = new BinaryWriter(_sockStream, new UTF8Encoding(), true);
                 Reader = new BinaryReader(_sockStream, new UTF8Encoding(), true);
-                Console.WriteLine("Connected!");
+
+                Logging.Logger.LogDebug($"[{PrinterId}] Connect: Successfully connected.");
+
                 reconnectAttempts = 0;
                 _isConnecting = false;
                 StartMonitoring();
