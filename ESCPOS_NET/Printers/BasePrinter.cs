@@ -12,7 +12,7 @@ using System.Timers;
 
 namespace ESCPOS_NET
 {
-    public abstract partial class BasePrinter : IDisposable
+    public abstract partial class BasePrinter : IPrinter, IDisposable
     {
         private bool disposed = false;
 
@@ -38,7 +38,7 @@ namespace ESCPOS_NET
 
         protected ConcurrentQueue<byte> ReadBuffer { get; set; } = new ConcurrentQueue<byte>();
 
-        protected ConcurrentQueue<byte> WriteBuffer { get; set; } = new ConcurrentQueue<byte>();
+        protected ConcurrentQueue<byte[]> WriteBuffer { get; set; } = new ConcurrentQueue<byte[]>();
 
         protected int BytesWrittenSinceLastFlush { get; set; } = 0;
 
@@ -64,7 +64,7 @@ namespace ESCPOS_NET
             // Implemented in the network printer
         }
 
-        public virtual void Read()
+        protected virtual void Read()
         {
             while (_isMonitoring)
             {
@@ -125,6 +125,8 @@ namespace ESCPOS_NET
 
         public virtual void Write(byte[] bytes)
         {
+
+
             if (!IsConnected)
             {
                 Logging.Logger?.LogInformation($"[{PrinterName}] Attempted to write but printer isn't connected. Attempting to reconnect...");
