@@ -87,6 +87,13 @@ namespace ESCPOS_NET
                     Logging.Logger?.LogDebug("[{PrinterName}]:[{Function}] Write Long-Running Task Cancellation was requested.", PrinterName, nameof(WriteLongRunningTask));
                     break;
                 }
+
+                await Task.Delay(100);
+                if (!IsConnected)
+                {
+                    continue;
+                }
+
                 try
                 {
                     var didDequeue = WriteBuffer.TryDequeue(out var nextBytes);
@@ -99,14 +106,13 @@ namespace ESCPOS_NET
                 {
                     // Thrown if the printer times out the socket connection
                     // default is 90 seconds
-                    Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing IOException... sometimes happens with network printers. Should get reconnected automatically.");
+                    //Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing IOException... sometimes happens with network printers. Should get reconnected automatically.");
                 }
                 catch (Exception ex)
                 {
                     // Swallow the exception
-                    Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
+                    //Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
                 }
-                await Task.Delay(50);
             }
         }
 
@@ -120,7 +126,10 @@ namespace ESCPOS_NET
                     break;
                 }
 
+                await Task.Delay(100);
+
                 if (Reader == null) continue;
+                if (!IsConnected) continue;
 
                 try
                 {
@@ -160,7 +169,6 @@ namespace ESCPOS_NET
                     // Swallow the exception
                     Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
                 }
-                await Task.Delay(50);
             }
         }
 
@@ -279,7 +287,7 @@ namespace ESCPOS_NET
                 else if (connectedStatus == true)
                 {
 
-                    Logging.Logger?.LogDebug($"[{PrinterName}] MonitorConnectivity polling printer for status.");
+                    //Logging.Logger?.LogDebug($"[{PrinterName}] MonitorConnectivity polling printer for status.");
                     // Enqueue a status request.
                     WriteBuffer.Enqueue(new byte[] { Cmd.GS, ESCPOS_NET.Emitters.BaseCommandValues.Status.RequestStatus, 0x31 });
                     // TODO: write status request
@@ -319,12 +327,12 @@ namespace ESCPOS_NET
                 {
                     try
                     {
-                        Logging.Logger?.LogInformation($"[{PrinterName}] MonitorConnectivity: Reconnecting...");
+                        //Logging.Logger?.LogInformation($"[{PrinterName}] MonitorConnectivity: Reconnecting...");
                         Reconnect();
                     }
                     catch (Exception e)
                     {
-                        Logging.Logger?.LogError(e, $"[{PrinterName}] MonitorConnectivity: Unable to reconnect. Trying again...");
+                        //Logging.Logger?.LogError(e, $"[{PrinterName}] MonitorConnectivity: Unable to reconnect. Trying again...");
                         lastConnectionStatus = null;
                     }
                     await Task.Delay(3000);
