@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29613.14
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31512.422
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESCPOS_NET", "ESCPOS_NET\ESCPOS_NET.csproj", "{BA181101-43A5-435E-8744-ACDA313D04D8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESCPOS_NET.ConsoleTest", "ESCPOS_NET.ConsoleTest\ESCPOS_NET.ConsoleTest.csproj", "{958464FE-6B30-4BA7-A4B1-D63ED2E23158}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESCPOS_NET.UnitTest", "ESCPOS_NET.UnitTest\ESCPOS_NET.UnitTest.csproj", "{8A848879-9776-4EBC-8484-41B8EE65FD8D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESCPOS_NET.UnitTest", "ESCPOS_NET.UnitTest\ESCPOS_NET.UnitTest.csproj", "{8A848879-9776-4EBC-8484-41B8EE65FD8D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESCPOS_NET.TCPPrintServerTest", "ESCPOS_NET.TCPPrintServerTest\ESCPOS_NET.TCPPrintServerTest.csproj", "{A79EB8C9-618F-40AD-ADF3-8794F07E240D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{8A848879-9776-4EBC-8484-41B8EE65FD8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A848879-9776-4EBC-8484-41B8EE65FD8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A848879-9776-4EBC-8484-41B8EE65FD8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A79EB8C9-618F-40AD-ADF3-8794F07E240D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A79EB8C9-618F-40AD-ADF3-8794F07E240D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A79EB8C9-618F-40AD-ADF3-8794F07E240D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A79EB8C9-618F-40AD-ADF3-8794F07E240D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
