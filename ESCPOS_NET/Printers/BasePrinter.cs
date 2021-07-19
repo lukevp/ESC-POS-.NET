@@ -289,7 +289,15 @@ namespace ESCPOS_NET
 
                     //Logging.Logger?.LogDebug($"[{PrinterName}] MonitorConnectivity polling printer for status.");
                     // Enqueue a status request.
-                    WriteBuffer.Enqueue(new byte[] { Cmd.GS, ESCPOS_NET.Emitters.BaseCommandValues.Status.RequestStatus, 0x31 });
+
+
+
+                    //WriteBuffer.Enqueue(new byte[] { Cmd.GS, ESCPOS_NET.Emitters.BaseCommandValues.Status.RequestStatus, 0x31 });
+
+
+
+
+
                     // TODO: write status request
                     // TODO: track last read/write time.  If no read or write has happened in a while, fire idle event
                     // TODO: if no read has happened in x amount of time, fire disconnected event and try to reconnect.
