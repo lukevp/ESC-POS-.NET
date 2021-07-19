@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace ESCPOS_NET
 {
@@ -89,6 +90,7 @@ namespace ESCPOS_NET
 
         protected override void Reconnect()
         {
+            if (_settings == null) return;
             if (!_settings.ReconnectOnTimeout)
             {
                 Logging.Logger?.LogInformation($"[{PrinterName}] Reconnect: Settings have disabled reconnection, skipping reconnect attempt.");
@@ -192,6 +194,7 @@ namespace ESCPOS_NET
                 if (_settings.ReconnectOnTimeout && (_settings.MaxReconnectAttempts == null && reconnectAttempts < 100) || reconnectAttempts < _settings.MaxReconnectAttempts)
                 {
                     _isConnecting = false;
+                    Thread.Sleep(250);
                     Reconnect();
                 }
             }

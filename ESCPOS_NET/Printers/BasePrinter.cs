@@ -78,7 +78,7 @@ namespace ESCPOS_NET
         {
             // Implemented in the network printer
         }
-        protected virtual void WriteLongRunningTask()
+        protected virtual async void WriteLongRunningTask()
         {
             while (true)
             {
@@ -106,10 +106,11 @@ namespace ESCPOS_NET
                     // Swallow the exception
                     Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
                 }
+                await Task.Delay(50);
             }
         }
 
-        protected virtual void ReadLongRunningTask()
+        protected virtual async void ReadLongRunningTask()
         {
             while (true)
             {
@@ -150,6 +151,8 @@ namespace ESCPOS_NET
                     // default is 90 seconds
                     Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing IOException... sometimes happens with network printers. Should get reconnected automatically.");
                     //TODO: reconnect socket here.
+
+                    await Task.Delay(250);
                     Reconnect();
                 }
                 catch (Exception ex)
@@ -157,6 +160,7 @@ namespace ESCPOS_NET
                     // Swallow the exception
                     Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
                 }
+                await Task.Delay(50);
             }
         }
 
