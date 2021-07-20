@@ -24,11 +24,7 @@ namespace ESCPOS_NET
     public class NetworkPrinter : BasePrinter
     {
         private readonly NetworkPrinterSettings _settings;
-        private Socket _socket;
-        private NetworkStream _sockStream;
-        private int reconnectAttempts = 0;
-        private volatile bool _isConnecting = false;
-        private SimpleTcpClient _client;
+        private TCPConnection _tcpConnection;
 
         private bool _isConnected = false;
         protected override bool IsConnected
@@ -42,7 +38,7 @@ namespace ESCPOS_NET
         public NetworkPrinter(NetworkPrinterSettings settings) : base(settings.PrinterName)
         {
             _settings = settings;
-            Task.Run(() => Connect(settings));
+            Task.Run(() => Connect());
         }
 
         //protected override void Reconnect()
@@ -116,48 +112,54 @@ namespace ESCPOS_NET
         private void Disconnected(object sender, ClientDisconnectedEventArgs e)
         {
             _isConnected = false;
+            // Invoke reconnect attempt in a background thread so we don't block the event handler thread.
+            Task.Run(() => { AttemptReconnectInfinitely(); });
 
         }
         private void DataReceived(object sender, DataReceivedEventArgs e)
         {
 
         }
+        private void AttemptReconnectInfinitely()
+        {
+            try
+            {
+                _tcpConnection.ConnectWithRetries(60000);
+            }
+            catch (TimeoutException)
+            {
+                Task.Run(async () => { await Task.Delay(250); AttemptReconnectInfinitely(); });
+            }
+        }
 
-        private void Connect(NetworkPrinterSettings settings)
+        private void Connect()
         {
 
             // instantiate
-            _client = new SimpleTcpClient(settings.EndPoint.ToString());
+            _tcpConnection = new TCPConnection(_settings.EndPoint.ToString());
 
             // set events
-            _client.Events.Connected += Connected;
-            _client.Events.Disconnected += Disconnected;
-            _client.Events.DataReceived += DataReceived;
+            _tcpConnection.Connected += Connected;
+            _tcpConnection.Disconnected += Disconnected;
+
+            Reader = new BinaryReader(_tcpConnection.ReadStream);
+            Writer = new BinaryWriter(_tcpConnection.WriteStream);
+
+            AttemptReconnectInfinitely();
 
             // let's go!
             // Attempt to connect for 5 minutes. If it fails, try again.
-            try
-            {
-                _client.ConnectWithRetries(20);
-            }
-            catch (TimeoutException ex)
-            {
-
-            }
             // TODO: adapt binaryreader and binarywriter to the SimpleClient so that when 
             // DataReceived is fired or when write is called it will send it to the client lib (SendAsync)
 
-                //// Need to review the parameters set here
-                //Writer = new BinaryWriter(_sockStream, new UTF8Encoding(), true);
-                //Reader = new BinaryReader(_sockStream, new UTF8Encoding(), true);
+            //// Need to review the parameters set here
+            //Writer = new BinaryWriter(_sockStream, new UTF8Encoding(), true);
+            //Reader = new BinaryReader(_sockStream, new UTF8Encoding(), true);
         }
 
         protected override void OverridableDispose()
         {
-            _sockStream?.Close();
-            _sockStream?.Dispose();
-            _socket?.Close();
-            _socket?.Dispose();
+            _tcpConnection = null;
         }
     }
 }
