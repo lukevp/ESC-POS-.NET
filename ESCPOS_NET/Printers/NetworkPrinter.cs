@@ -44,11 +44,14 @@ namespace ESCPOS_NET
 
         private void Connected(object sender, ClientConnectedEventArgs e)
         {
+            Logging.Logger?.LogInformation("[{PrinterName}] [{Function}]: Connected successfully to network printer! Settings: {Settings}", PrinterName, "Connected", JsonSerializer.Serialize(_settings));
             _isConnected = true;
         }
         private void Disconnected(object sender, ClientDisconnectedEventArgs e)
         {
             _isConnected = false;
+            Logging.Logger?.LogWarning("[{PrinterName}] [{Function}]: Network printer connection terminated. Attempting to reconnect. Settings: {Settings}", PrinterName, "Disconnected", JsonSerializer.Serialize(_settings));
+            //    Logging.Logger?.LogTrace($"[{PrinterName}] Reconnect: Reconnection attempt {reconnectAttempts}.");
             // Invoke reconnect attempt in a background thread so we don't block the event handler thread.
             Task.Run(() => { AttemptReconnectInfinitely(); });
 
@@ -57,10 +60,13 @@ namespace ESCPOS_NET
         {
             try
             {
-                _tcpConnection.ConnectWithRetries(60000);
+                //_tcpConnection.ConnectWithRetries(300000);
+                _tcpConnection.ConnectWithRetries(3000);
             }
             catch (TimeoutException)
             {
+                Logging.Logger?.LogWarning("[{PrinterName}] [{Function}]: Network printer unable to connect after 5 minutes. Attempting to reconnect. Settings: {Settings}", PrinterName, "AttemptReconnectInfinitely", JsonSerializer.Serialize(_settings));
+
                 Task.Run(async () => { await Task.Delay(250); AttemptReconnectInfinitely(); });
             }
         }
