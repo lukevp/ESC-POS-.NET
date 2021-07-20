@@ -3,6 +3,7 @@ using SimpleTcp;
 using System;
 using System.IO;
 using System.Net;
+using System.Text.Json;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -12,14 +13,14 @@ namespace ESCPOS_NET
 {
     public class NetworkPrinterSettings
     {
-        public IPEndPoint EndPoint;
-        public bool ReconnectOnTimeout;
-        public uint? ReceiveTimeoutMs;
-        public uint? SendTimeoutMs;
-        public uint? ConnectTimeoutMs;
-        public uint? ReconnectTimeoutMs;
-        public uint? MaxReconnectAttempts;
-        public string PrinterName;
+        public IPEndPoint EndPoint { get; set; }
+        //public bool ReconnectOnTimeout { get; set; }
+        //public uint? ReceiveTimeoutMs { get; set; }
+        //public uint? SendTimeoutMs { get; set; }
+        //public uint? ConnectTimeoutMs { get; set; }
+        //public uint? ReconnectTimeoutMs { get; set; }
+        //public uint? MaxReconnectAttempts { get; set; }
+        public string PrinterName { get; set; }
     }
     public class NetworkPrinter : BasePrinter
     {
