@@ -1,4 +1,5 @@
-﻿using SimpleTcp;
+﻿using ESCPOS_NET.Utils;
+using SimpleTcp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +9,7 @@ namespace ESCPOS_NET
 {
     public class TCPConnection
     {
-        public Stream ReadStream { get; private set; } = new MemoryStream();
+        public Stream ReadStream { get; private set; } = new EchoStream();
         public Stream WriteStream { get; private set; }
         public event EventHandler<ClientConnectedEventArgs> Connected;
         public event EventHandler<ClientDisconnectedEventArgs> Disconnected;
@@ -22,6 +23,7 @@ namespace ESCPOS_NET
             _client.Events.Disconnected += DisconnectedEventHandler;
             _client.Events.DataReceived += DataReceivedEventHandler;
             _client.Keepalive = new SimpleTcpKeepaliveSettings() { EnableTcpKeepAlives = true, TcpKeepAliveInterval = 1, TcpKeepAliveTime = 1, TcpKeepAliveRetryCount = 3 };
+            ReadStream.ReadTimeout = 1500;
             WriteStream = new InterceptableWriteMemoryStream(bytes => _client.Send(bytes));
         }
         private void ConnectedEventHandler(object sender, ClientConnectedEventArgs e)
