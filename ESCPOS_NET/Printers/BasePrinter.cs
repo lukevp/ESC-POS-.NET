@@ -66,7 +66,6 @@ namespace ESCPOS_NET
         private void Init()
         {
 
-            Status.DeviceIsConnected = false;
             _connectivityCancellationTokenSource = new CancellationTokenSource();
             _readCancellationTokenSource = new CancellationTokenSource();
             _writeCancellationTokenSource = new CancellationTokenSource();
@@ -78,15 +77,14 @@ namespace ESCPOS_NET
             Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Task Threads started", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
         }
 
+
         protected void InvokeConnect()
         {
-            Status.DeviceIsConnected = true;
-            Task.Run(() => StatusChanged?.Invoke(this, Status));
+            Task.Run(() => Connected?.Invoke(this, new ConnectionEventArgs() { IsConnected = true }));
         }
         protected void InvokeDisconnect()
         {
-            Status.DeviceIsConnected = false;
-            Task.Run(() => StatusChanged?.Invoke(this, Status));
+            Task.Run(() => Disconnected?.Invoke(this, new ConnectionEventArgs() { IsConnected = false }));
         }
 
         protected virtual void Reconnect()

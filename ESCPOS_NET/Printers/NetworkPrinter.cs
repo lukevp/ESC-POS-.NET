@@ -16,6 +16,8 @@ namespace ESCPOS_NET
     {
         // Connection string is of the form printer_name:port or ip:port
         public string ConnectionString { get; set; }
+        public EventHandler ConnectedHandler { get; set; }
+        public EventHandler DisconnectedHandler { get; set; }
         //public bool ReconnectOnTimeout { get; set; }
         //public uint? ReceiveTimeoutMs { get; set; }
         //public uint? SendTimeoutMs { get; set; }
@@ -32,12 +34,20 @@ namespace ESCPOS_NET
         public NetworkPrinter(NetworkPrinterSettings settings) : base(settings.PrinterName)
         {
             _settings = settings;
+            if (settings.ConnectedHandler != null)
+            {
+                Connected += settings.ConnectedHandler;
+            }
+            if (settings.DisconnectedHandler != null)
+            {
+                Disconnected += settings.DisconnectedHandler;
+            }
             Connect();
         }
 
         private void ConnectedEvent(object sender, ClientConnectedEventArgs e)
         {
-            Logging.Logger?.LogInformation("[{Function}]:[{PrinterName}] Connected successfully to network printer! Settings: {Settings}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, JsonSerializer.Serialize(_settings));
+            Logging.Logger?.LogInformation("[{Function}]:[{PrinterName}] Connected successfully to network printer! Connection String: {ConnectionString}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, _settings.ConnectionString);
             IsConnected = true;
             InvokeConnect();
         }
@@ -45,7 +55,7 @@ namespace ESCPOS_NET
         {
             IsConnected = false;
             InvokeDisconnect();
-            Logging.Logger?.LogWarning("[{Function}]:[{PrinterName}] Network printer connection terminated. Attempting to reconnect. Settings: {Settings}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, JsonSerializer.Serialize(_settings));
+            Logging.Logger?.LogWarning("[{Function}]:[{PrinterName}] Network printer connection terminated. Attempting to reconnect. Connection String: {ConnectionString}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, _settings.ConnectionString);
             Connect();
         }
         private void AttemptReconnectInfinitely()
