@@ -1,11 +1,13 @@
 using ESCPOS_NET.Emitters.BaseCommandValues;
 using ESCPOS_NET.Utilities;
+using ESCPOS_NET.Utils;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -24,7 +26,7 @@ namespace ESCPOS_NET
 
         private readonly int _maxBytesPerWrite = 15000; // max byte chunks to write at once.
 
-        public PrinterStatusEventArgs Status { get; private set; } = null;
+        public PrinterStatusEventArgs Status { get; private set; } = new PrinterStatusEventArgs();
 
         public event EventHandler StatusChanged;
         public event EventHandler Disconnected;
@@ -47,7 +49,7 @@ namespace ESCPOS_NET
 
         protected int BytesWrittenSinceLastFlush { get; set; } = 0;
 
-        protected virtual bool IsConnected => true;
+        protected volatile bool IsConnected  = true;
 
         public string PrinterName { get; protected set; }
 
@@ -63,15 +65,28 @@ namespace ESCPOS_NET
         }
         private void Init()
         {
+
+            Status.DeviceIsConnected = false;
             _connectivityCancellationTokenSource = new CancellationTokenSource();
             _readCancellationTokenSource = new CancellationTokenSource();
             _writeCancellationTokenSource = new CancellationTokenSource();
-            Logging.Logger?.LogDebug("{PrinterName}]:[{Function}] Initializing Task Threads...", PrinterName, nameof(Init));
-            Task.Factory.StartNew(MonitorPrinterStatusLongRunningTask, _connectivityCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+            Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Initializing Task Threads...", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+            //Task.Factory.StartNew(MonitorPrinterStatusLongRunningTask, _connectivityCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
             Task.Factory.StartNew(WriteLongRunningTask, _writeCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
             Task.Factory.StartNew(ReadLongRunningTask, _readCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
             // TODO: read and status monitoring probably won't work for fileprinter, should let printer types disable this feature.
-            Logging.Logger?.LogDebug("[{PrinterName}]:[{Function}] Task Threads started", PrinterName, nameof(Init));
+            Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Task Threads started", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+        }
+
+        protected void InvokeConnect()
+        {
+            Status.DeviceIsConnected = true;
+            Task.Run(() => StatusChanged?.Invoke(this, Status));
+        }
+        protected void InvokeDisconnect()
+        {
+            Status.DeviceIsConnected = false;
+            Task.Run(() => StatusChanged?.Invoke(this, Status));
         }
 
         protected virtual void Reconnect()
@@ -84,7 +99,7 @@ namespace ESCPOS_NET
             {
                 if (_writeCancellationTokenSource != null && _writeCancellationTokenSource.IsCancellationRequested)
                 {
-                    Logging.Logger?.LogDebug("[{PrinterName}]:[{Function}] Write Long-Running Task Cancellation was requested.", PrinterName, nameof(WriteLongRunningTask));
+                    Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Write Long-Running Task Cancellation was requested.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                     break;
                 }
 
@@ -106,12 +121,12 @@ namespace ESCPOS_NET
                 {
                     // Thrown if the printer times out the socket connection
                     // default is 90 seconds
-                    //Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing IOException... sometimes happens with network printers. Should get reconnected automatically.");
+                    //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing IOException... sometimes happens with network printers. Should get reconnected automatically.");
                 }
                 catch (Exception ex)
                 {
                     // Swallow the exception
-                    //Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
+                    //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
                 }
             }
         }
@@ -122,7 +137,7 @@ namespace ESCPOS_NET
             {
                 if (_readCancellationTokenSource != null && _readCancellationTokenSource.IsCancellationRequested)
                 {
-                    Logging.Logger?.LogDebug("[{PrinterName}]:[{Function}] Read Long-Running Task Cancellation was requested.", PrinterName, nameof(ReadLongRunningTask));
+                    Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Read Long-Running Task Cancellation was requested.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                     break;
                 }
 
@@ -135,9 +150,12 @@ namespace ESCPOS_NET
                 {
                     // Sometimes the serial port lib will throw an exception and read past the end of the queue if a
                     // status changes while data is being written.  We just ignore these bytes.
-                    var b = Reader.ReadByte();
-                    ReadBuffer.Enqueue(b);
-                    DataAvailable();
+                    var b = Reader.BaseStream.ReadByte();
+                    if (b >= 0 && b <= 255)
+                    {
+                        ReadBuffer.Enqueue((byte)b);
+                        DataAvailable();
+                    }
                 }
                 //catch (OperationCanceledException ex)
                 //{
@@ -149,25 +167,14 @@ namespace ESCPOS_NET
                 //    }
                 //    catch
                 //    {
-                //        Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing OperationCanceledException... secondary issue during dispose of cancellation token.");
+                //        Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing OperationCanceledException... secondary issue during dispose of cancellation token.");
                 //    }
-                //    Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing OperationCanceledException... this is used to turn off status monitoring.");
+                //    Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing OperationCanceledException... this is used to turn off status monitoring.");
 
                 //}
-                catch (IOException ex)
-                {
-                    // Thrown if the printer times out the socket connection
-                    // default is 90 seconds
-                    Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing IOException... sometimes happens with network printers. Should get reconnected automatically.");
-                    //TODO: reconnect socket here.
-
-                    await Task.Delay(250);
-                    Reconnect();
-                }
                 catch (Exception ex)
-                {
-                    // Swallow the exception
-                    Logging.Logger?.LogDebug($"[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
+                {                    // Swallow the exception
+                    //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 }
             }
         }
@@ -187,13 +194,13 @@ namespace ESCPOS_NET
 
             if (!IsConnected)
             {
-                Logging.Logger?.LogInformation($"[{PrinterName}] Attempted to write but printer isn't connected. Attempting to reconnect...");
+                Logging.Logger?.LogInformation("[{Function}]:[{PrinterName}] Attempted to write but printer isn't connected. Attempting to reconnect...", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 Reconnect();
             }
 
             if (!IsConnected)
             {
-                Logging.Logger?.LogError($"[{PrinterName}] Unrecoverable connectivity error writing to printer.");
+                Logging.Logger?.LogError("[{Function}]:[{PrinterName}] Unrecoverable connectivity error writing to printer.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 throw new IOException("Unrecoverable connectivity error writing to printer.");
             }
 
@@ -213,8 +220,8 @@ namespace ESCPOS_NET
                     Reconnect();
                     if (!IsConnected)
                     {
-                        Logging.Logger?.LogError(e, $"[{PrinterName}] Unrecoverable connectivity error writing to printer.");
-                        throw new IOException("Unrecoverable connectivity error writing to printer.");
+                        Logging.Logger?.LogError(e, "[{Function}]:[{PrinterName}] Unrecoverable connectivity error writing to printer.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+                        //throw new IOException("Unrecoverable connectivity error writing to printer.");
                     }
                     Writer.Write(bytes, bytePointer, count);
                 }
@@ -246,7 +253,7 @@ namespace ESCPOS_NET
             }
             catch (Exception ex)
             {
-                Logging.Logger?.LogError(ex, $"[{PrinterName}] Flush threw exception.");
+                Logging.Logger?.LogError(ex, "[{Function}]:[{PrinterName}] Flush threw exception.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
             }
         }
 
@@ -255,7 +262,7 @@ namespace ESCPOS_NET
         //    if (!_isMonitoring)
         //    {
         //        _isMonitoring = true;
-        //        Logging.Logger?.LogDebug($"[{PrinterName}] Started Monitoring.");
+        //        Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Started Monitoring.");
         //        ReadBuffer = new ConcurrentQueue<byte>();
 
         //        _readCancellationTokenSource = new CancellationTokenSource();
@@ -263,103 +270,103 @@ namespace ESCPOS_NET
         //    }
         //}
 
-        public bool? lastConnectionStatus = false;
-        public async virtual void MonitorPrinterStatusLongRunningTask()
-        {
-            while (_connectivityCancellationTokenSource != null && !_connectivityCancellationTokenSource.IsCancellationRequested)
-            {
-                var connectedStatus = IsConnected;
-                if (connectedStatus != lastConnectionStatus)
-                {
-                    // TODO: rename log messages and use structured logs.
-                    Logging.Logger?.LogDebug($"[{PrinterName}] MonitorConnectivity detected connection status change. Connected: {connectedStatus}.");
-                    lastConnectionStatus = connectedStatus;
-                    Status = new PrinterStatusEventArgs()
-                    {
-                        DeviceIsConnected = connectedStatus,
-                    };
+        //public bool? lastConnectionStatus = false;
+        //public async virtual void MonitorPrinterStatusLongRunningTask()
+        //{
+        //    while (_connectivityCancellationTokenSource != null && !_connectivityCancellationTokenSource.IsCancellationRequested)
+        //    {
+        //        var connectedStatus = IsConnected;
+        //        if (connectedStatus != lastConnectionStatus)
+        //        {
+        //            // TODO: rename log messages and use structured logs.
+        //            Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] MonitorConnectivity detected connection status change. Connected: {IsConnected}.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, connectedStatus);
+        //            lastConnectionStatus = connectedStatus;
+        //            Status = new PrinterStatusEventArgs()
+        //            {
+        //                DeviceIsConnected = connectedStatus,
+        //            };
 
-                    StatusChanged?.Invoke(this, Status);
+        //            StatusChanged?.Invoke(this, Status);
 
-                    await Task.Delay(500);
-                    continue;
-                }
-                else if (connectedStatus == true)
-                {
+        //            await Task.Delay(500);
+        //            continue;
+        //        }
+        //        else if (connectedStatus == true)
+        //        {
 
-                    //Logging.Logger?.LogDebug($"[{PrinterName}] MonitorConnectivity polling printer for status.");
-                    // Enqueue a status request.
-
-
-
-                    //WriteBuffer.Enqueue(new byte[] { Cmd.GS, ESCPOS_NET.Emitters.BaseCommandValues.Status.RequestStatus, 0x31 });
+        //            //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] MonitorConnectivity polling printer for status.");
+        //            // Enqueue a status request.
 
 
 
+        //            //WriteBuffer.Enqueue(new byte[] { Cmd.GS, ESCPOS_NET.Emitters.BaseCommandValues.Status.RequestStatus, 0x31 });
 
 
-                    // TODO: write status request
-                    // TODO: track last read/write time.  If no read or write has happened in a while, fire idle event
-                    // TODO: if no read has happened in x amount of time, fire disconnected event and try to reconnect.
 
-                    try
-                    {
-                        //Writer.Write(new byte[] { Cmd.GS, ESCPOS_NET.Emitters.BaseCommandValues.Status.RequestStatus, 0x31 });
-                        //Reader.ReadByte();
-                        //Status = new PrinterStatusEventArgs()
-                        //{
-                        //    DeviceIsConnected = true,
-                        //};
 
-                        //StatusChanged?.Invoke(this, Status);
-                    }
-                    catch
-                    {
-                        //connectedStatus = false;
-                        //Logging.Logger?.LogInformation($"[{PrinterName}] MonitorConnectivity: Detected connection failure.");
-                        //Status = new PrinterStatusEventArgs()
-                        //{
-                        //    DeviceIsConnected = false,
-                        //};
 
-                        //StatusChanged?.Invoke(this, Status);
-                        //}
+        //            // TODO: write status request
+        //            // TODO: track last read/write time.  If no read or write has happened in a while, fire idle event
+        //            // TODO: if no read has happened in x amount of time, fire disconnected event and try to reconnect.
 
-                        // Wait a couple seconds (so we don't do this too often)
-                    }
+        //            try
+        //            {
+        //                //Writer.Write(new byte[] { Cmd.GS, ESCPOS_NET.Emitters.BaseCommandValues.Status.RequestStatus, 0x31 });
+        //                //Reader.ReadByte();
+        //                //Status = new PrinterStatusEventArgs()
+        //                //{
+        //                //    DeviceIsConnected = true,
+        //                //};
 
-                    await Task.Delay(500);
-                }
+        //                //StatusChanged?.Invoke(this, Status);
+        //            }
+        //            catch
+        //            {
+        //                //connectedStatus = false;
+        //                //Logging.Logger?.LogInformation("[{Function}]:[{PrinterName}] MonitorConnectivity: Detected connection failure.");
+        //                //Status = new PrinterStatusEventArgs()
+        //                //{
+        //                //    DeviceIsConnected = false,
+        //                //};
 
-                if (connectedStatus == false)
-                {
-                    try
-                    {
-                        //Logging.Logger?.LogInformation($"[{PrinterName}] MonitorConnectivity: Reconnecting...");
-                        Reconnect();
-                    }
-                    catch (Exception e)
-                    {
-                        //Logging.Logger?.LogError(e, $"[{PrinterName}] MonitorConnectivity: Unable to reconnect. Trying again...");
-                        lastConnectionStatus = null;
-                    }
-                    await Task.Delay(3000);
-                }
-            }
-        }
+        //                //StatusChanged?.Invoke(this, Status);
+        //                //}
+
+        //                // Wait a couple seconds (so we don't do this too often)
+        //            }
+
+        //            await Task.Delay(500);
+        //        }
+
+        //        if (connectedStatus == false)
+        //        {
+        //            try
+        //            {
+        //                //Logging.Logger?.LogInformation("[{Function}]:[{PrinterName}] MonitorConnectivity: Reconnecting...");
+        //                Reconnect();
+        //            }
+        //            catch (Exception e)
+        //            {
+        //                //Logging.Logger?.LogError(e, "[{Function}]:[{PrinterName}] MonitorConnectivity: Unable to reconnect. Trying again...");
+        //                lastConnectionStatus = null;
+        //            }
+        //            await Task.Delay(3000);
+        //        }
+        //    }
+        //}
 
         //public virtual void StopMonitoring()
         //{
         //    if (_isMonitoring)
         //    {
-        //        Logging.Logger?.LogDebug($"[{PrinterName}] Stopping Monitoring...");
+        //        Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Stopping Monitoring...");
         //        ReadBuffer = new ConcurrentQueue<byte>();
 
         //        if (_readCancellationTokenSource != null)
         //        {
         //            _readCancellationTokenSource?.Cancel();
         //        }
-        //        Logging.Logger?.LogDebug($"[{PrinterName}] Stopped Monitoring.");
+        //        Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Stopped Monitoring.");
         //        _isMonitoring = false;
         //    }
         //}
@@ -394,7 +401,7 @@ namespace ESCPOS_NET
                 index++;
             }
 
-            Logging.Logger?.LogDebug($"[{PrinterName}] TryUpdatePrinterStatus: {bytesToString}");
+            Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] TryUpdatePrinterStatus: {bytesToString}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, bytesToString);
 
             // Check header bits 0, 1 and 7 are 0, and 4 is 1
             if (bytes[0].IsBitNotSet(0) && bytes[0].IsBitNotSet(1) && bytes[0].IsBitSet(4) && bytes[0].IsBitNotSet(7))
@@ -421,7 +428,7 @@ namespace ESCPOS_NET
 
             if (StatusChanged != null)
             {
-                Logging.Logger?.LogDebug($"[{PrinterName}] Invoking Status Changed Event Handler...");
+                Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Invoking Status Changed Event Handler...", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 StatusChanged?.Invoke(this, Status);
             }
         }
@@ -456,7 +463,7 @@ namespace ESCPOS_NET
                 }
                 catch (Exception e)
                 {
-                    Logging.Logger?.LogDebug(e, $"[{PrinterName}] Dispose Issue during cancellation token cancellation call.");
+                    Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue during cancellation token cancellation call.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 }
                 try
                 {
@@ -464,7 +471,7 @@ namespace ESCPOS_NET
                 }
                 catch (Exception e)
                 {
-                    Logging.Logger?.LogDebug(e, $"[{PrinterName}] Dispose Issue closing reader.");
+                    Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue closing reader.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 }
                 try
                 {
@@ -472,7 +479,7 @@ namespace ESCPOS_NET
                 }
                 catch (Exception e)
                 {
-                    Logging.Logger?.LogDebug(e, $"[{PrinterName}] Dispose Issue disposing reader.");
+                    Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue disposing reader.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 }
                 try
                 {
@@ -480,7 +487,7 @@ namespace ESCPOS_NET
                 }
                 catch (Exception e)
                 {
-                    Logging.Logger?.LogDebug(e, $"[{PrinterName}] Dispose Issue closing writer.");
+                    Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue closing writer.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 }
                 try
                 {
@@ -488,7 +495,7 @@ namespace ESCPOS_NET
                 }
                 catch (Exception e)
                 {
-                    Logging.Logger?.LogDebug(e, $"[{PrinterName}] Dispose Issue disposing writer.");
+                    Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue disposing writer.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 }
                 try
                 {
@@ -496,7 +503,7 @@ namespace ESCPOS_NET
                 }
                 catch (Exception e)
                 {
-                    Logging.Logger?.LogDebug(e, $"[{PrinterName}] Dispose Issue during overridable dispose.");
+                    Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue during overridable dispose.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 }
             }
 
