@@ -47,6 +47,9 @@ namespace ESCPOS_NET
         {
             try
             {
+                _client.Events.DataReceived -= DataReceivedEventHandler;
+                _client.Events.Connected -= ConnectedEventHandler;
+                _client.Events.Disconnected -= DisconnectedEventHandler;
                 _client?.Dispose();
             }
             catch { }
