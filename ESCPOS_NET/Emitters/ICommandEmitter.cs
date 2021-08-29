@@ -1,4 +1,4 @@
-﻿namespace ESCPOS_NET.Emitters
+namespace ESCPOS_NET.Emitters
 {
     public interface ICommandEmitter
     {
@@ -26,9 +26,9 @@
         byte[] Disable();
 
         /* Cash Drawer Commands */
-        byte[] CashDrawerOpenPin2();
+        byte[] CashDrawerOpenPin2(int pulseOnTimeMs = 120, int pulseOffTimeMs = 240);
 
-        byte[] CashDrawerOpenPin5();
+        byte[] CashDrawerOpenPin5(int pulseOnTimeMs = 120, int pulseOffTimeMs = 240);
 
         /* Character Commands */
         byte[] SetStyles(PrintStyle style);

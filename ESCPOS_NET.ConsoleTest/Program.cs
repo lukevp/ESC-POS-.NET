@@ -3,6 +3,9 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Linq;
+using Microsoft.Extensions.Logging;
+using System.Threading;
 
 namespace ESCPOS_NET.ConsoleTest
 {
@@ -14,7 +17,19 @@ namespace ESCPOS_NET.ConsoleTest
         static void Main(string[] args)
         {
 
-            Console.WriteLine("ESCPOS_NET Test Application...");
+            Console.WriteLine("Welcome to the ESCPOS_NET Test Application!");
+            Console.Write("Would you like to see all debug messages? (y/n): ");
+            var response = Console.ReadLine().Trim().ToLowerInvariant();
+            var logLevel = LogLevel.Information;
+            if (response.Length >= 1 && response[0] == 'y')
+            {
+                Console.WriteLine("Debugging enabled!");
+                logLevel = LogLevel.Trace;
+            }
+            var factory = LoggerFactory.Create(b => b.AddConsole().SetMinimumLevel(logLevel));
+            var logger = factory.CreateLogger<Program>();
+            ESCPOS_NET.Logging.Logger = logger;
+
             Console.WriteLine("1 ) Test Serial Port");
             Console.WriteLine("2 ) Test Network Printer");
             Console.Write("Choice: ");
@@ -22,7 +37,7 @@ namespace ESCPOS_NET.ConsoleTest
             string baudRate;
             string ip;
             string networkPort;
-            var response = Console.ReadLine();
+            response = Console.ReadLine();
             var valid = new List<string> { "1", "2" };
             if (!valid.Contains(response))
             {
@@ -37,20 +52,20 @@ namespace ESCPOS_NET.ConsoleTest
                 {
                     while (!comPort.StartsWith("COM"))
                     {
-                        Console.Write("COM Port (eg. COM5): ");
+                        Console.Write("COM Port (enter for default COM5): ");
                         comPort = Console.ReadLine();
                         if (string.IsNullOrWhiteSpace(comPort))
                         {
                             comPort = "COM5";
                         }
                     }
-                    Console.Write("Baud Rate (eg. 115200): ");
+                    Console.Write("Baud Rate (enter for default 115200): ");
                     baudRate = Console.ReadLine();
                     if (string.IsNullOrWhiteSpace(baudRate))
                     {
                         baudRate = "115200";
                     }
-                    printer = new SerialPrinter(portName: comPort, baudRate: int.Parse(baudRate));
+                    printer = new SerialPrinter(portName: comPort, baudRate: 115200);
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
@@ -69,18 +84,19 @@ namespace ESCPOS_NET.ConsoleTest
                 ip = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(ip))
                 {
-                    ip = "192.168.1.240";
+                    ip = "192.168.254.202";
                 }
-                Console.Write("TCP Port (eg. 9000): ");
+                Console.Write("TCP Port (enter for default 9100): ");
                 networkPort = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(networkPort))
                 {
-                    networkPort = "9000";
+                    networkPort = "9100";
                 }
                 printer = new NetworkPrinter(ipAddress: ip, port: int.Parse(networkPort), reconnectOnTimeout: true);
             }
 
             bool monitor = false;
+            Thread.Sleep(500);
             Console.Write("Turn on Live Status Back Monitoring? (y/n): ");
             response = Console.ReadLine().Trim().ToLowerInvariant();
             if (response.Length >= 1 && response[0] == 'y')
@@ -91,13 +107,15 @@ namespace ESCPOS_NET.ConsoleTest
             e = new EPSON();
             var testCases = new Dictionary<Option, string>()
             {
-                { Option.Printing, "Printing" },
+                { Option.SingleLinePrinting, "Single Line Printing" },
+                { Option.MultiLinePrinting, "Multi-line Printing" },
                 { Option.LineSpacing, "Line Spacing" },
                 { Option.BarcodeStyles, "Barcode Styles" },
                 { Option.BarcodeTypes, "Barcode Types" },
                 { Option.TwoDimensionCodes, "2D Codes" },
                 { Option.TextStyles, "Text Styles" },
                 { Option.FullReceipt, "Full Receipt" },
+                { Option.CodePages, "Code Pages (Euro, Katakana, Etc)" },
                 { Option.Images, "Images" },
                 { Option.LegacyImages, "Legacy Images" },
                 { Option.LargeByteArrays, "Large Byte Arrays" },
@@ -138,8 +156,11 @@ namespace ESCPOS_NET.ConsoleTest
 
                 switch (enumChoice)
                 {
-                    case Option.Printing:
-                        printer.Write(Tests.Printing(e));
+                    case Option.SingleLinePrinting:
+                        printer.Write(Tests.SingleLinePrinting(e));
+                        break;
+                    case Option.MultiLinePrinting:
+                        printer.Write(Tests.MultiLinePrinting(e));
                         break;
                     case Option.LineSpacing:
                         printer.Write(Tests.LineSpacing(e));
@@ -190,24 +211,21 @@ namespace ESCPOS_NET.ConsoleTest
                 printer?.Write(e.PrintLine($"== [ End {testCases[enumChoice]} ] =="));
                 printer?.Write(e.PartialCutAfterFeed(5));
 
-                // TODO: write a sanitation check.
-                // TODO: make DPI to inch conversion function
-                // TODO: full cuts and reverse feeding not implemented on epson...  should throw exception?
-                // TODO: make an input loop that lets you execute each test separately.
                 // TODO: also make an automatic runner that runs all tests (command line).
-                //Thread.Sleep(1000);
             }
         }
 
         public enum Option
         {
-            Printing = 1,
+            SingleLinePrinting = 1,
+            MultiLinePrinting,
             LineSpacing,
             BarcodeStyles,
             BarcodeTypes,
             TwoDimensionCodes,
             TextStyles,
             FullReceipt,
+            CodePages,
             Images,
             LegacyImages,
             LargeByteArrays,
@@ -219,7 +237,8 @@ namespace ESCPOS_NET.ConsoleTest
         private static void StatusChanged(object sender, EventArgs ps)
         {
             var status = (PrinterStatusEventArgs)ps;
-            Console.WriteLine($"Printer Online Status: {status.IsCoverOpen}");
+            if (status == null) { Console.WriteLine("Status was null - unable to read status from printer."); return; }
+            Console.WriteLine($"Printer Online Status: {status.DeviceIsConnected}");
             Console.WriteLine(JsonConvert.SerializeObject(status));
         }
         private static bool _hasEnabledStatusMonitoring = false;
@@ -242,100 +261,5 @@ namespace ESCPOS_NET.ConsoleTest
                 }
             }
         }
-
-        /*
-        static void TestCutter()
-        {
-            sp.Write(e.PrintLine("Performing Full Cut (no feed)."));
-            sp.Write(e.FullCut());
-            sp.Write(e.PrintLine("Performing Partial Cut (no feed)."));
-            sp.Write(e.PartialCut());
-            sp.Write(e.PrintLine("Performing Full Cut (1000 dot feed)."));
-            sp.Write(e.FullCutAfterFeed(1000));
-            sp.Write(e.PrintLine("Performing Partial Cut (1000 dot feed)."));
-            sp.Write(e.PartialCutAfterFeed(1000));
-        }
-
-        static void TestBarcodeTypes()
-        {
-            sp.Write(
-              e.PrintLine("UPC_A: 012345678905 "),
-                e.SetBarLabelFontB(false),
-                e.SetBarLabelPosition(BarLabelPrintPosition.Below),
-                e.PrintBarcode(BarcodeType.UPC_A, "012345678905")
-                );
-            /*
-             * 
-                e.PrintBarcode(BarcodeType.CODE128, "10945500020119184400014"),
-                /*
-            e.PrintBarcode(BarcodeType., "041220096138"),
-             *         UPC_A                       = 0x41,
-        UPC_E                       = 0x42,
-        JAN13_EAN13                 = 0x43,
-        JAN8_EAN8                   = 0x44,
-        CODE39                      = 0x45,
-        ITF                         = 0x46,
-        CODABAR_NW_7                = 0x47,
-        CODE93                      = 0x48,
-        CODE128                     = 0x49,
-        GS1_128                     = 0x4A,
-        GS1_DATABAR_OMNIDIRECTIONAL = 0x4B,
-        GS1_DATABAR_TRUNCATED       = 0x4C,
-        GS1_DATABAR_LIMITED         = 0x4D,
-        GS1_DATABAR_EXPANDED        = 0x4E
-
-
-            */
-        /*
-    }
-
-
-    static void TestHEBReceipt()
-    {
-        sp.Write(
-            //e.FeedDots(2000),
-            // TODO: logo
-            e.CenterAlign(),
-            //e.PrintLine("BHONEYWELLv"),
-            //e.SetBarcodeHeightInDots(360),
-            //e.SetBarWidth(BarWidth.Regular),
-            //e.SetBarLabelPosition(BarLabelPrintPosition.None),
-            e.PrintBarcode(BarcodeType.JAN13_EAN13, "041220096138"),
-            /*
-            e.PrintLine(""),
-            e.PrintLine("B&H PHOTO & VIDEO"),
-            e.PrintLine("420 NINTH AVE."),
-            e.PrintLine("NEW YORK, NY 10001"),
-            e.PrintLine("(212) 502-6380 - (800)947-9975"),
-            e.SetStyles(PrintStyle.Underline),
-            e.PrintLine("www.bhphotovideo.com"),
-            e.SetStyles(PrintStyle.None),
-            e.PrintLine(""),
-            e.LeftAlign,
-            e.PrintLine("Order: 123456789        Date: 02/01/19"),
-            e.PrintLine(""),
-            e.PrintLine(""),
-            e.SetStyles(PrintStyle.FontB),
-            e.PrintLine("1   TRITON LOW-NOISE IN-LINE MICROPHONE PREAMP"),
-            e.PrintLine("    TRFETHEAD/FETHEAD                        89.95         89.95"),
-            e.PrintLine("----------------------------------------------------------------"),
-            e.RightAlign,
-            e.PrintLine("SUBTOTAL         89.95"),
-            e.PrintLine("Total Order:         89.95"),
-            e.PrintLine("Total Payment:              "),
-            e.PrintLine(""),
-            e.LeftAlign,
-            e.SetStyles(PrintStyle.Bold | PrintStyle.FontB),
-            e.PrintLine("SOLD TO:                        SHIP TO:"),
-            e.SetStyles(PrintStyle.FontB),
-            e.PrintLine("  LUKE PAIREEPINART               LUKE PAIREEPINART"),
-            e.PrintLine("  123 FAKE ST.                    123 FAKE ST."),
-            e.PrintLine("  DECATUR, IL 12345               DECATUR, IL 12345"),
-            e.PrintLine("  (123)456-7890                   (123)456-7890"),
-            e.PrintLine("  CUST: 87654321"),*//*
-        e.FullCutAfterFeed(1000)
-        );
-    }
-   */
     }
 }

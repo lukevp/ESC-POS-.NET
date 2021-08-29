@@ -28,7 +28,7 @@ namespace ESCPOS_NET.Emitters
         }
 
         /* Image Commands */
-        public byte[] SetImageDensity(bool isHiDPI)
+        public virtual byte[] SetImageDensity(bool isHiDPI)
         {
             ByteArrayBuilder builder = new ByteArrayBuilder();
             byte dpiSetting = isHiDPI ? (byte)0x33 : (byte)0x32; // TODO: is this right??
@@ -38,7 +38,7 @@ namespace ESCPOS_NET.Emitters
             return builder.ToArray();
         }
 
-        public byte[] BufferImage(byte[] image, int maxWidth = -1, bool isLegacy = false, int color = 1)
+        public virtual byte[] BufferImage(byte[] image, int maxWidth = -1, bool isLegacy = false, int color = 1)
         {
             ByteArrayBuilder imageCommand = new ByteArrayBuilder();
 
@@ -97,7 +97,7 @@ namespace ESCPOS_NET.Emitters
             return response.ToArray();
         }
 
-        public byte[] WriteImageFromBuffer()
+        public virtual byte[] WriteImageFromBuffer()
         {
             // Print image that's already buffered.
             ByteArrayBuilder response = new ByteArrayBuilder();
@@ -107,7 +107,7 @@ namespace ESCPOS_NET.Emitters
             return response.ToArray();
         }
 
-        public byte[] PrintImage(byte[] image, bool isHiDPI, bool isLegacy = false, int maxWidth = -1, int color = 1)
+        public virtual byte[] PrintImage(byte[] image, bool isHiDPI, bool isLegacy = false, int maxWidth = -1, int color = 1)
         {
             if (isLegacy)
             {

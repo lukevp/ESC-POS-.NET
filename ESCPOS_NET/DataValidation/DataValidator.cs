@@ -143,7 +143,7 @@ namespace ESCPOS_NET.DataValidation
                     case BarcodeType.CODE93:
                         if (!barcode.StartsWith("*", StringComparison.InvariantCulture) || !barcode.EndsWith("*", StringComparison.InvariantCulture))
                         {
-                            throw new ArgumentException($"CODE39 Barcode {barcode} must start and end with * characters.");
+                            throw new ArgumentException($"CODE93 Barcode {barcode} must start and end with * characters.");
                         }
 
                         break;
