@@ -47,6 +47,8 @@ namespace ESCPOS_NET.Emitters
 
         byte[] CodePage(CodePage codePage);
 
+        byte[] Color(Color color);
+
         /* Action Commands */
         byte[] FullCut();
 
