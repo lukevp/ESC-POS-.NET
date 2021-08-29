@@ -5,7 +5,7 @@ namespace ESCPOS_NET.ConsoleTest
 {
     public static partial class Tests
     {
-        public static byte[][] Printing(ICommandEmitter e) => new byte[][] {
+        public static byte[][] MultiLinePrinting(ICommandEmitter e) => new byte[][] {
             e.Print("Multiline Test: Windows...\r\nOSX...\rUnix...\n"),
             //TODO: sanitize test.
             e.PrintLine("Feeding 250 dots."),
@@ -16,6 +16,10 @@ namespace ESCPOS_NET.ConsoleTest
             e.PrintLine("Reverse Feeding 6 lines."),
             e.FeedLinesReverse(6),
             e.PrintLine("Done Reverse Feeding.")
+        };
+
+        public static byte[][] SingleLinePrinting(ICommandEmitter e) => new byte[][] {
+            e.Print("Single Test Line Of Text\r\n"),
         };
     }
 }
