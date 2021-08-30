@@ -255,15 +255,9 @@ namespace ESCPOS_NET
 
         private void TryUpdatePrinterStatus(byte[] bytes)
         {
-            var bytesToString = string.Empty;
-            var index = 0;
-            foreach (var b in bytes)
-            {
-                bytesToString += $"index[{index}], value[{b}]\n";
-                index++;
-            }
+            var bytesToString = BitConverter.ToString(bytes);
 
-            Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] TryUpdatePrinterStatus: {bytesToString}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, bytesToString);
+            Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] TryUpdatePrinterStatus: Received flag values {bytesToString}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, bytesToString);
 
             // Check header bits 0, 1 and 7 are 0, and 4 is 1
             if (bytes[0].IsBitNotSet(0) && bytes[0].IsBitNotSet(1) && bytes[0].IsBitSet(4) && bytes[0].IsBitNotSet(7))
