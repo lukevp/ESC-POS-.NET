@@ -92,7 +92,7 @@ namespace ESCPOS_NET.ConsoleTest
                 {
                     networkPort = "9100";
                 }
-                printer = new NetworkPrinter(ipAddress: ip, port: int.Parse(networkPort), reconnectOnTimeout: true);
+                printer = new NetworkPrinter(settings: new NetworkPrinterSettings() { ConnectionString = $"{ip}:{networkPort}" });
             }
 
             bool monitor = false;
@@ -148,7 +148,9 @@ namespace ESCPOS_NET.ConsoleTest
 
                 if (monitor)
                 {
-                    printer.StartMonitoring();
+                    printer.Write(e.Initialize());
+                    printer.Write(e.Enable());
+                    printer.Write(e.EnableAutomaticStatusBack());
                 }
                 Setup(monitor);
 
@@ -238,7 +240,7 @@ namespace ESCPOS_NET.ConsoleTest
         {
             var status = (PrinterStatusEventArgs)ps;
             if (status == null) { Console.WriteLine("Status was null - unable to read status from printer."); return; }
-            Console.WriteLine($"Printer Online Status: {status.DeviceIsConnected}");
+            Console.WriteLine($"Printer Online Status: {status.IsPrinterOnline}");
             Console.WriteLine(JsonConvert.SerializeObject(status));
         }
         private static bool _hasEnabledStatusMonitoring = false;
