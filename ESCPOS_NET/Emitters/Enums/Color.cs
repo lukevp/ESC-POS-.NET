@@ -7,6 +7,6 @@ namespace ESCPOS_NET.Emitters
     public enum Color
     {
         Black = 0,
-        Red = 1
+        Red   = 1
     }
 }
