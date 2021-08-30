@@ -54,6 +54,10 @@ namespace ESCPOS_NET
         }
         protected BasePrinter(string printerName)
         {
+            if (string.IsNullOrEmpty(printerName))
+            {
+                printerName = Guid.NewGuid().ToString();
+            }
             PrinterName = printerName;
             Init();
         }
