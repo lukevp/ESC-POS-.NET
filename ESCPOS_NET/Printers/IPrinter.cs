@@ -10,8 +10,8 @@ namespace ESCPOS_NET
         event EventHandler StatusChanged;
         event EventHandler Disconnected;
         event EventHandler Connected;
-        event EventHandler WriteFailed;
-        event EventHandler Idle;
+        //event EventHandler WriteFailed;
+        //event EventHandler Idle;
         //event EventHandler IdleDisconnected; is this useful? to know that it disconnected because of idle? probably better to have this as info in disconnected event object instead.
     }
 }
