@@ -103,6 +103,7 @@ namespace ESCPOS_NET
                     if (didDequeue && nextBytes?.Length > 0)
                     {
                         WriteToBinaryWriter(nextBytes);
+                        await Task.Delay(2);
                     } else {
                         await Task.Delay(100);
                     }
