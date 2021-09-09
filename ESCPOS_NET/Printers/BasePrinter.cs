@@ -97,18 +97,14 @@ namespace ESCPOS_NET
                     break;
                 }
 
-                await Task.Delay(100);
-                if (!IsConnected)
-                {
-                    continue;
-                }
-
                 try
                 {
-                    var didDequeue = WriteBuffer.TryDequeue(out var nextBytes);
+                    var didDequeue = IsConnected && WriteBuffer.TryDequeue(out var nextBytes);
                     if (didDequeue && nextBytes?.Length > 0)
                     {
                         WriteToBinaryWriter(nextBytes);
+                    } else {
+                        await Task.Delay(100);
                     }
                 }
                 catch (IOException ex)
@@ -121,6 +117,7 @@ namespace ESCPOS_NET
                 {
                     // Swallow the exception
                     //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
+                    await Task.Delay(100);
                 }
             }
         }
