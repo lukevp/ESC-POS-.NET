@@ -34,7 +34,6 @@ namespace ESCPOS_NET.ConsoleTest
             Console.WriteLine("2 ) Test Network Printer");
             Console.Write("Choice: ");
             string comPort = "";
-            string baudRate;
             string ip;
             string networkPort;
             response = Console.ReadLine();
@@ -58,14 +57,13 @@ namespace ESCPOS_NET.ConsoleTest
                         {
                             comPort = "COM5";
                         }
-                    }
-                    Console.Write("Baud Rate (enter for default 115200): ");
-                    baudRate = Console.ReadLine();
-                    if (string.IsNullOrWhiteSpace(baudRate))
+                    }                    
+                    Console.Write("Baud Rate (enter for default 115200): ");                    
+                    if (!int.TryParse(Console.ReadLine(), out var baudRate))
                     {
-                        baudRate = "115200";
+                        baudRate = 115200;
                     }
-                    printer = new SerialPrinter(portName: comPort, baudRate: 115200);
+                    printer = new SerialPrinter(portName: comPort, baudRate: baudRate);
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
