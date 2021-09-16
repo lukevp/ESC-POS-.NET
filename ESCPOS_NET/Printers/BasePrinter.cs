@@ -42,8 +42,8 @@ namespace ESCPOS_NET
         protected ConcurrentQueue<byte[]> WriteBuffer { get; set; } = new ConcurrentQueue<byte[]>();
 
         protected int BytesWrittenSinceLastFlush { get; set; } = 0;
-
-        protected volatile bool IsConnected  = true;
+        
+        protected virtual bool IsConnected { get; } = true;
 
         public string PrinterName { get; protected set; }
 
