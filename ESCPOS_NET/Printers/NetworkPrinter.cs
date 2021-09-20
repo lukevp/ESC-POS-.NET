@@ -82,7 +82,17 @@ namespace ESCPOS_NET
         private void Connect()
         {
             CreateTcpConnection();
-            Task.Run(async () => { await AttemptReconnectInfinitely(); });
+            try
+            {
+                _tcpConnection.Connect();
+            }
+            catch (SocketException)
+            {
+                if (!IsConnected)
+                {
+                    Task.Run(async () => { await AttemptReconnectInfinitely(); });
+                }
+            }
         }
 
         private void CreateTcpConnection()
@@ -103,7 +113,15 @@ namespace ESCPOS_NET
 
         protected override void OverridableDispose()
         {
+            // Dispose to close tcp connection when the printer object is disposed otherwise
+            // the tcp connection is held until garbage collected
+            _tcpConnection?.Dispose();
             _tcpConnection = null;
+        }
+
+        ~NetworkPrinter()
+        {
+            Dispose(true);
         }
     }
 }
