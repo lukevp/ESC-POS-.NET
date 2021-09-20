@@ -35,7 +35,7 @@ namespace ESCPOS_NET.ConsoleTest
                 cube
             );
             MemoryPrinter mp = new MemoryPrinter();
-            mp.Write(expectedResult);
+            mp.WriteTest(expectedResult);
             var response = mp.GetAllData();
             bool hasErrors = false;
             if (expectedResult.Length != response.Length)
@@ -68,7 +68,7 @@ namespace ESCPOS_NET.ConsoleTest
             var filename = $"{r.NextDouble().ToString()}.tmp";
             using (FilePrinter fp = new FilePrinter(filename, true))
             { 
-                fp.Write(expectedResult);
+                fp.WriteTest(expectedResult);
             }
             response = File.ReadAllBytes(filename);
             hasErrors = false;

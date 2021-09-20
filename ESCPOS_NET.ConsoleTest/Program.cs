@@ -13,10 +13,13 @@ namespace ESCPOS_NET.ConsoleTest
     {
         private static BasePrinter printer;
         private static ICommandEmitter e;
+        /// <summary>
+        /// Indicate whether to test with long-lived printer object or create and dispose every time.
+        /// </summary>
+        private const bool SINGLETON_PRINTER_OBJECT = false;
 
         static void Main(string[] args)
         {
-
             Console.WriteLine("Welcome to the ESCPOS_NET Test Application!");
             Console.Write("Would you like to see all debug messages? (y/n): ");
             var response = Console.ReadLine().Trim().ToLowerInvariant();
@@ -34,8 +37,9 @@ namespace ESCPOS_NET.ConsoleTest
             Console.WriteLine("2 ) Test Network Printer");
             Console.Write("Choice: ");
             string comPort = "";
-            string ip;
-            string networkPort;
+            string ip = "";
+            string networkPort = "";
+            Action createPrinter = null;
             response = Console.ReadLine();
             var valid = new List<string> { "1", "2" };
             if (!valid.Contains(response))
@@ -63,7 +67,10 @@ namespace ESCPOS_NET.ConsoleTest
                     {
                         baudRate = 115200;
                     }
-                    printer = new SerialPrinter(portName: comPort, baudRate: baudRate);
+                    if (SINGLETON_PRINTER_OBJECT)
+                        printer = new SerialPrinter(portName: comPort, baudRate: baudRate);
+                    else
+                        createPrinter = () => { printer = new SerialPrinter(portName: comPort, baudRate: baudRate); };
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
@@ -73,7 +80,10 @@ namespace ESCPOS_NET.ConsoleTest
                     {
                         comPort = "/dev/usb/lp0";
                     }
-                    printer = new FilePrinter(filePath: comPort, false);
+                    if (SINGLETON_PRINTER_OBJECT)
+                        printer = new FilePrinter(filePath: comPort, false);
+                    else
+                        createPrinter = () => { printer = new FilePrinter(filePath: comPort, false); };
                 }
             }
             else if (choice == 2)
@@ -82,7 +92,7 @@ namespace ESCPOS_NET.ConsoleTest
                 ip = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(ip))
                 {
-                    ip = "192.168.254.202";
+                    ip = "127.0.0.1"; // default to local for using TCPPrintServerTest
                 }
                 Console.Write("TCP Port (enter for default 9100): ");
                 networkPort = Console.ReadLine();
@@ -90,7 +100,10 @@ namespace ESCPOS_NET.ConsoleTest
                 {
                     networkPort = "9100";
                 }
-                printer = new NetworkPrinter(settings: new NetworkPrinterSettings() { ConnectionString = $"{ip}:{networkPort}" });
+                if (SINGLETON_PRINTER_OBJECT)
+                    printer = new NetworkPrinter(settings: new NetworkPrinterSettings() { ConnectionString = $"{ip}:{networkPort}" });
+                else
+                    createPrinter = () => { printer = new NetworkPrinter(settings: new NetworkPrinterSettings() { ConnectionString = $"{ip}:{networkPort}" }); };
             }
 
             bool monitor = false;
@@ -136,6 +149,11 @@ namespace ESCPOS_NET.ConsoleTest
                     continue;
                 }
 
+                if (!SINGLETON_PRINTER_OBJECT)
+                {
+                    createPrinter();
+                }
+
                 var enumChoice = (Option)choice;
                 if (enumChoice == Option.Exit)
                 {
@@ -146,50 +164,50 @@ namespace ESCPOS_NET.ConsoleTest
 
                 if (monitor)
                 {
-                    printer.Write(e.Initialize());
-                    printer.Write(e.Enable());
-                    printer.Write(e.EnableAutomaticStatusBack());
+                    printer.WriteTest(e.Initialize());
+                    printer.WriteTest(e.Enable());
+                    printer.WriteTest(e.EnableAutomaticStatusBack());
                 }
                 Setup(monitor);
 
-                printer?.Write(e.PrintLine($"== [ Start {testCases[enumChoice]} ] =="));
+                printer?.WriteTest(e.PrintLine($"== [ Start {testCases[enumChoice]} ] =="));
 
                 switch (enumChoice)
                 {
                     case Option.SingleLinePrinting:
-                        printer.Write(Tests.SingleLinePrinting(e));
+                        printer.WriteTest(Tests.SingleLinePrinting(e));
                         break;
                     case Option.MultiLinePrinting:
-                        printer.Write(Tests.MultiLinePrinting(e));
+                        printer.WriteTest(Tests.MultiLinePrinting(e));
                         break;
                     case Option.LineSpacing:
-                        printer.Write(Tests.LineSpacing(e));
+                        printer.WriteTest(Tests.LineSpacing(e));
                         break;
                     case Option.BarcodeStyles:
-                        printer.Write(Tests.BarcodeStyles(e));
+                        printer.WriteTest(Tests.BarcodeStyles(e));
                         break;
                     case Option.BarcodeTypes:
-                        printer.Write(Tests.BarcodeTypes(e));
+                        printer.WriteTest(Tests.BarcodeTypes(e));
                         break;
                     case Option.TwoDimensionCodes:
-                        printer.Write(Tests.TwoDimensionCodes(e));
+                        printer.WriteTest(Tests.TwoDimensionCodes(e));
                         break;
                     case Option.TextStyles:
-                        printer.Write(Tests.TextStyles(e));
+                        printer.WriteTest(Tests.TextStyles(e));
                         break;
                     case Option.FullReceipt:
-                        printer.Write(Tests.Receipt(e));
+                        printer.WriteTest(Tests.Receipt(e));
                         break;
                     case Option.Images:
-                        printer.Write(Tests.Images(e, false));
+                        printer.WriteTest(Tests.Images(e, false));
                         break;
                     case Option.LegacyImages:
-                        printer.Write(Tests.Images(e, true));
+                        printer.WriteTest(Tests.Images(e, true));
                         break;
                     case Option.LargeByteArrays:
                         try
                         {
-                            printer.Write(Tests.TestLargeByteArrays(e));
+                            printer.WriteTest(Tests.TestLargeByteArrays(e));
                         }
                         catch (Exception e)
                         {
@@ -197,10 +215,10 @@ namespace ESCPOS_NET.ConsoleTest
                         }
                         break;
                     case Option.CashDrawerPin2:
-                        printer.Write(Tests.CashDrawerOpenPin2(e));
+                        printer.WriteTest(Tests.CashDrawerOpenPin2(e));
                         break;
                     case Option.CashDrawerPin5:
-                        printer.Write(Tests.CashDrawerOpenPin5(e));
+                        printer.WriteTest(Tests.CashDrawerOpenPin5(e));
                         break;
                     default:
                         Console.WriteLine("Invalid entry.");
@@ -208,9 +226,10 @@ namespace ESCPOS_NET.ConsoleTest
                 }
 
                 Setup(monitor);
-                printer?.Write(e.PrintLine($"== [ End {testCases[enumChoice]} ] =="));
-                printer?.Write(e.PartialCutAfterFeed(5));
-
+                printer?.WriteTest(e.PrintLine($"== [ End {testCases[enumChoice]} ] =="));
+                printer?.WriteTest(e.PartialCutAfterFeed(5));
+                if (!SINGLETON_PRINTER_OBJECT)
+                    printer?.Dispose();
                 // TODO: also make an automatic runner that runs all tests (command line).
             }
         }
@@ -260,6 +279,21 @@ namespace ESCPOS_NET.ConsoleTest
                     printer.Write(e.EnableAutomaticStatusBack());
                 }
             }
+        }
+    }
+
+    internal static class TestExtensions
+    {
+        /// <summary>
+        /// Wrapper exception function for ease of switching between Write and WriteAsync function
+        /// </summary>
+        /// <param name="printer"></param>
+        /// <param name="arrays"></param>
+        internal static void WriteTest(this BasePrinter printer, params byte[][] arrays)
+        {
+            // Switch to use this if need to test with obsolated Write function
+            //printer.Write(arrays);
+            printer.WriteAsync(arrays).Wait();
         }
     }
 }
