@@ -31,6 +31,8 @@ namespace ESCPOS_NET
         private readonly NetworkPrinterSettings _settings;
         private TCPConnection _tcpConnection;
 
+        protected override bool IsConnected => _tcpConnection?.IsConnected??false;
+
         public NetworkPrinter(NetworkPrinterSettings settings) : base(settings.PrinterName)
         {
             _settings = settings;
@@ -48,31 +50,52 @@ namespace ESCPOS_NET
         private void ConnectedEvent(object sender, ClientConnectedEventArgs e)
         {
             Logging.Logger?.LogInformation("[{Function}]:[{PrinterName}] Connected successfully to network printer! Connection String: {ConnectionString}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, _settings.ConnectionString);
-            IsConnected = true;
+            // Close previously created reader and writer if any (for handling reconnect after connection lose (in the future))
+            Reader?.Close();
+            Writer?.Close();
+            Reader = new BinaryReader(_tcpConnection.ReadStream);
+            Writer = new BinaryWriter(_tcpConnection.WriteStream);
             InvokeConnect();
         }
         private void DisconnectedEvent(object sender, ClientDisconnectedEventArgs e)
         {
-            IsConnected = false;
             InvokeDisconnect();
             Logging.Logger?.LogWarning("[{Function}]:[{PrinterName}] Network printer connection terminated. Attempting to reconnect. Connection String: {ConnectionString}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, _settings.ConnectionString);
             Connect();
         }
-        private void AttemptReconnectInfinitely()
+        private async ValueTask AttemptReconnectInfinitely()
         {
             try
             {
                 //_tcpConnection.ConnectWithRetries(300000);
                 _tcpConnection.ConnectWithRetries(3000);
             }
-            catch (Exception e)
+            catch (TimeoutException)
             {
                 //Logging.Logger?.LogWarning("[{Function}]:[{PrinterName}] Network printer unable to connect after 5 minutes. Attempting to reconnect. Settings: {Settings}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, JsonSerializer.Serialize(_settings));
-                Task.Run(async () => { await Task.Delay(250); Connect(); });
+                await Task.Delay(250);
+                CreateTcpConnection();
+                await AttemptReconnectInfinitely();
             }
         }
 
         private void Connect()
+        {
+            CreateTcpConnection();
+            try
+            {
+                _tcpConnection.Connect();
+            }
+            catch (SocketException)
+            {
+                if (!IsConnected)
+                {
+                    Task.Run(async () => { await AttemptReconnectInfinitely(); });
+                }
+            }
+        }
+
+        private void CreateTcpConnection()
         {
             if (_tcpConnection != null)
             {
@@ -86,16 +109,19 @@ namespace ESCPOS_NET
             // set events
             _tcpConnection.Connected += ConnectedEvent;
             _tcpConnection.Disconnected += DisconnectedEvent;
-
-            Reader = new BinaryReader(_tcpConnection.ReadStream);
-            Writer = new BinaryWriter(_tcpConnection.WriteStream);
-
-            Task.Run(() => { AttemptReconnectInfinitely(); });
         }
 
         protected override void OverridableDispose()
         {
+            // Dispose to close tcp connection when the printer object is disposed otherwise
+            // the tcp connection is held until garbage collected
+            _tcpConnection?.Dispose();
             _tcpConnection = null;
+        }
+
+        ~NetworkPrinter()
+        {
+            Dispose(true);
         }
     }
 }
