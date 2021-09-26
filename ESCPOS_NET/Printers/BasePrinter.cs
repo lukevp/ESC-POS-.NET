@@ -3,6 +3,7 @@ using ESCPOS_NET.Utilities;
 using ESCPOS_NET.Utils;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
@@ -90,50 +91,57 @@ namespace ESCPOS_NET
             // Implemented in the network printer
         }
         protected virtual async void WriteLongRunningTask()
-        {
+        {            
             // Loop when there is a new item in the _writeBuffer, break when _writeBuffer.CompleteAdding() is called (in the dispose)
             foreach (var (nextBytes, taskSource) in _writeBuffer.GetConsumingEnumerable())
             {
-                await Task.WhenAny(
-                    Task.Delay(WriteTimeout),
-                    Task.Run(async () =>
-                    {
-                        while (!IsConnected) // Await for the connection to the printer get restored
+                var writeSuccess = false;
+                var isAwaitableWrite = taskSource != null;
+                do
+                {
+                    await Task.WhenAny(
+                        Task.Delay(WriteTimeout),
+                        Task.Run(async () =>
                         {
-                            await Task.Delay(100);
-                        }
-                    })
-                );
+                            while (!IsConnected) // Await for the connection to the printer get restored
+                            {
+                                await Task.Delay(100);
+                            }
+                        })
+                    );
 
-                if (!IsConnected)
-                {
-                    taskSource.SetException(new IOException($"Unrecoverable connectivity error writing to printer."));
-                    continue;
-                }
-                try
-                {
-                    if (nextBytes?.Length > 0)
+                    if (!IsConnected)
                     {
-                        WriteToBinaryWriter(nextBytes);
-                        taskSource.SetResult(true);
+                        taskSource?.SetException(new IOException($"Unrecoverable connectivity error writing to printer."));
+                        continue;
                     }
-                    else
+                    try
                     {
-                        taskSource.SetResult(false);
+                        if (nextBytes?.Length > 0)
+                        {
+                            WriteToBinaryWriter(nextBytes);
+                            taskSource?.SetResult(true);
+                        }
+                        else
+                        {
+                            taskSource?.SetResult(false);
+                        }
+                        writeSuccess = true;
+                    }
+                    catch (IOException ex)
+                    {
+                        // Thrown if the printer times out the socket connection
+                        // default is 90 seconds
+                        taskSource?.TrySetException(ex);
+                        //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing IOException... sometimes happens with network printers. Should get reconnected automatically.");
+                    }
+                    catch (Exception ex)
+                    {
+                        taskSource?.TrySetException(ex);
+                        //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
                     }
                 }
-                catch (IOException ex)
-                {
-                    // Thrown if the printer times out the socket connection
-                    // default is 90 seconds
-                    taskSource.TrySetException(ex);
-                    //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing IOException... sometimes happens with network printers. Should get reconnected automatically.");
-                }
-                catch (Exception ex)
-                {
-                    taskSource.TrySetException(ex);
-                    //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
-                }
+                while (!isAwaitableWrite && !writeSuccess);
             }
 
             Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Write Long-Running Task Cancellation was requested.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
@@ -182,7 +190,7 @@ namespace ESCPOS_NET
         ///<inheritdoc/>
         public virtual void Write(byte[] bytes)
         {
-            _ = WriteAsync(bytes);
+            _writeBuffer.Add((bytes, null));
         }
 
         ///<inheritdoc/>
