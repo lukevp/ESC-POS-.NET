@@ -1,5 +1,4 @@
 ﻿using ESCPOS_NET.Emitters;
-using ESCPOS_NET.Utilities;
 using System.IO;
 
 namespace ESCPOS_NET.ConsoleTest

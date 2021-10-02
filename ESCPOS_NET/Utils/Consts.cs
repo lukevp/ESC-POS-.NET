@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ESCPOS_NET.Utils
+﻿namespace ESCPOS_NET.Utils
 {
     public static class Consts
     {

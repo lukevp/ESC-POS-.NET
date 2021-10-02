@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Linq;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 
