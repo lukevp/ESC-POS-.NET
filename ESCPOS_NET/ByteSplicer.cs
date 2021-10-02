@@ -7,7 +7,9 @@
             ByteArrayBuilder builder = new ByteArrayBuilder();
             foreach (var byteArray in byteArrays)
             {
-                builder.Append(byteArray);
+                // For easier usage, ignore null byte arrays
+                if (byteArray != null)
+                    builder.Append(byteArray);
             }
             return builder.ToArray();
         }
