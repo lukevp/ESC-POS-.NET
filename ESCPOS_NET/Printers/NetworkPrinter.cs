@@ -65,7 +65,7 @@ namespace ESCPOS_NET
                 //_tcpConnection.ConnectWithRetries(300000);
                 _tcpConnection.ConnectWithRetries(3000);
             }
-            catch (Exception e)
+            catch
             {
                 //Logging.Logger?.LogWarning("[{Function}]:[{PrinterName}] Network printer unable to connect after 5 minutes. Attempting to reconnect. Settings: {Settings}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, JsonSerializer.Serialize(_settings));
                 Task.Run(async () => { await Task.Delay(250); Connect(); });

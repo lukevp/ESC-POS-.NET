@@ -111,13 +111,13 @@ namespace ESCPOS_NET
                         WriteToBinaryWriter(nextBytes);
                     }
                 }
-                catch (IOException ex)
+                catch (IOException)
                 {
                     // Thrown if the printer times out the socket connection
                     // default is 90 seconds
                     //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing IOException... sometimes happens with network printers. Should get reconnected automatically.");
                 }
-                catch (Exception ex)
+                catch
                 {
                     // Swallow the exception
                     //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
@@ -152,7 +152,7 @@ namespace ESCPOS_NET
                     }
                 }
              
-                catch (Exception ex)
+                catch
                 {                    
                     // Swallow the exception
                     //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
