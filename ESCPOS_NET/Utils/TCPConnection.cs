@@ -1,9 +1,7 @@
 ﻿using ESCPOS_NET.Utils;
 using SimpleTcp;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace ESCPOS_NET
 {

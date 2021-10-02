@@ -1,10 +1,7 @@
-using ESCPOS_NET.Emitters.BaseCommandValues;
 using ESCPOS_NET.Utilities;
-using ESCPOS_NET.Utils;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
