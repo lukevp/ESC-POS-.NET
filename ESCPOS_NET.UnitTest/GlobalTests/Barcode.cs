@@ -8,6 +8,7 @@ namespace ESCPOS_NET.UnitTest.GlobalTests
     public class Barcode
     {
         private const string WEBSITE_STRING = "https://github.com/lukevp/ESC-POS-.NET/";
+        private const string SHORTER_WEBSITE_STRING = "https://github.com/";
 
         [Theory]
         [InlineData("EPSON", TwoDimensionCodeType.QRCODE_MODEL1)]
@@ -21,7 +22,10 @@ namespace ESCPOS_NET.UnitTest.GlobalTests
 
             byte[] bytes;
             if (codeType is TwoDimensionCodeType codeTypeValue)
-                bytes = e.PrintQRCode(WEBSITE_STRING, codeTypeValue);
+            {
+                string data = codeTypeValue == TwoDimensionCodeType.QRCODE_MICRO ? SHORTER_WEBSITE_STRING : WEBSITE_STRING;
+                bytes = e.PrintQRCode(data, codeTypeValue);
+            }
             else
                 bytes = e.PrintQRCode(WEBSITE_STRING);
 
