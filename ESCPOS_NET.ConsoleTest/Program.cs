@@ -92,6 +92,8 @@ namespace ESCPOS_NET.ConsoleTest
                 printer = new NetworkPrinter(settings: new NetworkPrinterSettings() { ConnectionString = $"{ip}:{networkPort}" });
             }
 
+            printer.Connect();
+
             bool monitor = false;
             Thread.Sleep(500);
             Console.Write("Turn on Live Status Back Monitoring? (y/n): ");

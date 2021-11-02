@@ -57,8 +57,9 @@ namespace ESCPOS_NET
             Connect();
         }
         
-        private void Connect()
+        public override void Connect()
         {
+
             OverridableDispose();
 
             // instantiate
@@ -72,6 +73,8 @@ namespace ESCPOS_NET
             Writer = new BinaryWriter(_tcpConnection.WriteStream);
 
             _tcpConnection.ConnectWithRetries(3000);
+
+            base.Connect();
         }
 
         protected override void OverridableDispose()

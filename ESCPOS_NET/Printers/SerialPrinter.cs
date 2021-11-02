@@ -6,22 +6,35 @@ namespace ESCPOS_NET
 {
     public class SerialPrinter : BasePrinter
     {
-        private readonly SerialPort _serialPort;
+        private readonly string portName;
+        private readonly int baudRate;
+        private SerialPort _serialPort;
 
         public SerialPrinter(string portName, int baudRate)
             : base()
+        {
+            this.portName = portName;
+            this.baudRate = baudRate;
+        }
+
+        public override void Connect()
         {
             _serialPort = new SerialPort(portName, baudRate);
             _serialPort.Open();
             Writer = new BinaryWriter(_serialPort.BaseStream);
             Reader = new BinaryReader(_serialPort.BaseStream);
+
+            base.Connect();
         }
 
         protected override void OverridableDispose()
         {
-            _serialPort?.Close();
-            _serialPort?.Dispose();
-            Task.Delay(250).Wait(); // Based on MSDN Documentation, should sleep after calling Close or some functionality will not be determinant.
+            if (_serialPort != null)
+            {
+                _serialPort?.Close();
+                _serialPort?.Dispose();
+                Task.Delay(250).Wait(); // Based on MSDN Documentation, should sleep after calling Close or some functionality will not be determinant.
+            }
         }
     }
 }

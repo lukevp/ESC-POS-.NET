@@ -49,7 +49,6 @@ namespace ESCPOS_NET
         protected BasePrinter()
         {
             PrinterName = Guid.NewGuid().ToString();
-            Init();
         }
         protected BasePrinter(string printerName)
         {
@@ -58,9 +57,9 @@ namespace ESCPOS_NET
                 printerName = Guid.NewGuid().ToString();
             }
             PrinterName = printerName;
-            Init();
         }
-        private void Init()
+
+        public virtual void Connect()
         {
             _readCancellationTokenSource = new CancellationTokenSource();
             _writeCancellationTokenSource = new CancellationTokenSource();
