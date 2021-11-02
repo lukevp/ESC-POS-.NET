@@ -61,6 +61,9 @@ namespace ESCPOS_NET
 
         public virtual void Connect()
         {
+            if (Reader == null || Writer == null)
+                throw new Exception("Reader and Writer were null, call base.Connect after establishing them in the child printer driver.");
+
             _readCancellationTokenSource = new CancellationTokenSource();
             _writeCancellationTokenSource = new CancellationTokenSource();
             Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Initializing Task Threads...", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
