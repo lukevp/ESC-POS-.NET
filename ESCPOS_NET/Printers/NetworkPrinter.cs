@@ -39,7 +39,6 @@ namespace ESCPOS_NET
             {
                 Disconnected += settings.DisconnectedHandler;
             }
-            Connect();
         }
 
         private void ConnectedEvent(object sender, ClientConnectedEventArgs e)
