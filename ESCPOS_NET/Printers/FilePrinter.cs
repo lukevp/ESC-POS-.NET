@@ -16,7 +16,7 @@ namespace ESCPOS_NET
             this.filePath = filePath;
         }
 
-        public override void Connect()
+        public override void Connect(bool reconnecting = false)
         {
             if (createIfNotExists)
             {
@@ -29,7 +29,7 @@ namespace ESCPOS_NET
             Writer = new BinaryWriter(_file);
             Reader = new BinaryReader(_file);
 
-            base.Connect();
+            base.Connect(reconnecting);
         }
 
         ~FilePrinter()

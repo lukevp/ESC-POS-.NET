@@ -54,10 +54,10 @@ namespace ESCPOS_NET
             IsConnected = false;
             InvokeDisconnect();
             Logging.Logger?.LogWarning("[{Function}]:[{PrinterName}] Network printer connection terminated. Attempting to reconnect. Connection String: {ConnectionString}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, _settings.ConnectionString);
-            Connect();
+            Connect(true);
         }
-        
-        public override void Connect()
+
+        public override void Connect(bool reconnecting = false)
         {
 
             OverridableDispose();
@@ -74,7 +74,7 @@ namespace ESCPOS_NET
 
             _tcpConnection.ConnectWithRetries(3000);
 
-            base.Connect();
+            base.Connect(reconnecting);
         }
 
         protected override void OverridableDispose()

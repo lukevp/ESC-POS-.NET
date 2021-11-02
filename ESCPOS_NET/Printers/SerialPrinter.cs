@@ -17,14 +17,14 @@ namespace ESCPOS_NET
             this.baudRate = baudRate;
         }
 
-        public override void Connect()
+        public override void Connect(bool reconnecting = false)
         {
             _serialPort = new SerialPort(portName, baudRate);
             _serialPort.Open();
             Writer = new BinaryWriter(_serialPort.BaseStream);
             Reader = new BinaryReader(_serialPort.BaseStream);
 
-            base.Connect();
+            base.Connect(reconnecting);
         }
 
         protected override void OverridableDispose()
