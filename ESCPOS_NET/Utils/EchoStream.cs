@@ -81,16 +81,15 @@ namespace ESCPOS_NET.Utils
         // we override the xxxxAsync functions because the default base class shares state between ReadAsync and WriteAsync, which causes a hang if both are called at once
         public new Task WriteAsync(byte[] buffer, int offset, int count)
         {
-            return Task.Run(() => Write(buffer, offset, count));
+            Write(buffer, offset, count);
+
+            return Task.CompletedTask;
         }
 
         // we override the xxxxAsync functions because the default base class shares state between ReadAsync and WriteAsync, which causes a hang if both are called at once
         public new Task<int> ReadAsync(byte[] buffer, int offset, int count)
         {
-            return Task.Run(() =>
-            {
-                return Read(buffer, offset, count);
-            });
+            return Task.FromResult(Read(buffer, offset, count));
         }
 
         public override void Write(byte[] buffer, int offset, int count)

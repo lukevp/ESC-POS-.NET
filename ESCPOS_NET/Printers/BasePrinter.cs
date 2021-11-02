@@ -71,8 +71,8 @@ namespace ESCPOS_NET
                 _writeCancellationTokenSource = new CancellationTokenSource();
                 Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Initializing Task Threads...", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 //Task.Factory.StartNew(MonitorPrinterStatusLongRunningTask, _connectivityCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
-                Task.Factory.StartNew(WriteLongRunningTask, _writeCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
-                Task.Factory.StartNew(ReadLongRunningTask, _readCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+                Task.Factory.StartNew(WriteLongRunningAsync, _writeCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+                Task.Factory.StartNew(ReadLongRunningAsync, _readCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
                 // TODO: read and status monitoring probably won't work for fileprinter, should let printer types disable this feature.
                 Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Task Threads started", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
             }
@@ -81,14 +81,14 @@ namespace ESCPOS_NET
 
         protected void InvokeConnect()
         {
-            Task.Run(() => Connected?.Invoke(this, new ConnectionEventArgs() { IsConnected = true }));
+            Connected?.Invoke(this, new ConnectionEventArgs() { IsConnected = true });
         }
         protected void InvokeDisconnect()
         {
-            Task.Run(() => Disconnected?.Invoke(this, new ConnectionEventArgs() { IsConnected = false }));
+            Disconnected?.Invoke(this, new ConnectionEventArgs() { IsConnected = false });
         }
 
-        protected virtual async void WriteLongRunningTask()
+        protected virtual async void WriteLongRunningAsync()
         {
             _writeTaskRunning = true;
             List<byte> internalWriteBuffer = new List<byte>();
@@ -101,7 +101,8 @@ namespace ESCPOS_NET
                 }
 
                 await Task.Delay(100);
-                if (!IsConnected)
+
+                if (Writer == null || !IsConnected)
                 {
                     continue;
                 }
@@ -132,7 +133,7 @@ namespace ESCPOS_NET
             _writeTaskRunning = false;
         }
 
-        protected virtual async void ReadLongRunningTask()
+        protected virtual async void ReadLongRunningAsync()
         {
             _readTaskRunning = true;
             while (true)
@@ -145,8 +146,10 @@ namespace ESCPOS_NET
 
                 await Task.Delay(100);
 
-                if (Reader == null) continue;
-                if (!IsConnected) continue;
+                if (Reader == null || !IsConnected)
+                {
+                    continue;
+                }
 
                 try
                 {
@@ -181,7 +184,7 @@ namespace ESCPOS_NET
             WriteBuffer.Enqueue(bytes);
         }
 
-        protected virtual void WriteToBinaryWriter(ref List<byte> bytes)
+        protected void WriteToBinaryWriter(ref List<byte> bytes)
         {
             try
             {
@@ -313,7 +316,7 @@ namespace ESCPOS_NET
                     Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue during cancellation token cancellation call.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 }
 
-                while (_readTaskRunning && _writeTaskRunning) Task.Delay(100).Wait();
+                while (_readTaskRunning || _writeTaskRunning) Thread.Sleep(100);
                 try
                 {
                     Reader?.Close();
