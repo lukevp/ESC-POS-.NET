@@ -59,12 +59,7 @@ namespace ESCPOS_NET
         
         private void Connect()
         {
-            if (_tcpConnection != null)
-            {
-                _tcpConnection.Connected -= ConnectedEvent;
-                _tcpConnection.Disconnected -= DisconnectedEvent;
-                _tcpConnection.Dispose();
-            }
+            OverridableDispose();
 
             // instantiate
             _tcpConnection = new TCPConnection(_settings.ConnectionString);
@@ -81,8 +76,13 @@ namespace ESCPOS_NET
 
         protected override void OverridableDispose()
         {
-            _tcpConnection?.Dispose();
-            _tcpConnection = null;
+            if (_tcpConnection != null)
+            {
+                _tcpConnection.Connected -= ConnectedEvent;
+                _tcpConnection.Disconnected -= DisconnectedEvent;
+                _tcpConnection?.Dispose();
+                _tcpConnection = null;
+            }
         }
     }
 }
