@@ -18,7 +18,9 @@ namespace ESCPOS_NET
         //private volatile bool _isMonitoring;
 
         private CancellationTokenSource _readCancellationTokenSource;
+        private bool _readTaskRunning = false;
         private CancellationTokenSource _writeCancellationTokenSource;
+        private bool _writeTaskRunning = false;
 
         private readonly int _maxBytesPerWrite = 15000; // max byte chunks to write at once.
 
@@ -86,6 +88,7 @@ namespace ESCPOS_NET
         }
         protected virtual async void WriteLongRunningTask()
         {
+            _writeTaskRunning = true;
             while (true)
             {
                 if (_writeCancellationTokenSource != null && _writeCancellationTokenSource.IsCancellationRequested)
@@ -120,10 +123,14 @@ namespace ESCPOS_NET
                     //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
                 }
             }
+
+            Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Write Long-Running Task has exited.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+            _writeTaskRunning = false;
         }
 
         protected virtual async void ReadLongRunningTask()
         {
+            _readTaskRunning = true;
             while (true)
             {
                 if (_readCancellationTokenSource != null && _readCancellationTokenSource.IsCancellationRequested)
@@ -155,6 +162,9 @@ namespace ESCPOS_NET
                     //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 }
             }
+
+            Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Read Long-Running Task has exited.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+            _readTaskRunning = false;
         }
 
         public virtual void Write(params byte[][] arrays)
@@ -317,11 +327,14 @@ namespace ESCPOS_NET
                 try
                 {
                     _readCancellationTokenSource?.Cancel();
+                    _writeCancellationTokenSource?.Cancel();
                 }
                 catch (Exception e)
                 {
                     Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue during cancellation token cancellation call.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 }
+
+                while (_readTaskRunning && _writeTaskRunning) Task.Delay(100).Wait();
                 try
                 {
                     Reader?.Close();
