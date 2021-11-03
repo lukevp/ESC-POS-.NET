@@ -155,11 +155,15 @@ namespace ESCPOS_NET
                 {
                     // Sometimes the serial port lib will throw an exception and read past the end of the queue if a
                     // status changes while data is being written.  We just ignore these bytes.
-                    var b = Reader.BaseStream.ReadByte();
-                    if (b >= 0 && b <= 255)
+                    byte[] buffer = new byte[1];
+                    var count = await Reader.BaseStream.ReadAsync(buffer, 0, 1, _readCancellationTokenSource.Token);
+                    if (count > 0)
                     {
-                        ReadBuffer.Enqueue((byte)b);
-                        DataAvailable();
+                        if (buffer[0] >= 0 && buffer[0] <= 255)
+                        {
+                            ReadBuffer.Enqueue((byte)buffer[0]);
+                            DataAvailable();
+                        }
                     }
                 }
 
