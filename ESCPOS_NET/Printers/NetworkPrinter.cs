@@ -68,12 +68,24 @@ namespace ESCPOS_NET
             _tcpConnection.Connected += ConnectedEvent;
             _tcpConnection.Disconnected += DisconnectedEvent;
 
-            Reader = new BinaryReader(_tcpConnection.ReadStream);
-            Writer = new BinaryWriter(_tcpConnection.WriteStream);
-
             _tcpConnection.ConnectWithRetries(3000);
 
             base.Connect(reconnecting);
+        }
+
+        protected override void WriteBytesUnderlying(byte[] buffer, int offset, int count)
+        {
+            _tcpConnection.WriteStream?.Write(buffer, offset, count);
+        }
+
+        protected override int ReadBytesUnderlying(byte[] buffer, int offset, int bufferSize)
+        {
+            return _tcpConnection.ReadStream?.Read(buffer, offset, bufferSize) ?? 0;
+        }
+
+        protected override void FlushUnderlying()
+        {
+            _tcpConnection.WriteStream?.Flush();
         }
 
         protected override void OverridableDispose()

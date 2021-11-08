@@ -26,10 +26,23 @@ namespace ESCPOS_NET
             {
                 _file = File.Open(filePath, FileMode.Open);
             }
-            Writer = new BinaryWriter(_file);
-            Reader = new BinaryReader(_file);
 
             base.Connect(reconnecting);
+        }
+
+        protected override int ReadBytesUnderlying(byte[] buffer, int offset, int bufferSize)
+        {
+            return _file.Read(buffer, offset, bufferSize);
+        }
+        
+        protected override void WriteBytesUnderlying(byte[] buffer, int offset, int count)
+        {
+            _file.Write(buffer, offset, count);
+        }
+
+        protected override void FlushUnderlying()
+        {
+            _file.Flush();
         }
 
         ~FilePrinter()
