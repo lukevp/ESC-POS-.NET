@@ -30,12 +30,6 @@ namespace ESCPOS_NET
         public event EventHandler StatusChanged;
         public event EventHandler Disconnected;
         public event EventHandler Connected;
-        //public event EventHandler WriteFailed;
-        //public event EventHandler Idle;
-
-        protected BinaryWriter Writer { get; set; }
-
-        protected BinaryReader Reader { get; set; }
 
         protected ConcurrentQueue<byte> ReadBuffer { get; set; } = new ConcurrentQueue<byte>();
 
@@ -46,6 +40,10 @@ namespace ESCPOS_NET
         protected volatile bool IsConnected = true;
 
         public string PrinterName { get; protected set; }
+
+        protected abstract int ReadBytesUnderlying(byte[] buffer, int offset, int bufferSize);
+        protected abstract void WriteBytesUnderlying(byte[] buffer, int offset, int count);
+        protected abstract void FlushUnderlying();
 
         protected BasePrinter()
         {
@@ -64,9 +62,6 @@ namespace ESCPOS_NET
         {
             if (!reconnecting)
             {
-                if (Reader == null || Writer == null)
-                    throw new Exception("Reader and Writer were null, call base.Connect after establishing them in the child printer driver.");
-
                 _readCancellationTokenSource = new CancellationTokenSource();
                 _writeCancellationTokenSource = new CancellationTokenSource();
                 Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Initializing Task Threads...", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
@@ -77,7 +72,6 @@ namespace ESCPOS_NET
                 Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Task Threads started", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
             }
         }
-
 
         protected void InvokeConnect()
         {
@@ -101,11 +95,6 @@ namespace ESCPOS_NET
                 }
 
                 await Task.Delay(100);
-
-                if (Writer == null || !IsConnected)
-                {
-                    continue;
-                }
 
                 try
                 {
@@ -146,22 +135,17 @@ namespace ESCPOS_NET
 
                 await Task.Delay(100);
 
-                if (Reader == null || !IsConnected)
-                {
-                    continue;
-                }
-
                 try
                 {
                     // Sometimes the serial port lib will throw an exception and read past the end of the queue if a
                     // status changes while data is being written.  We just ignore these bytes.
-                    byte[] buffer = new byte[1];
-                    var count = await Reader.BaseStream.ReadAsync(buffer, 0, 1, _readCancellationTokenSource.Token);
-                    if (count > 0)
+                    byte[] buffer = new byte[4096];
+                    int readBytes = this.ReadBytesUnderlying(buffer, 0, 4096);
+                    if (readBytes > 0)
                     {
-                        if (buffer[0] >= 0 && buffer[0] <= 255)
+                        for (int ix = 0; ix < readBytes; ix++)
                         {
-                            ReadBuffer.Enqueue((byte)buffer[0]);
+                            ReadBuffer.Enqueue((byte)buffer[ix]);
                             DataAvailable();
                         }
                     }
@@ -197,7 +181,7 @@ namespace ESCPOS_NET
                 {
 
                     int count = Math.Min(_maxBytesPerWrite, bytes.Count);
-                    Writer.Write(bytes.ToArray(), 0, count);
+                    this.WriteBytesUnderlying(bytes.ToArray(), 0, count);
                     bytes.RemoveRange(0, count);
 
                     BytesWrittenSinceLastFlush += count;
@@ -222,7 +206,7 @@ namespace ESCPOS_NET
             try
             {
                 BytesWrittenSinceLastFlush = 0;
-                Writer.Flush();
+                this.FlushUnderlying();
             }
             catch (Exception ex)
             {
@@ -321,38 +305,7 @@ namespace ESCPOS_NET
                 }
 
                 while (_readTaskRunning || _writeTaskRunning) Thread.Sleep(100);
-                try
-                {
-                    Reader?.Close();
-                }
-                catch (Exception e)
-                {
-                    Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue closing reader.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
-                }
-                try
-                {
-                    Reader?.Dispose();
-                }
-                catch (Exception e)
-                {
-                    Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue disposing reader.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
-                }
-                try
-                {
-                    Writer?.Close();
-                }
-                catch (Exception e)
-                {
-                    Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue closing writer.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
-                }
-                try
-                {
-                    Writer?.Dispose();
-                }
-                catch (Exception e)
-                {
-                    Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue disposing writer.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
-                }
+
                 try
                 {
                     OverridableDispose();
