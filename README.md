@@ -156,6 +156,7 @@ Thanks to all of our contributors working to make this the best .NET thermal pri
 * [@netgg93](https://github.com/netgg93)
 * [@igorocampos](https://github.com/igorocampos)
 * [@kodejack](https://github.com/kodejack)
+* [@hollandar](https://github.com/hollandar)
 
 # USB Usage Guide
 
