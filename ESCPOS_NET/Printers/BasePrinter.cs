@@ -272,6 +272,7 @@ namespace ESCPOS_NET
 
         ~BasePrinter()
         {
+            Flush(this, null);
             Dispose(false);
         }
 
