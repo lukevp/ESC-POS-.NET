@@ -176,7 +176,6 @@ namespace ESCPOS_NET
         {
             try
             {
-                bool hasFlushed = false;
                 while (bytes.Count > 0)
                 {
 
@@ -197,7 +196,7 @@ namespace ESCPOS_NET
             catch (IOException e)
             {
                 // Network or serial connection failed, dont consume the buffer this time around
-                Logging.Logger?.LogDebug("Device appears disconnected.  No more bytes will be written until it is reconnected.");
+                Logging.Logger?.LogDebug(e, "Device appears disconnected.  No more bytes will be written until it is reconnected.");
             }
         }
 
