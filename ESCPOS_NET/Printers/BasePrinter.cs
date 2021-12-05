@@ -88,12 +88,6 @@ namespace ESCPOS_NET
             List<byte> internalWriteBuffer = new List<byte>();
             while (true)
             {
-                if (_writeCancellationTokenSource != null && _writeCancellationTokenSource.IsCancellationRequested)
-                {
-                    Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Write Long-Running Task Cancellation was requested.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
-                    break;
-                }
-
                 await Task.Delay(100);
 
                 try
@@ -116,6 +110,12 @@ namespace ESCPOS_NET
                     // Swallow the exception
                     Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
                 }
+
+                if (!WriteBuffer.Any() && _writeCancellationTokenSource != null && _writeCancellationTokenSource.IsCancellationRequested)
+                {
+                    Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Write Long-Running Task Cancellation was requested.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+                    break;
+                }
             }
 
             Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Write Long-Running Task has exited.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
@@ -127,12 +127,6 @@ namespace ESCPOS_NET
             _readTaskRunning = true;
             while (true)
             {
-                if (_readCancellationTokenSource != null && _readCancellationTokenSource.IsCancellationRequested)
-                {
-                    Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Read Long-Running Task Cancellation was requested.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
-                    break;
-                }
-
                 await Task.Delay(100);
 
                 try
@@ -155,6 +149,12 @@ namespace ESCPOS_NET
                 {
                     // Swallow the exception
                     //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+                }
+
+                if (_readCancellationTokenSource != null && _readCancellationTokenSource.IsCancellationRequested)
+                {
+                    Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Read Long-Running Task Cancellation was requested.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+                    break;
                 }
             }
 
