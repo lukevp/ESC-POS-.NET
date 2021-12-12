@@ -25,6 +25,7 @@ namespace ESCPOS_NET
             else
             {
                 _file = File.Open(filePath, FileMode.Open);
+                //if (_file.CanSeek) _file.Seek(0, SeekOrigin.End);
             }
 
             base.Connect(reconnecting);
