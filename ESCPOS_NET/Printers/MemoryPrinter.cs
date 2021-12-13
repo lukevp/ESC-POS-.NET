@@ -11,7 +11,6 @@ namespace ESCPOS_NET
             : base()
         {
             _ms = new MemoryStream();
-            Writer = new BinaryWriter(_ms);
         }
 
         ~MemoryPrinter()
@@ -22,6 +21,21 @@ namespace ESCPOS_NET
         public byte[] GetAllData()
         {
             return _ms.ToArray();
+        }
+
+        protected override int ReadBytesUnderlying(byte[] buffer, int offset, int bufferSize)
+        {
+            return 0;
+        }
+
+        protected override void WriteBytesUnderlying(byte[] buffer, int offset, int count)
+        {
+            _ms.Write(buffer, offset, count);
+        }
+
+        protected override void FlushUnderlying()
+        {
+            _ms.Flush();
         }
 
         protected override void OverridableDispose()

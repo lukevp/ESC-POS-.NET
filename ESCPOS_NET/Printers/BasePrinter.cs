@@ -2,6 +2,7 @@ using ESCPOS_NET.Utilities;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,7 +19,9 @@ namespace ESCPOS_NET
         //private volatile bool _isMonitoring;
 
         private CancellationTokenSource _readCancellationTokenSource;
+        private bool _readTaskRunning = false;
         private CancellationTokenSource _writeCancellationTokenSource;
+        private bool _writeTaskRunning = false;
 
         private readonly int _maxBytesPerWrite = 15000; // max byte chunks to write at once.
 
@@ -27,12 +30,6 @@ namespace ESCPOS_NET
         public event EventHandler StatusChanged;
         public event EventHandler Disconnected;
         public event EventHandler Connected;
-        //public event EventHandler WriteFailed;
-        //public event EventHandler Idle;
-
-        protected BinaryWriter Writer { get; set; }
-
-        protected BinaryReader Reader { get; set; }
 
         protected ConcurrentQueue<byte> ReadBuffer { get; set; } = new ConcurrentQueue<byte>();
 
@@ -40,14 +37,17 @@ namespace ESCPOS_NET
 
         protected int BytesWrittenSinceLastFlush { get; set; } = 0;
 
-        protected volatile bool IsConnected  = true;
+        protected volatile bool IsConnected = true;
 
         public string PrinterName { get; protected set; }
+
+        protected abstract int ReadBytesUnderlying(byte[] buffer, int offset, int bufferSize);
+        protected abstract void WriteBytesUnderlying(byte[] buffer, int offset, int count);
+        protected abstract void FlushUnderlying();
 
         protected BasePrinter()
         {
             PrinterName = Guid.NewGuid().ToString();
-            Init();
         }
         protected BasePrinter(string printerName)
         {
@@ -56,105 +56,110 @@ namespace ESCPOS_NET
                 printerName = Guid.NewGuid().ToString();
             }
             PrinterName = printerName;
-            Init();
-        }
-        private void Init()
-        {
-            _readCancellationTokenSource = new CancellationTokenSource();
-            _writeCancellationTokenSource = new CancellationTokenSource();
-            Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Initializing Task Threads...", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
-            //Task.Factory.StartNew(MonitorPrinterStatusLongRunningTask, _connectivityCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
-            Task.Factory.StartNew(WriteLongRunningTask, _writeCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
-            Task.Factory.StartNew(ReadLongRunningTask, _readCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
-            // TODO: read and status monitoring probably won't work for fileprinter, should let printer types disable this feature.
-            Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Task Threads started", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
         }
 
+        public virtual void Connect(bool reconnecting = false)
+        {
+            if (!reconnecting)
+            {
+                _readCancellationTokenSource = new CancellationTokenSource();
+                _writeCancellationTokenSource = new CancellationTokenSource();
+                Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Initializing Task Threads...", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+                //Task.Factory.StartNew(MonitorPrinterStatusLongRunningTask, _connectivityCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+                Task.Factory.StartNew(WriteLongRunningAsync, _writeCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+                Task.Factory.StartNew(ReadLongRunningAsync, _readCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+                // TODO: read and status monitoring probably won't work for fileprinter, should let printer types disable this feature.
+                Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Task Threads started", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+            }
+        }
 
         protected void InvokeConnect()
         {
-            Task.Run(() => Connected?.Invoke(this, new ConnectionEventArgs() { IsConnected = true }));
+            Connected?.Invoke(this, new ConnectionEventArgs() { IsConnected = true });
         }
         protected void InvokeDisconnect()
         {
-            Task.Run(() => Disconnected?.Invoke(this, new ConnectionEventArgs() { IsConnected = false }));
+            Disconnected?.Invoke(this, new ConnectionEventArgs() { IsConnected = false });
         }
 
-        protected virtual void Reconnect()
+        protected virtual async void WriteLongRunningAsync()
         {
-            // Implemented in the network printer
-        }
-        protected virtual async void WriteLongRunningTask()
-        {
+            _writeTaskRunning = true;
+            List<byte> internalWriteBuffer = new List<byte>();
             while (true)
             {
-                if (_writeCancellationTokenSource != null && _writeCancellationTokenSource.IsCancellationRequested)
-                {
-                    Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Write Long-Running Task Cancellation was requested.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
-                    break;
-                }
-
                 await Task.Delay(100);
-                if (!IsConnected)
-                {
-                    continue;
-                }
 
                 try
                 {
                     var didDequeue = WriteBuffer.TryDequeue(out var nextBytes);
                     if (didDequeue && nextBytes?.Length > 0)
                     {
-                        WriteToBinaryWriter(nextBytes);
+                        internalWriteBuffer.AddRange(nextBytes);
+                        WriteToBinaryWriter(ref internalWriteBuffer);
                     }
                 }
                 catch (IOException)
                 {
                     // Thrown if the printer times out the socket connection
                     // default is 90 seconds
-                    //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing IOException... sometimes happens with network printers. Should get reconnected automatically.");
+                    Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing IOException... sometimes happens with network printers. Should get reconnected automatically.");
                 }
                 catch
                 {
                     // Swallow the exception
-                    //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
+                    Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.");
                 }
-            }
-        }
 
-        protected virtual async void ReadLongRunningTask()
-        {
-            while (true)
-            {
-                if (_readCancellationTokenSource != null && _readCancellationTokenSource.IsCancellationRequested)
+                if (!WriteBuffer.Any() && _writeCancellationTokenSource != null && _writeCancellationTokenSource.IsCancellationRequested)
                 {
-                    Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Read Long-Running Task Cancellation was requested.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+                    Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Write Long-Running Task Cancellation was requested.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                     break;
                 }
+            }
 
+            Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Write Long-Running Task has exited.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+            _writeTaskRunning = false;
+        }
+
+        protected virtual async void ReadLongRunningAsync()
+        {
+            _readTaskRunning = true;
+            while (true)
+            {
                 await Task.Delay(100);
-
-                if (Reader == null) continue;
-                if (!IsConnected) continue;
 
                 try
                 {
                     // Sometimes the serial port lib will throw an exception and read past the end of the queue if a
                     // status changes while data is being written.  We just ignore these bytes.
-                    var b = Reader.BaseStream.ReadByte();
-                    if (b >= 0 && b <= 255)
+                    byte[] buffer = new byte[4096];
+                    int readBytes = this.ReadBytesUnderlying(buffer, 0, 4096);
+                    if (readBytes > 0)
                     {
-                        ReadBuffer.Enqueue((byte)b);
-                        DataAvailable();
+                        for (int ix = 0; ix < readBytes; ix++)
+                        {
+                            ReadBuffer.Enqueue((byte)buffer[ix]);
+                            DataAvailable();
+                        }
                     }
                 }
-             
+
                 catch
-                {                    
+                {
                     // Swallow the exception
                     //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 }
+
+                if (_readCancellationTokenSource != null && _readCancellationTokenSource.IsCancellationRequested)
+                {
+                    Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Read Long-Running Task Cancellation was requested.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+                    break;
+                }
             }
+
+            Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Read Long-Running Task has exited.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+            _readTaskRunning = false;
         }
 
         public virtual void Write(params byte[][] arrays)
@@ -167,56 +172,31 @@ namespace ESCPOS_NET
             WriteBuffer.Enqueue(bytes);
         }
 
-        protected virtual void WriteToBinaryWriter(byte[] bytes)
+        protected void WriteToBinaryWriter(ref List<byte> bytes)
         {
-
-            if (!IsConnected)
+            try
             {
-                Logging.Logger?.LogInformation("[{Function}]:[{PrinterName}] Attempted to write but printer isn't connected. Attempting to reconnect...", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
-                Reconnect();
-            }
-
-            if (!IsConnected)
-            {
-                Logging.Logger?.LogError("[{Function}]:[{PrinterName}] Unrecoverable connectivity error writing to printer.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
-                throw new IOException("Unrecoverable connectivity error writing to printer.");
-            }
-
-            int bytePointer = 0;
-            int bytesLeft = bytes.Length;
-            bool hasFlushed = false;
-            while (bytesLeft > 0)
-            {
-
-                int count = Math.Min(_maxBytesPerWrite, bytesLeft);
-                try
+                while (bytes.Count > 0)
                 {
-                    Writer.Write(bytes, bytePointer, count);
-                }
-                catch (IOException e)
-                {
-                    Reconnect();
-                    if (!IsConnected)
+
+                    int count = Math.Min(_maxBytesPerWrite, bytes.Count);
+                    this.WriteBytesUnderlying(bytes.ToArray(), 0, count);
+                    bytes.RemoveRange(0, count);
+
+                    BytesWrittenSinceLastFlush += count;
+                    if (BytesWrittenSinceLastFlush >= 200)
                     {
-                        Logging.Logger?.LogError(e, "[{Function}]:[{PrinterName}] Unrecoverable connectivity error writing to printer.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
+                        // Immediately trigger a flush before proceeding so the output buffer will not be delayed.
+                        Flush(null, null);
                     }
-                    Writer.Write(bytes, bytePointer, count);
-                }
-                BytesWrittenSinceLastFlush += count;
-                if (BytesWrittenSinceLastFlush >= 200)
-                {
-                    // Immediately trigger a flush before proceeding so the output buffer will not be delayed.
-                    hasFlushed = true;
-                    Flush(null, null);
                 }
 
-                bytePointer += count;
-                bytesLeft -= count;
+                Flush(null, null);
             }
-
-            if (!hasFlushed)
+            catch (IOException e)
             {
-                Task.Run(async () => { await Task.Delay(50); Flush(null, null); });
+                // Network or serial connection failed, dont consume the buffer this time around
+                Logging.Logger?.LogDebug(e, "Device appears disconnected.  No more bytes will be written until it is reconnected.");
             }
         }
 
@@ -224,9 +204,8 @@ namespace ESCPOS_NET
         {
             try
             {
-
                 BytesWrittenSinceLastFlush = 0;
-                Writer.Flush();
+                this.FlushUnderlying();
             }
             catch (Exception ex)
             {
@@ -292,6 +271,7 @@ namespace ESCPOS_NET
 
         ~BasePrinter()
         {
+            Flush(this, null);
             Dispose(false);
         }
 
@@ -317,43 +297,15 @@ namespace ESCPOS_NET
                 try
                 {
                     _readCancellationTokenSource?.Cancel();
+                    _writeCancellationTokenSource?.Cancel();
                 }
                 catch (Exception e)
                 {
                     Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue during cancellation token cancellation call.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 }
-                try
-                {
-                    Reader?.Close();
-                }
-                catch (Exception e)
-                {
-                    Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue closing reader.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
-                }
-                try
-                {
-                    Reader?.Dispose();
-                }
-                catch (Exception e)
-                {
-                    Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue disposing reader.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
-                }
-                try
-                {
-                    Writer?.Close();
-                }
-                catch (Exception e)
-                {
-                    Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue closing writer.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
-                }
-                try
-                {
-                    Writer?.Dispose();
-                }
-                catch (Exception e)
-                {
-                    Logging.Logger?.LogDebug(e, "[{Function}]:[{PrinterName}] Dispose Issue disposing writer.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
-                }
+
+                while (_readTaskRunning || _writeTaskRunning) Thread.Sleep(100);
+
                 try
                 {
                     OverridableDispose();

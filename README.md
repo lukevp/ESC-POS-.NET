@@ -40,6 +40,8 @@ var printer = new SerialPrinter(portName: "COM5", baudRate: 115200);
 
 // Linux output to USB / Serial file
 var printer = new FilePrinter(filePath: "/dev/usb/lp0");
+
+printer.Connect();
 ```
 ## Step 1a (optional): Monitor for Events - out of paper, cover open...
 ```csharp

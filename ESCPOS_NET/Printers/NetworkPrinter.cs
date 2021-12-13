@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Reflection;
+using System.Threading;
 
 namespace ESCPOS_NET
 {
@@ -21,6 +22,7 @@ namespace ESCPOS_NET
         //public uint? MaxReconnectAttempts { get; set; }
         public string PrinterName { get; set; }
     }
+
     public class NetworkPrinter : BasePrinter
     {
         private readonly NetworkPrinterSettings _settings;
@@ -37,7 +39,6 @@ namespace ESCPOS_NET
             {
                 Disconnected += settings.DisconnectedHandler;
             }
-            Connect();
         }
 
         private void ConnectedEvent(object sender, ClientConnectedEventArgs e)
@@ -46,34 +47,19 @@ namespace ESCPOS_NET
             IsConnected = true;
             InvokeConnect();
         }
+
         private void DisconnectedEvent(object sender, ClientDisconnectedEventArgs e)
         {
             IsConnected = false;
             InvokeDisconnect();
             Logging.Logger?.LogWarning("[{Function}]:[{PrinterName}] Network printer connection terminated. Attempting to reconnect. Connection String: {ConnectionString}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, _settings.ConnectionString);
-            Connect();
-        }
-        private void AttemptReconnectInfinitely()
-        {
-            try
-            {
-                //_tcpConnection.ConnectWithRetries(300000);
-                _tcpConnection.ConnectWithRetries(3000);
-            }
-            catch
-            {
-                //Logging.Logger?.LogWarning("[{Function}]:[{PrinterName}] Network printer unable to connect after 5 minutes. Attempting to reconnect. Settings: {Settings}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, JsonSerializer.Serialize(_settings));
-                Task.Run(async () => { await Task.Delay(250); Connect(); });
-            }
+            Connect(true);
         }
 
-        private void Connect()
+        public override void Connect(bool reconnecting = false)
         {
-            if (_tcpConnection != null)
-            {
-                _tcpConnection.Connected -= ConnectedEvent;
-                _tcpConnection.Disconnected -= DisconnectedEvent;
-            }
+
+            OverridableDispose();
 
             // instantiate
             _tcpConnection = new TCPConnection(_settings.ConnectionString);
@@ -82,15 +68,35 @@ namespace ESCPOS_NET
             _tcpConnection.Connected += ConnectedEvent;
             _tcpConnection.Disconnected += DisconnectedEvent;
 
-            Reader = new BinaryReader(_tcpConnection.ReadStream);
-            Writer = new BinaryWriter(_tcpConnection.WriteStream);
+            _tcpConnection.ConnectWithRetries(3000);
 
-            Task.Run(() => { AttemptReconnectInfinitely(); });
+            base.Connect(reconnecting);
+        }
+
+        protected override void WriteBytesUnderlying(byte[] buffer, int offset, int count)
+        {
+            _tcpConnection.WriteStream?.Write(buffer, offset, count);
+        }
+
+        protected override int ReadBytesUnderlying(byte[] buffer, int offset, int bufferSize)
+        {
+            return _tcpConnection.ReadStream?.Read(buffer, offset, bufferSize) ?? 0;
+        }
+
+        protected override void FlushUnderlying()
+        {
+            _tcpConnection.WriteStream?.Flush();
         }
 
         protected override void OverridableDispose()
         {
-            _tcpConnection = null;
+            if (_tcpConnection != null)
+            {
+                _tcpConnection.Connected -= ConnectedEvent;
+                _tcpConnection.Disconnected -= DisconnectedEvent;
+                _tcpConnection?.Dispose();
+                _tcpConnection = null;
+            }
         }
     }
 }

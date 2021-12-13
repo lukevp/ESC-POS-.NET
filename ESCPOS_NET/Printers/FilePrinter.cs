@@ -4,11 +4,19 @@ namespace ESCPOS_NET
 {
     public class FilePrinter : BasePrinter
     {
-        private readonly FileStream _file;
+        private FileStream _file;
+        private bool createIfNotExists;
+        private string filePath;
 
         // TODO: default values to their default values in ctor.
         public FilePrinter(string filePath, bool createIfNotExists = false)
             : base()
+        {
+            this.createIfNotExists = createIfNotExists;
+            this.filePath = filePath;
+        }
+
+        public override void Connect(bool reconnecting = false)
         {
             if (createIfNotExists)
             {
@@ -17,9 +25,25 @@ namespace ESCPOS_NET
             else
             {
                 _file = File.Open(filePath, FileMode.Open);
+                //if (_file.CanSeek) _file.Seek(0, SeekOrigin.End);
             }
-            Writer = new BinaryWriter(_file);
-            Reader = new BinaryReader(_file);
+
+            base.Connect(reconnecting);
+        }
+
+        protected override int ReadBytesUnderlying(byte[] buffer, int offset, int bufferSize)
+        {
+            return _file.Read(buffer, offset, bufferSize);
+        }
+        
+        protected override void WriteBytesUnderlying(byte[] buffer, int offset, int count)
+        {
+            _file.Write(buffer, offset, count);
+        }
+
+        protected override void FlushUnderlying()
+        {
+            _file.Flush();
         }
 
         ~FilePrinter()
