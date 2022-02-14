@@ -40,7 +40,7 @@ namespace SixLabors.ImageSharp
 
             image.ProcessPixelRows(accessor =>
             {
-                for (int y = 0; y < image.Height; y++)
+                for (int y = 0; y < accessor.Height; y++)
                 {
                     var row = accessor.GetRowSpan(y);
                     var rowStartPosition = y * bytesPerRow;
