@@ -139,7 +139,7 @@ namespace ESCPOS_NET.Emitters
             var bytes = memoryStream.ToArray();
             memoryStream.Dispose();
 
-            return bytes;
+            return PrintImage(bytes, true);
         }
     }
 }
