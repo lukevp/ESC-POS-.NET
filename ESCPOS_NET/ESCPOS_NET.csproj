@@ -10,7 +10,7 @@
 			.NET Standard 2.0 Implementation of ESC/POS command generation and integration with thermal printers.
 			Allows creating receipts with all common functionality supported.
 		</Description>
-		<Copyright>Copyright 2021 CandL Development, LLC.</Copyright>
+		<Copyright>Copyright 2022 CandL Development, LLC.</Copyright>
 		<PackageLicenseUrl></PackageLicenseUrl>
 		<RepositoryUrl>https://github.com/lukevp/ESC-POS-.NET</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
