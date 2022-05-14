@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESCPOS_NET.ConsoleTest", "E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESCPOS_NET.UnitTest", "ESCPOS_NET.UnitTest\ESCPOS_NET.UnitTest.csproj", "{8A848879-9776-4EBC-8484-41B8EE65FD8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESCPOS_NET.TCPPrintServerTest", "ESCPOS_NET.TCPPrintServerTest\ESCPOS_NET.TCPPrintServerTest.csproj", "{A79EB8C9-618F-40AD-ADF3-8794F07E240D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESCPOS_NET.TCPPrintServerTest", "ESCPOS_NET.TCPPrintServerTest\ESCPOS_NET.TCPPrintServerTest.csproj", "{A79EB8C9-618F-40AD-ADF3-8794F07E240D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
