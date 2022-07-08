@@ -31,12 +31,14 @@ namespace ESCPOS_NET.ConsoleTest
 
             Console.WriteLine("1 ) Test Serial Port");
             Console.WriteLine("2 ) Test Network Printer");
+            Console.WriteLine("3 ) Test Samba-Shared Printer");
             Console.Write("Choice: ");
             string comPort = "";
             string ip;
             string networkPort;
+            string smbPath;
             response = Console.ReadLine();
-            var valid = new List<string> { "1", "2" };
+            var valid = new List<string> { "1", "2", "3" };
             if (!valid.Contains(response))
             {
                 response = "1";
@@ -91,14 +93,24 @@ namespace ESCPOS_NET.ConsoleTest
                 }
                 printer = new NetworkPrinter(settings: new NetworkPrinterSettings() { ConnectionString = $"{ip}:{networkPort}" });
             }
+            else if (choice == 3)
+            {
+                Console.Write(@"SMB Share Name (eg. \\computer\printer): ");
+                smbPath = Console.ReadLine();
+
+                printer = new SambaPrinter(tempFileBasePath: @"C:\Temp", filePath: smbPath);
+            }
 
             bool monitor = false;
             Thread.Sleep(500);
-            Console.Write("Turn on Live Status Back Monitoring? (y/n): ");
-            response = Console.ReadLine().Trim().ToLowerInvariant();
-            if (response.Length >= 1 && response[0] == 'y')
+            if (choice != 3) // SMB printers do not support reads so status back will not work.
             {
-                monitor = true;
+                Console.Write("Turn on Live Status Back Monitoring? (y/n): ");
+                response = Console.ReadLine().Trim().ToLowerInvariant();
+                if (response.Length >= 1 && response[0] == 'y')
+                {
+                    monitor = true;
+                }
             }
 
             e = new EPSON();
