@@ -37,21 +37,25 @@ namespace SixLabors.ImageSharp
             var bytesPerRow = (image.Width + 7 & -8) / 8;
 
             var result = new byte[bytesPerRow * image.Height];
-            for (int y = 0; y < image.Height; y++)
+
+            image.ProcessPixelRows(accessor =>
             {
-                var row = image.GetPixelRowSpan(y);
-                var rowStartPosition = y * bytesPerRow;
-
-                for (int x = 0; x < row.Length; x++)
+                for (int y = 0; y < accessor.Height; y++)
                 {
-                    if (!row[x].IsBlack())
-                    {
-                        continue;
-                    }
+                    var row = accessor.GetRowSpan(y);
+                    var rowStartPosition = y * bytesPerRow;
 
-                    result[rowStartPosition + (x / 8)] |= (byte)(0x01 << (7 - (x % 8)));
+                    for (int x = 0; x < row.Length; x++)
+                    {
+                        if (!row[x].IsBlack())
+                        {
+                            continue;
+                        }
+
+                        result[rowStartPosition + (x / 8)] |= (byte)(0x01 << (7 - (x % 8)));
+                    }
                 }
-            }
+            });
 
             return result;
         }
