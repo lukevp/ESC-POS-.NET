@@ -128,8 +128,8 @@ namespace ESCPOS_NET.Emitters
         {
             var font = fontFamily.CreateFont(size, fontStyle);
 
-            var options = new RendererOptions(font);
-            var rect = TextMeasurer.Measure(text, options);
+            TextOptions textOptions = new TextOptions(font);
+            var rect = TextMeasurer.Measure(text, textOptions);
 
             Image image = new Image<Rgba32>((int)rect.Width, (int)rect.Height);
             image.Mutate(x => x.DrawText(text, font, SixLabors.ImageSharp.Color.Black, new PointF(0, 0)));
