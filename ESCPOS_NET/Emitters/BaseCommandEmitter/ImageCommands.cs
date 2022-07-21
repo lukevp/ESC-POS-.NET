@@ -1,7 +1,11 @@
+using System.IO;
 using ESCPOS_NET.Emitters.BaseCommandValues;
 using ESCPOS_NET.Utilities;
+using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Drawing.Processing;
 
 namespace ESCPOS_NET.Emitters
 {
@@ -118,6 +122,24 @@ namespace ESCPOS_NET.Emitters
             {
                 return ByteSplicer.Combine(SetImageDensity(isHiDPI), BufferImage(image, maxWidth, isLegacy, color), WriteImageFromBuffer());
             }
+        }
+
+        public virtual byte[] PrintRasterizedText(string text, FontFamily fontFamily, float size, FontStyle fontStyle = FontStyle.Regular)
+        {
+            var font = fontFamily.CreateFont(size, fontStyle);
+
+            TextOptions textOptions = new TextOptions(font);
+            var rect = TextMeasurer.Measure(text, textOptions);
+
+            Image image = new Image<Rgba32>((int)rect.Width, (int)rect.Height);
+            image.Mutate(x => x.DrawText(text, font, SixLabors.ImageSharp.Color.Black, new PointF(0, 0)));
+
+            var memoryStream = new MemoryStream();
+            image.SaveAsPng(memoryStream);
+            var bytes = memoryStream.ToArray();
+            memoryStream.Dispose();
+
+            return PrintImage(bytes, true);
         }
     }
 }
