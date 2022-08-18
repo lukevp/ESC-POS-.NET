@@ -34,7 +34,7 @@ This means that Bluetooth, WiFi, Ethernet, USB, and Serial printers are all usab
 ```csharp
 // Ethernet or WiFi (This uses an Immediate Printer, no live paper status events, but is easier to use)
 var hostnameOrIp = "192.168.1.50";
-var port = 9000;
+var port = 9100;
 var printer = new ImmediateNetworkPrinter(new ImmediateNetworkPrinterSettings() { ConnectionString = $"{hostnameOrIp}:{port}", PrinterName = "TestPrinter" });
 
 // USB, Bluetooth, or Serial
