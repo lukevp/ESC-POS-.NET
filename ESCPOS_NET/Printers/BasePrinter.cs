@@ -27,8 +27,6 @@ namespace ESCPOS_NET
         public event EventHandler StatusChanged;
         public event EventHandler Disconnected;
         public event EventHandler Connected;
-        //public event EventHandler WriteFailed;
-        //public event EventHandler Idle;
 
         protected BinaryWriter Writer { get; set; }
 
@@ -40,7 +38,7 @@ namespace ESCPOS_NET
 
         protected int BytesWrittenSinceLastFlush { get; set; } = 0;
 
-        protected volatile bool IsConnected  = true;
+        protected volatile bool IsConnected = true;
 
         public string PrinterName { get; protected set; }
 
@@ -148,9 +146,9 @@ namespace ESCPOS_NET
                         DataAvailable();
                     }
                 }
-             
+
                 catch
-                {                    
+                {
                     // Swallow the exception
                     //Logging.Logger?.LogDebug("[{Function}]:[{PrinterName}] Swallowing generic read exception... sometimes happens with serial port printers.", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName);
                 }
