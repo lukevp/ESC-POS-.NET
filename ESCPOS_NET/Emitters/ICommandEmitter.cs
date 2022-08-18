@@ -1,3 +1,5 @@
+using ESCPOS_NET.Emitters.BaseCommandValues;
+
 namespace ESCPOS_NET.Emitters
 {
     public interface ICommandEmitter
@@ -71,6 +73,19 @@ namespace ESCPOS_NET.Emitters
         byte[] EnableAutomaticStatusBack();
 
         byte[] EnableAutomaticInkStatusBack();
+
+        byte[] DisableAutomaticStatusBack();
+
+        byte[] DisableAutomaticInkStatusBack();
+
+        byte[] RequestOnlineStatus();
+
+        byte[] RequestPaperStatus();
+
+        byte[] RequestDrawerStatus();
+
+        byte[] RequestInkStatus();
+
 
         /* Barcode Commands */
         byte[] PrintBarcode(BarcodeType type, string barcode, BarcodeCode code = BarcodeCode.CODE_B);

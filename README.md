@@ -32,8 +32,10 @@ This means that Bluetooth, WiFi, Ethernet, USB, and Serial printers are all usab
 
 ## Step 1: Create a Printer object
 ```csharp
-// Ethernet or WiFi
-var printer = new NetworkPrinter(ipAddress: "192.168.1.50", port: 9000, reconnectOnTimeout: true);
+// Ethernet or WiFi (This uses an Immediate Printer, no live paper status events, but is easier to use)
+var hostnameOrIp = "192.168.1.50";
+var port = 9000;
+var printer = new ImmediateNetworkPrinter(new ImmediateNetworkPrinterSettings() { ConnectionString = $"{hostnameOrIp}:{port}", PrinterName = "TestPrinter" });
 
 // USB, Bluetooth, or Serial
 var printer = new SerialPrinter(portName: "COM5", baudRate: 115200);
@@ -41,7 +43,7 @@ var printer = new SerialPrinter(portName: "COM5", baudRate: 115200);
 // Linux output to USB / Serial file
 var printer = new FilePrinter(filePath: "/dev/usb/lp0");
 ```
-## Step 1a (optional): Monitor for Events - out of paper, cover open...
+## Step 1a (optional): Monitor for Events - out of paper, cover open... 
 ```csharp
 // Define a callback method.
 static void StatusChanged(object sender, EventArgs ps)
@@ -67,7 +69,7 @@ printer.StartMonitoring();
 ## Step 2: Write a receipt to the printer
 ```csharp
 var e = new EPSON();
-printer.Write(
+printer.Write( // or, if using and immediate printer, use await printer.WriteAsync
   ByteSplicer.Combine(
     e.CenterAlign(),
     e.PrintImage(File.ReadAllBytes("images/pd-logo-300.png"), true),
@@ -122,9 +124,11 @@ Desktop support (WiFI, Ethernet, Bluetooth, USB, Serial):
   - ARM platforms such as Raspberry Pi
   - x86/64 platform
 * Mac OSX
-  - Tested on high sierra
+  - Tested from High Sierra to Monterrey, both Intel and M1 architectures
 
 Mobile support (WiFi/Ethernet only):
+**ImmediateNetworkPrinter is the recommended integration type for mobile usage, since mobile applications can background your application at any time**
+* Xamarin.Forms
 * iOS
   - Xamarin.iOS
 * Android
@@ -175,6 +179,7 @@ NOTE: The cross platform .NET library we use from Microsoft only supports COM po
 
 # Implemented Commands
 
+Most common commands are implemented natively in the library's included emitter.
 ## Bit Image Commands
 * `ESC ✻` Select bit-image mode
 * `GS ( L` OR `GS 8 L` Set graphics data
@@ -185,7 +190,6 @@ NOTE: The cross platform .NET library we use from Microsoft only supports COM po
 ## Character Commands
 * `ESC !` Select print mode(s)
 * `GS B` Turn white/black reverse print mode on/off - Thanks @juliogamasso!
-
 
 ## Print Commands
 * `LF` Print and line feed
