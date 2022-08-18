@@ -15,7 +15,7 @@
 		<RepositoryUrl>https://github.com/lukevp/ESC-POS-.NET</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>epson thermal receipt printing printer usb wifi bluetooth serial esc pos escpos escp esc/pos esc/pos.net esc_pos esc_pos_net esc_pos_usb esc_pos_usb_net</PackageTags>
-		<Version>2.1.0</Version>
+		<Version>3.0.0</Version>
 		<AssemblyVersion>2.1.0.0</AssemblyVersion>
 		<FileVersion>2.1.0.0</FileVersion>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
