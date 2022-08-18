@@ -42,6 +42,9 @@ var printer = new SerialPrinter(portName: "COM5", baudRate: 115200);
 
 // Linux output to USB / Serial file
 var printer = new FilePrinter(filePath: "/dev/usb/lp0");
+
+// Samba
+var printer = new SambaPrinter(tempFileBasePath: @"C:\Temp", filePath: "\\computer\printer");
 ```
 ## Step 1a (optional): Monitor for Events - out of paper, cover open... 
 ```csharp
