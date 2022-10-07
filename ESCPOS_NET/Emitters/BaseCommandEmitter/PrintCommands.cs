@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using ESCPOS_NET.Emitters.BaseCommandValues;
 
 namespace ESCPOS_NET.Emitters
@@ -8,6 +9,9 @@ namespace ESCPOS_NET.Emitters
         /* Printing Commands */
         public virtual byte[] Print(string data)
         {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
             // Fix OSX or Windows-style newlines
             data = data.Replace("\r\n", "\n");
             data = data.Replace("\r", "\n");
