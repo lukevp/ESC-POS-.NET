@@ -22,5 +22,11 @@
         public static readonly byte[] SetQRCodeCorrectionLevel = { 0x03, 0x00, 0x31, 0x45 };
         public static readonly byte[] StoreQRCodeData = { 0x31, 0x50, 0x30 };
         public static readonly byte[] PrintQRCode = { 0x03, 0x00, 0x31, 0x51, 0x30 };
+
+        public static readonly byte[] SetAztecCodeModeTypeAndNumberOfDataLayers = { 0x04, 0x00, 0x35, 0x42 };
+        public static readonly byte[] SetAztecCodeSizeOfModule = { 0x03, 0x00, 0x35, 0x43 };
+        public static readonly byte[] SetAztecCodeErrorCorrectionLevel = { 0x03, 0x00, 0x35, 0x45 };
+        public static readonly byte[] StoreAztecCodeData = { 0x35, 0x50, 0x30 };
+        public static readonly byte[] PrintAztecCode = { 0x03, 0x00, 0x35, 0x51, 0x30 };
     }
 }

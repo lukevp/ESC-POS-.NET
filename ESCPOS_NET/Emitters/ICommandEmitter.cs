@@ -1,5 +1,3 @@
-using ESCPOS_NET.Emitters.BaseCommandValues;
-
 namespace ESCPOS_NET.Emitters
 {
     public interface ICommandEmitter
@@ -86,7 +84,6 @@ namespace ESCPOS_NET.Emitters
 
         byte[] RequestInkStatus();
 
-
         /* Barcode Commands */
         byte[] PrintBarcode(BarcodeType type, string barcode, BarcodeCode code = BarcodeCode.CODE_B);
 
@@ -102,6 +99,56 @@ namespace ESCPOS_NET.Emitters
         byte[] SetBarLabelPosition(BarLabelPrintPosition position);
 
         byte[] SetBarLabelFontB(bool fontB);
+
+        /// <summary>
+        /// Print Aztec Code
+        /// </summary>
+        /// <param name="data">
+        /// <para>Data to print as Aztec Code.</para>
+        /// </param>
+        /// <param name="modeType">
+        /// <para>The mode type for Aztec Code.</para>
+        /// <para>Default is FULL_RANGE.</para>
+        /// </param>
+        /// <param name="size">
+        /// <para>The size of one module of Aztec Code in dot units, valid range is 2-16.</para>
+        /// <para>Default is 3.</para>
+        /// </param>
+        /// <param name="correctionLevel">
+        /// <para>The error correction level in percent, valid range is 5-95.</para>
+        /// <para>Default is 23.</para>
+        /// </param>
+        /// <param name="numberOfDataLayers">
+        /// <para>The number of data layers for Aztec Code.</para>
+        /// <para>0 = automatic processing for the number of layers, valid range is 0-32.</para>
+        /// <para>Default is 0.</para>
+        /// </param>
+        byte[] PrintAztecCode(string data, ModeTypeAztecCode modeType = ModeTypeAztecCode.FULL_RANGE, int size = 3, int correctionLevel = 23, int numberOfDataLayers = 0);
+
+        /// <summary>
+        /// Print Aztec Code
+        /// </summary>
+        /// <param name="data">
+        /// <para>Data to print as Aztec Code.</para>
+        /// </param>
+        /// <param name="modeType">
+        /// <para>The mode type for Aztec Code.</para>
+        /// <para>Default is FULL_RANGE.</para>
+        /// </param>
+        /// <param name="size">
+        /// <para>The size of one module of Aztec Code in dot units, valid range is 2-16.</para>
+        /// <para>Default is 3.</para>
+        /// </param>
+        /// <param name="correctionLevel">
+        /// <para>The error correction level in percent, valid range is 5-95.</para>
+        /// <para>Default is 23.</para>
+        /// </param>
+        /// <param name="numberOfDataLayers">
+        /// <para>The number of data layers for Aztec Code.</para>
+        /// <para>0 = automatic processing for the number of layers, valid range is 0-32.</para>
+        /// <para>Default is 0.</para>
+        /// </param>
+        byte[] PrintAztecCode(byte[] data, ModeTypeAztecCode modeType = ModeTypeAztecCode.FULL_RANGE, int size = 3, int correctionLevel = 23, int numberOfDataLayers = 0);
 
         /* Print Position Commands */
         byte[] SetLeftMargin(int leftMargin);
