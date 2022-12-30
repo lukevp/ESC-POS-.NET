@@ -102,5 +102,8 @@ namespace ESCPOS_NET.Emitters
         byte[] SetBarLabelPosition(BarLabelPrintPosition position);
 
         byte[] SetBarLabelFontB(bool fontB);
+
+        /* Print Position Commands */
+        byte[] SetLeftMargin(int leftMargin);
     }
 }
