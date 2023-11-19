@@ -114,20 +114,22 @@ namespace ESCPOS_NET.Emitters
         public virtual byte[] SetBarLabelFontB(bool fontB) => new byte[] { Cmd.GS, Barcodes.SetBarLabelFont, (byte)(fontB ? 1 : 0) };
 
         /// <inheritdoc />
-        public virtual byte[] PrintAztecCode(string data, ModeTypeAztecCode modeType = ModeTypeAztecCode.FULL_RANGE, int size = 3, int correctionLevel = 23, int numberOfDataLayers = 0)
+        public virtual byte[] PrintAztecCode(string data, ModeTypeAztecCode modeType = ModeTypeAztecCode.FULL_RANGE, int moduleSize = 3, int correctionLevel = 23, int numberOfDataLayers = 0)
         {
             var bytes = data.ToCharArray().Select(x => (byte)x).ToArray();
-            return PrintAztecCode(bytes, modeType, size, correctionLevel, numberOfDataLayers);
+            return PrintAztecCode(bytes, modeType, moduleSize, correctionLevel, numberOfDataLayers);
         }
 
         /// <inheritdoc />
-        public virtual byte[] PrintAztecCode(byte[] data, ModeTypeAztecCode modeType = ModeTypeAztecCode.FULL_RANGE, int size = 3, int correctionLevel = 23, int numberOfDataLayers = 0)
+        public virtual byte[] PrintAztecCode(byte[] data, ModeTypeAztecCode modeType = ModeTypeAztecCode.FULL_RANGE, int moduleSize = 3, int correctionLevel = 23, int numberOfDataLayers = 0)
         {
+            AztecDataValidator.ValidateAztecCode(modeType, data, moduleSize, correctionLevel, numberOfDataLayers);
+
             List<byte> command = new List<byte>();
             byte[] initial = { Cmd.GS, Barcodes.Set2DCode, Barcodes.PrintBarcode };
 
             command.AddRange(initial, Barcodes.SetAztecCodeModeTypeAndNumberOfDataLayers, (byte)modeType, (byte)numberOfDataLayers);
-            command.AddRange(initial, Barcodes.SetAztecCodeSizeOfModule, (byte)size);
+            command.AddRange(initial, Barcodes.SetAztecCodeSizeOfModule, (byte)moduleSize);
             command.AddRange(initial, Barcodes.SetAztecCodeErrorCorrectionLevel, (byte)correctionLevel);
 
             int num = data.Length + 3;
