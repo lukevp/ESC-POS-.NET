@@ -36,6 +36,7 @@
 		<PackageReference Include="SuperSimpleTcp" Version="2.4.0" />
 		<PackageReference Include="System.IO.Ports" Version="6.0.0" />
 		<PackageReference Include="System.Text.Json" Version="6.0.4" />
+		<PackageReference Include="ZXing.Net" Version="0.16.9" />
 	</ItemGroup>
 
 </Project>

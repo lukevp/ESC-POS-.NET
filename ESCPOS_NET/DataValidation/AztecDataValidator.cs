@@ -58,6 +58,16 @@ namespace ESCPOS_NET.DataValidation
             {
                 throw new ArgumentException($"Correction level '{correctionLevel}' is higher than the minimum {constraints.MaxCorrectionLevel} for {type}.");
             }
+
+            // Try encoding Aztec using ZXing.Net to validate data size
+            try
+            {
+                ZXing.Aztec.Internal.Encoder.encode(data, correctionLevel, numberOfDataLayers);
+            }
+            catch (ArgumentException)
+            {
+                throw;
+            }
         }
     }
 }
