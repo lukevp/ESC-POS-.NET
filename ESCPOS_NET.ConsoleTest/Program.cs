@@ -130,6 +130,7 @@ namespace ESCPOS_NET.ConsoleTest
                 { Option.LargeByteArrays, "Large Byte Arrays" },
                 { Option.CashDrawerPin2, "Cash Drawer Pin2" },
                 { Option.CashDrawerPin5, "Cash Drawer Pin5" },
+                { Option.Languages, "Language handling" },
                 { Option.Exit, "Exit" }
 
             };
@@ -213,6 +214,11 @@ namespace ESCPOS_NET.ConsoleTest
                     case Option.CashDrawerPin5:
                         printer.Write(Tests.CashDrawerOpenPin5(e));
                         break;
+
+                    case Option.Languages:
+                        printer.Write(Tests.Languages(e));
+                        break;
+
                     default:
                         Console.WriteLine("Invalid entry.");
                         break;
@@ -242,6 +248,7 @@ namespace ESCPOS_NET.ConsoleTest
             LargeByteArrays,
             CashDrawerPin2,
             CashDrawerPin5,
+            Languages,
             Exit = 99
         }
 
