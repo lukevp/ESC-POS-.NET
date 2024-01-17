@@ -7,7 +7,11 @@ namespace ESCPOS_NET.Emitters
         /* Print Commands */
         byte[] PrintLine(string line = null);
 
+        byte[] PrintLine(string line, int codepage);
+
         byte[] Print(string line);
+
+        byte[] Print(string data, int codepage);
 
         byte[] FeedLines(int lineCount);
 
