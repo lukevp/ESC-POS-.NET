@@ -133,6 +133,47 @@ So below an example of how to print `€`
 ```
 Refer to [this code](https://github.com/lukevp/ESC-POS-.NET/blob/7edaa3f0d9f7298ffe33517074fbc3622e4192a9/ESCPOS_NET.ConsoleTest/TestCodePages.cs#L6-L41) to test your current CodePage, and to [this post](https://github.com/lukevp/ESC-POS-.NET/issues/103#issuecomment-778874734) for a full explanation.
 
+### Printing Chinese characters
+Assuming your printer has its default CodePage to match [GBK Enconding](https://en.wikipedia.org/wiki/GBK_(character_encoding)) you could accomplish printing chinese characters in 2 ways:
+
+#### 1 - Defining the Encoding in the Emitter
+```cs
+var e = new EPSON { Encoding = System.Text.Encoding.GetEncoding("GBK") };
+string chineseCharactersString = "汉字";
+
+printer.Write( 
+  ByteSplicer.Combine(
+    e.CenterAlign(),
+    e.Print("------------------------------------------"),
+    e.PrintLine(),
+    e.Print(chineseCharactersString),
+    e.PrintLine(),
+    e.Print("------------------------------------------"),
+    e.RightAlign(),
+    e.PrintLine()
+  )
+);
+```
+
+#### 2 - Encoding all strings and directly using them in the Write() method
+```cs
+var encoding = System.Text.Encoding.GetEncoding("GBK");
+var e = new EPSON();
+string chineseCharactersString = "汉字";
+printer.Write( 
+  ByteSplicer.Combine(
+    e.CenterAlign(),
+    e.Print("------------------------------------------"),
+    e.PrintLine(),
+    encoding.GetBytes(chineseCharactersString),
+    e.PrintLine(),
+    e.Print("------------------------------------------"),
+    e.RightAlign(),
+    e.PrintLine()
+  )
+);
+```
+
 # Supported Platforms
 Desktop support (WiFI, Ethernet, Bluetooth, USB, Serial):
 * Windows

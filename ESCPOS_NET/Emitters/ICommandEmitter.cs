@@ -1,9 +1,12 @@
 using ESCPOS_NET.Emitters.BaseCommandValues;
+using System.Text;
 
 namespace ESCPOS_NET.Emitters
 {
     public interface ICommandEmitter
     {
+        Encoding Encoding { get; set; }
+
         /* Print Commands */
         byte[] PrintLine(string line = null);
 
