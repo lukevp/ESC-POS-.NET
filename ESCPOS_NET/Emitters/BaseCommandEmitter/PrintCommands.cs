@@ -12,6 +12,7 @@ namespace ESCPOS_NET.Emitters
         /* Printing Commands */
         public virtual byte[] Print(string data)
         {
+            // Fix OSX or Windows-style newliness
             data = Regex.Replace(data, @"\r\n|\r", "\n");
 
             if (Encoding is null)
