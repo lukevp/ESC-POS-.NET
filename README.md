@@ -117,7 +117,21 @@ printer.Write( // or, if using and immediate printer, use await printer.WriteAsy
   )
 );
 ```
+## Step 3: Print special characters 
+Before you proceed, please make sure you understand the CodePages your printer supports, and if necessary use the [CodePage](https://github.com/lukevp/ESC-POS-.NET/blob/7edaa3f0d9f7298ffe33517074fbc3622e4192a9/ESCPOS_NET/Emitters/BaseCommandEmitter/CharacterCommands.cs#L24) command to change it accordingly to the wanted [encoding](https://en.wikipedia.org/wiki/Character_encoding).
 
+The problem folks usually run into is that C# strings are Unicode, so you are able to declare a string with, for example, the value `€` in C#, but unfortunately, that value does not correctly map to an ASCII 8-bit value that is printable using the standard 7-bit + extended codepages. See [here](https://www.compart.com/en/unicode/U+20AC) for more information
+
+So below an example of how to print `€`
+```cs
+    // € is char 0xD5 at PC858_EURO CodePage
+    var EURO = new byte[] { 0xD5 };
+    printer.Write(ByteSplicer.Combine(e.CodePage(CodePage.PC858_EURO), EURO));
+
+    //Optionally you can return to whatever default CodePage you had before. PC437 in this example
+    printer.Write(e.CodePage(CodePage.PC437_USA_STANDARD_EUROPE_DEFAULT));
+```
+Refer to [this code](https://github.com/lukevp/ESC-POS-.NET/blob/7edaa3f0d9f7298ffe33517074fbc3622e4192a9/ESCPOS_NET.ConsoleTest/TestCodePages.cs#L6-L41) to test your current CodePage, and to [this post](https://github.com/lukevp/ESC-POS-.NET/issues/103#issuecomment-778874734) for a full explanation.
 
 # Supported Platforms
 Desktop support (WiFI, Ethernet, Bluetooth, USB, Serial):
@@ -209,6 +223,7 @@ Most common commands are implemented natively in the library's included emitter.
 * `GS h` Set bar code height
 * `GS k` Print bar code
 * `GS w` Set bar code width
+* `GS ( k` Print 2D bar codes (QRCode and PDF417)
 
 ## Status Commands
 * `GS a` Enable/disable Automatic Status Back (ASB)
