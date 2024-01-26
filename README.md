@@ -173,6 +173,17 @@ printer.Write(
   )
 );
 ```
+#### Important Note
+If you are using this library with .NET and not .NET Framework, an [extra step](https://learn.microsoft.com/en-us/dotnet/api/system.text.codepagesencodingprovider.instance?view=net-8.0) might be needed before you pass on the Enconding instance to the library
+
+![image](https://github.com/lukevp/ESC-POS-.NET/assets/10572656/01c9f3d3-ff83-4450-9178-0a3d2ea7eeaf)
+
+This means you need to register the provider once with the line below before you instantiate the Encoding with `System.Text.Encoding.GetEncoding` method.
+```cs
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+```
+
+More details about .NET and Encoding [here](https://learn.microsoft.com/en-us/dotnet/standard/base-types/character-encoding).
 
 # Supported Platforms
 Desktop support (WiFI, Ethernet, Bluetooth, USB, Serial):
