@@ -1,19 +1,27 @@
 ﻿using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using ESCPOS_NET.Emitters.BaseCommandValues;
 
 namespace ESCPOS_NET.Emitters
 {
     public abstract partial class BaseCommandEmitter : ICommandEmitter
     {
+        public Encoding Encoding { get; set; }
+
         /* Printing Commands */
         public virtual byte[] Print(string data)
         {
             // Fix OSX or Windows-style newlines
-            data = data.Replace("\r\n", "\n");
-            data = data.Replace("\r", "\n");
+            data = Regex.Replace(data, @"\r\n|\r", "\n");
 
-            // TODO: Sanitize...
-            return data.ToCharArray().Select(x => (byte)x).ToArray();
+            if (Encoding is null)
+            {
+                // TODO: Sanitize...
+                return data.ToCharArray().Select(x => (byte)x).ToArray();
+            }
+
+            return Encoding.GetBytes(data);
         }
 
         public virtual byte[] PrintLine(string line)
