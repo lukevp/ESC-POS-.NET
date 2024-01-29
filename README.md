@@ -71,7 +71,7 @@ printer.StartMonitoring();
 
 ## Step 2: Write a receipt to the printer
 ```csharp
-var e = new EPSON();
+var e = new EPSON{ Columns = 64 };
 printer.Write( // or, if using and immediate printer, use await printer.WriteAsync
   ByteSplicer.Combine(
     e.CenterAlign(),
@@ -97,13 +97,11 @@ printer.Write( // or, if using and immediate printer, use await printer.WriteAsy
     e.SetStyles(PrintStyle.FontB),
     e.PrintLine("1   TRITON LOW-NOISE IN-LINE MICROPHONE PREAMP"),
     e.PrintLine("    TRFETHEAD/FETHEAD                        89.95         89.95"),
-    e.PrintLine("----------------------------------------------------------------"),
-    e.RightAlign(),
-    e.PrintLine("SUBTOTAL         89.95"),
-    e.PrintLine("Total Order:         89.95"),
-    e.PrintLine("Total Payment:         89.95"),
+    e.HorizontalLine(),
+    e.SameLineLeftAndRightAlign("SUBTOTAL", "89.95"),
+    e.SameLineLeftAndRightAlign("Total Order:", "89.95"),
+    e.SameLineLeftAndRightAlign("Total Payment:", "89.95"),
     e.PrintLine(),
-    e.LeftAlign(),
     e.SetStyles(PrintStyle.Bold | PrintStyle.FontB),
     e.PrintLine("SOLD TO:                        SHIP TO:"),
     e.SetStyles(PrintStyle.FontB),

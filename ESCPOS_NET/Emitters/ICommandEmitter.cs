@@ -6,6 +6,7 @@ namespace ESCPOS_NET.Emitters
     public interface ICommandEmitter
     {
         Encoding Encoding { get; set; }
+        int Columns { get; set; }
 
         /* Print Commands */
         byte[] PrintLine(string line = null);
