@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using SimpleTcp;
+using SuperSimpleTcp;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -40,13 +40,13 @@ namespace ESCPOS_NET
             Connect();
         }
 
-        private void ConnectedEvent(object sender, ClientConnectedEventArgs e)
+        private void ConnectedEvent(object sender, SuperSimpleTcp.ConnectionEventArgs e)
         {
             Logging.Logger?.LogInformation("[{Function}]:[{PrinterName}] Connected successfully to network printer! Connection String: {ConnectionString}", $"{this}.{MethodBase.GetCurrentMethod().Name}", PrinterName, _settings.ConnectionString);
             IsConnected = true;
             InvokeConnect();
         }
-        private void DisconnectedEvent(object sender, ClientDisconnectedEventArgs e)
+        private void DisconnectedEvent(object sender, SuperSimpleTcp.ConnectionEventArgs e)
         {
             IsConnected = false;
             InvokeDisconnect();
