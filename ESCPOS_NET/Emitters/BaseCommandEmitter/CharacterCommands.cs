@@ -5,7 +5,35 @@ namespace ESCPOS_NET.Emitters
     public abstract partial class BaseCommandEmitter : ICommandEmitter
     {
         /* Character Commands */
+        /// <summary>
+        /// Select print mode(s)
+        /// </summary>
+        /// <param name="style"></param>
+        /// <returns></returns>
         public virtual byte[] SetStyles(PrintStyle style) => new byte[] { Cmd.ESC, Chars.StyleMode, (byte)style };
+
+        /// <summary>
+        /// Select character size. Please reference <see cref="https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=34"/>
+        /// Value from 0 to 7, 0 for normal size.
+        /// </summary>
+        /// <param name="widthMagnification">Enlargement in horizontal direction.</param>
+        /// <param name="heightMagnification">Enlargement in vertical direction.</param>
+        /// <returns></returns>
+        public virtual byte[] SetSize(byte widthMagnification, byte heightMagnification)
+        {
+            if (widthMagnification > 7) widthMagnification = 7;
+            if (heightMagnification > 7) heightMagnification = 7;
+
+            return [Cmd.GS, Chars.SizeMode, (byte)(widthMagnification * 0x10 + heightMagnification)];
+        }
+
+        /// <summary>
+        /// Select character size. Please reference <see cref="https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=34"/>
+        /// Set both width and height magnification in same value.
+        /// </summary>
+        /// <param name="magnification">Enlargement in both horizontal and vertical direction.</param>
+        /// <returns></returns>
+        public virtual byte[] SetSize(byte magnification) => SetSize(magnification, magnification);
 
         public virtual byte[] LeftAlign() => new byte[] { Cmd.ESC, Chars.Alignment, (byte)Align.Left };
 
