@@ -98,8 +98,8 @@ namespace ESCPOS_NET.DataValidation
                     { BarcodeType.ITF, new DataConstraint() { MinLength = 2, MaxLength = 255, ValidChars = "0123456789" } },
                     { BarcodeType.CODABAR_NW_7, new DataConstraint() { MinLength = 2, MaxLength = 255, ValidChars = "0123456789ABCDabcd$+-./:" } },
                     { BarcodeType.CODE93, new DataConstraint() { MinLength = 1, MaxLength = 255, ValidChars = "7BIT-ASCII" } },
-                    { BarcodeType.CODE128, new DataConstraint() { MinLength = 1, MaxLength = 253, ValidChars = "7BIT-ASCII" } },
-                    { BarcodeType.GS1_128, new DataConstraint() { MinLength = 1, MaxLength = 253, ValidChars = "7BIT-ASCII" } },
+                    { BarcodeType.CODE128, new DataConstraint() { MinLength = 2, MaxLength = 255, ValidChars = "7BIT-ASCII" } },
+                    { BarcodeType.GS1_128, new DataConstraint() { MinLength = 2, MaxLength = 255, ValidChars = "7BIT-ASCII" } },
                     { BarcodeType.GS1_DATABAR_OMNIDIRECTIONAL, new DataConstraint() { MinLength = 13, MaxLength = 13, ValidChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./" } },
                     { BarcodeType.GS1_DATABAR_TRUNCATED, new DataConstraint() { MinLength = 13, MaxLength = 13, ValidChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./" } },
                     { BarcodeType.GS1_DATABAR_LIMITED, new DataConstraint() { MinLength = 13, MaxLength = 13, ValidChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./" } },
@@ -173,7 +173,8 @@ namespace ESCPOS_NET.DataValidation
             {
                 _constraints = new Dictionary<TwoDimensionCodeType, DataConstraint>()
                 {
-                    { TwoDimensionCodeType.PDF417, new DataConstraint() { MinLength = 0, MaxLength = 255 } },
+                    //Explanation regarding 65532 limit can be found at https://github.com/lukevp/ESC-POS-.NET/issues/253#issuecomment-1895806167
+                    { TwoDimensionCodeType.PDF417, new DataConstraint() { MinLength = 0, MaxLength = 65532 } },
                     { TwoDimensionCodeType.QRCODE_MODEL1, new DataConstraint() { MinLength = 0, MaxLength = 707 } },
                     { TwoDimensionCodeType.QRCODE_MODEL2, new DataConstraint() { MinLength = 0, MaxLength = 4296 } },
                     { TwoDimensionCodeType.QRCODE_MICRO, new DataConstraint() { MinLength = 0, MaxLength = 21 } },
