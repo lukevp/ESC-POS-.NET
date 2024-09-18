@@ -38,6 +38,10 @@ namespace ESCPOS_NET.Emitters
         /* Character Commands */
         byte[] SetStyles(PrintStyle style);
 
+        byte[] SetSize(byte widthMagnification, byte heightMagnification);
+
+        byte[] SetSize(byte magnification);
+
         byte[] LeftAlign();
 
         byte[] RightAlign();
