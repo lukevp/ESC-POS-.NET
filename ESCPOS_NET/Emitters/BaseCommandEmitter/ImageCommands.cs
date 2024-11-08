@@ -3,6 +3,10 @@ using ESCPOS_NET.Utilities;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
+using System.Drawing;
+
+using static System.Net.Mime.MediaTypeNames;
+
 namespace ESCPOS_NET.Emitters
 {
     public abstract partial class BaseCommandEmitter : ICommandEmitter
@@ -41,6 +45,22 @@ namespace ESCPOS_NET.Emitters
 
         public virtual byte[] BufferImage(byte[] image, int maxWidth = -1, bool isLegacy = false, int color = 1)
         {
+            int width;
+            int height;
+            byte[] imageData;
+            using (var img = SixLabors.ImageSharp.Image.Load<Rgba32>(image))
+            {
+                imageData = img.ToSingleBitPixelByteArray(maxWidth: maxWidth == -1 ? (int?)null : maxWidth);
+                height = img.Height;
+                width = img.Width;
+            }
+
+            return BufferImageSingleBitPixelByteArray(imageData, width, height, isLegacy, color);
+        }
+
+        public virtual byte[] BufferImageSingleBitPixelByteArray(byte[] singleBitPixelByteArray,
+            int width, int height, bool isLegacy = false, int color = 1)
+        {
             ByteArrayBuilder imageCommand = new ByteArrayBuilder();
 
             byte colorByte;
@@ -55,16 +75,6 @@ namespace ESCPOS_NET.Emitters
                 default:
                     colorByte = 0x31;
                     break;
-            }
-
-            int width;
-            int height;
-            byte[] imageData;
-            using (var img = Image.Load<Rgba32>(image))
-            {
-                imageData = img.ToSingleBitPixelByteArray(maxWidth: maxWidth == -1 ? (int?)null : maxWidth);
-                height = img.Height;
-                width = img.Width;
             }
 
             byte heightL = (byte)height;
@@ -84,7 +94,7 @@ namespace ESCPOS_NET.Emitters
                 imageCommand.Append(new byte[] { 0x30, 0x70, 0x30, 0x01, 0x01, colorByte, widthL, widthH, heightL, heightH });
             }
 
-            imageCommand.Append(imageData);
+            imageCommand.Append(singleBitPixelByteArray);
 
             // Load image to print buffer
             ByteArrayBuilder response = new ByteArrayBuilder();
@@ -117,6 +127,18 @@ namespace ESCPOS_NET.Emitters
             else
             {
                 return ByteSplicer.Combine(SetImageDensity(isHiDPI), BufferImage(image, maxWidth, isLegacy, color), WriteImageFromBuffer());
+            }
+        }
+
+        public virtual byte[] PrintImageSingleBitPixelByteArray(byte[] singleBitPixelByteArray, int width, int height, bool isHiDPI, bool isLegacy = false, int maxWidth = -1, int color = 1)
+        {
+            if (isLegacy)
+            {
+                return ByteSplicer.Combine(BufferImageSingleBitPixelByteArray(singleBitPixelByteArray, width, height, isLegacy));
+            }
+            else
+            {
+                return ByteSplicer.Combine(SetImageDensity(isHiDPI), BufferImageSingleBitPixelByteArray(singleBitPixelByteArray, width, height, isLegacy, color), WriteImageFromBuffer());
             }
         }
     }
