@@ -8,6 +8,11 @@ namespace ESCPOS_NET
     {
         private readonly SerialPort _serialPort;
 
+        /// <summary>
+        /// Expose to be reused elsewhere as Serial Port will be held open.
+        /// </summary>
+        public SerialPort SerialPort => _serialPort;
+
         public SerialPrinter(string portName, int baudRate)
             : base()
         {

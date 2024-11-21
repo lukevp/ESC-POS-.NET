@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using System.Text;
+using System.Threading;
 
 namespace TcpEchoServer
 {
@@ -18,23 +19,40 @@ namespace TcpEchoServer
 			int port = 9100;
 			TcpListener listener = new TcpListener(IPAddress.Loopback, port);
 			listener.Start();
+			TcpClient client;
 
-			TcpClient client = listener.AcceptTcpClient();
-			NetworkStream stream = client.GetStream();
+            while (true)
+            {
+                // Accept multiple connections with a dedicated thread for each connection
+                client = listener.AcceptTcpClient();
+				ThreadPool.QueueUserWorkItem(TcpClientConnectionHandler, client);
+            }
+        }
+
+		private static void TcpClientConnectionHandler(object obj)
+		{
+			var tcp = (TcpClient)obj;
+			NetworkStream stream = tcp.GetStream();
 			StreamWriter writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true };
 			StreamReader reader = new StreamReader(stream, Encoding.ASCII);
-
-			while (true)
+			try
 			{
-				string inputLine = "";
-				while (inputLine != null)
+				while (true)
 				{
-					inputLine = reader.ReadLine();
-					writer.Write("E");
-					Console.WriteLine("Echoing string: " + inputLine);
+					string inputLine = "";
+					while (inputLine != null)
+					{
+						inputLine = reader.ReadLine();
+						writer.Write("E");
+						Console.WriteLine("Echoing string: " + inputLine);
+					}
+					Console.WriteLine("Server saw disconnect from client.");
 				}
-				Console.WriteLine("Server saw disconnect from client.");
 			}
+			catch(IOException)
+            {
+				// connection is closed
+            }			
 		}
 	}
 }

@@ -5,7 +5,7 @@ using System.IO;
 
 namespace ESCPOS_NET
 {
-    public class TCPConnection
+    public class TCPConnection : IDisposable
     {
         public Stream ReadStream { get; private set; } = new EchoStream();
         public Stream WriteStream { get; private set; }
@@ -36,12 +36,30 @@ namespace ESCPOS_NET
         {
             ReadStream.Write(e.Data, 0, e.Data.Length);
         }
+        /// <summary>
+        /// Establish a connection to the server without retry. SocketException will be thrown after the certain period of attempts.
+        /// </summary>
+        /// <exception cref="System.Net.Sockets.SocketException"></exception>
+        public void Connect()
+        {
+            _client.Connect();
+        }
         public void ConnectWithRetries(int timeoutMs)
         {
             _client.ConnectWithRetries(timeoutMs);
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
         ~TCPConnection()
+        {
+            Dispose(false);
+        }
+
+        private void Dispose(bool disposing)
         {
             try
             {
@@ -49,9 +67,17 @@ namespace ESCPOS_NET
                 _client.Events.Connected -= ConnectedEventHandler;
                 _client.Events.Disconnected -= DisconnectedEventHandler;
                 _client?.Dispose();
+                _client = null;
+            }
+            catch { }
+            try
+            {
+                WriteStream?.Dispose();
+                ReadStream?.Dispose();
+                WriteStream = null;
+                ReadStream = null;
             }
             catch { }
         }
-
     }
 }
