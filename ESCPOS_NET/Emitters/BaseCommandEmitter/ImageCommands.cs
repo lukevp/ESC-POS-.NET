@@ -1,8 +1,5 @@
-using System;
 using ESCPOS_NET.Emitters.BaseCommandValues;
 using ESCPOS_NET.Utilities;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace ESCPOS_NET.Emitters
 {
@@ -60,13 +57,7 @@ namespace ESCPOS_NET.Emitters
 
             int width;
             int height;
-            byte[] imageData;
-            using (var img = Image.Load<Rgba32>(image.AsSpan()))
-            {
-                imageData = img.ToSingleBitPixelByteArray(maxWidth: maxWidth == -1 ? (int?)null : maxWidth);
-                height = img.Height;
-                width = img.Width;
-            }
+            byte[] imageData = RasterImageEncoder.Encode(image, maxWidth, out width, out height);
 
             byte heightL = (byte)height;
             byte heightH = (byte)(height >> 8);
