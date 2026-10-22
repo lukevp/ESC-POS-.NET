@@ -1,3 +1,18 @@
+## Building this fork
+
+Requires the .NET 8 SDK or newer. The `PrintImage` API and ESC/POS image commands are unchanged.
+
+```powershell
+dotnet test ESCPOS_NET.UnitTest/ESCPOS_NET.UnitTest.csproj --configuration Debug
+```
+
+ImageSharp 4.1.3 allows Debug builds with a license warning. Release builds require a valid Six Labors license, supplied through `SixLaborsLicenseFile` or `SixLaborsLicenseKey`. For example:
+
+```powershell
+dotnet build ESCPOS_NET/ESCPOS_NET.csproj --configuration Release -p:SixLaborsLicenseFile="C:\path\to\sixlabors.lic"
+```
+
+Keep license files and keys outside source control. The kiosk references this fork as a sibling project at `../ESC-POS-.NET/ESCPOS_NET/ESCPOS_NET.csproj` rather than the upstream NuGet package.
 <img src="https://raw.githubusercontent.com/lukevp/ESC-POS-.NET/master/banner2.jpg" />
 <h1 align="center">ESCPOS.NET - Easy to use, Cross-Platform, Fast and Efficient.</h1>
 <br />
@@ -16,7 +31,7 @@
     <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/lukevp/ESC-POS-.NET">
     </a>
 </p>
-ESCPOS.NET is a super easy to use library that supports the most common functionality of the ESC/POS standard by Epson.  It is highly compatible, and runs on full framework .NET as well as .NET Core.
+ESCPOS.NET is a super easy to use library that supports the most common functionality of the ESC/POS standard by Epson.  This fork targets .NET 8 and newer and uses ImageSharp 4.1.3; it does not support .NET Framework.
 
 It works with Serial, USB, Ethernet, and WiFi printers, and works great on Windows, Linux and OSX.
 

@@ -1,3 +1,4 @@
+using System;
 using ESCPOS_NET.Emitters.BaseCommandValues;
 using ESCPOS_NET.Utilities;
 using SixLabors.ImageSharp;
@@ -60,7 +61,7 @@ namespace ESCPOS_NET.Emitters
             int width;
             int height;
             byte[] imageData;
-            using (var img = Image.Load<Rgba32>(image))
+            using (var img = Image.Load<Rgba32>(image.AsSpan()))
             {
                 imageData = img.ToSingleBitPixelByteArray(maxWidth: maxWidth == -1 ? (int?)null : maxWidth);
                 height = img.Height;
