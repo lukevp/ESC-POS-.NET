@@ -1,3 +1,12 @@
+## Building this fork
+
+Requires the .NET 8 SDK or newer. Images are decoded and resized with SkiaSharp (MIT), then converted to monochrome using Stucki dithering. `PrintImage` and the ESC/POS image commands are unchanged.
+
+```powershell
+dotnet test ESCPOS_NET.UnitTest/ESCPOS_NET.UnitTest.csproj --configuration Release
+```
+
+SkiaSharp deploys native binaries for Windows and macOS through its package dependencies. Linux applications must additionally reference `SkiaSharp.NativeAssets.Linux.NoDependencies` matching the SkiaSharp version. Native assets belong in the executable/test project, not this library. Linux/macOS runtime behavior must be verified on those platforms.
 <img src="https://raw.githubusercontent.com/lukevp/ESC-POS-.NET/master/banner2.jpg" />
 <h1 align="center">ESCPOS.NET - Easy to use, Cross-Platform, Fast and Efficient.</h1>
 <br />
@@ -16,7 +25,7 @@
     <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/lukevp/ESC-POS-.NET">
     </a>
 </p>
-ESCPOS.NET is a super easy to use library that supports the most common functionality of the ESC/POS standard by Epson.  It is highly compatible, and runs on full framework .NET as well as .NET Core.
+ESCPOS.NET is a super easy to use library that supports the most common functionality of the ESC/POS standard by Epson.  This fork targets .NET 8 and newer and uses SkiaSharp; it does not support .NET Framework.
 
 It works with Serial, USB, Ethernet, and WiFi printers, and works great on Windows, Linux and OSX.
 
