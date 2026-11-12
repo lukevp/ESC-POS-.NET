@@ -1,7 +1,8 @@
 using ESCPOS_NET.Emitters.BaseCommandValues;
 using ESCPOS_NET.Utilities;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using SkiaSharp;
+using SkiaSharp.Extensions;
+using System;
 
 namespace ESCPOS_NET.Emitters
 {
@@ -60,11 +61,22 @@ namespace ESCPOS_NET.Emitters
             int width;
             int height;
             byte[] imageData;
-            using (var img = Image.Load<Rgba32>(image))
+            using (var bitmap = SKBitmap.Decode(image))
             {
-                imageData = img.ToSingleBitPixelByteArray(maxWidth: maxWidth == -1 ? (int?)null : maxWidth);
-                height = img.Height;
-                width = img.Width;
+                if (bitmap == null)
+                {
+                    throw new ArgumentException(
+                        "The provided byte array does not contain a supported image.",
+                        nameof(image));
+                }
+
+                imageData = bitmap.ToSingleBitPixelByteArray(
+                    out width,
+                    out height,
+                    rasterFormat: true,
+                    maxWidth: maxWidth == -1
+                        ? (int?)null
+                        : maxWidth);
             }
 
             byte heightL = (byte)height;
