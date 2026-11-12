@@ -25,4 +25,19 @@
 		<ProjectReference Include="..\ESCPOS_NET\ESCPOS_NET.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="TestImages\logo.bmp">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="TestImages\logo.gif">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="TestImages\logo.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="TestImages\logo.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 </Project>
